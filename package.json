@@ -1,0 +1,46 @@
+{
+  "name": "zhicang",
+  "version": "0.1.0",
+  "private": true,
+  "description": "智藏 ZhiCang · AI 驱动的收藏夹管理桌面程序（跨端 + 授权 + 付费门户）",
+  "packageManager": "pnpm@9.15.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:desktop": "pnpm --filter @zhicang/desktop dev",
+    "dev:backend": "pnpm --filter @zhicang/backend start:dev",
+    "dev:portal": "pnpm --filter @zhicang/portal dev",
+    "build:shared": "pnpm --filter @zhicang/shared build",
+    "build:desktop": "pnpm --filter @zhicang/desktop build",
+    "build:backend": "pnpm --filter @zhicang/backend build",
+    "build:portal": "pnpm --filter @zhicang/portal build",
+    "dist:desktop": "pnpm --filter @zhicang/desktop dist",
+    "build:all": "pnpm build:shared && pnpm build:backend && pnpm build:portal && pnpm build:desktop",
+    "build:extension": "pnpm --filter @zhicang/extension build",
+    "mcp": "pnpm --filter @zhicang/mcp start",
+    "dev:all": "bash scripts/dev.sh",
+    "start:backend": "bash scripts/run-backend.sh",
+    "start:portal": "bash scripts/run-portal.sh",
+    "start:desktop": "bash scripts/run-desktop.sh",
+    "deploy": "bash scripts/deploy.sh",
+    "lint": "eslint . --ext .ts,.tsx,.js,.cjs,.mjs --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.cjs,.mjs --fix",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:backend:e2e": "pnpm build:shared && pnpm build:backend && node scripts/smoke-backend.mjs",
+    "test:packaging": "node --test scripts/test/windows-packaging.test.mjs"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^4.6.2"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "app-builder-lib@24.13.3": "patches/app-builder-lib@24.13.3.patch"
+    }
+  }
+}

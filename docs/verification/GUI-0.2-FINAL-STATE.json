@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-11-22T19:36:48.357979+08:00",
+  "scope": "read-only isolated profile after confirmed GUI exit; no token/AI Key queried",
+  "bookmarks": [
+    {
+      "url": "https://example.com",
+      "title": "备份前A",
+      "status": "active"
+    }
+  ],
+  "settings": {
+    "bridgeEnabled": "1",
+    "bridgePort": "38123",
+    "local_mode": "1",
+    "onboarded": "1"
+  }
+}

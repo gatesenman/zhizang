@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Lint · Typecheck · Test · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 共享包先产出 dist，供其余包的类型检查 / 构建消费
+      - name: Build shared package
+        run: pnpm --filter @zhicang/shared build
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm -r --if-present test
+
+      - name: Build backend
+        run: pnpm --filter @zhicang/backend build
+
+      - name: Build portal
+        run: pnpm --filter @zhicang/portal build
+
+      - name: Build desktop (compile only, no packaging)
+        run: pnpm --filter @zhicang/desktop build
+
+      - name: Build browser extension
+        run: pnpm --filter @zhicang/extension build

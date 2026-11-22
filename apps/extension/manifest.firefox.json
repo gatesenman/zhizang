@@ -1,0 +1,45 @@
+{
+  "manifest_version": 2,
+  "name": "智藏 ZhiCang 收藏助手",
+  "version": "0.3.1",
+  "description": "一键把当前页 / 所有标签页 / 链接收藏到智藏 ZhiCang 桌面端，支持正文存档。",
+  "permissions": [
+    "tabs",
+    "contextMenus",
+    "activeTab",
+    "storage",
+    "notifications",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "scripts": [
+      "browser-polyfill.js",
+      "background.js"
+    ]
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "智藏 ZhiCang",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zhicang@cognition.local",
+      "strict_min_version": "109.0"
+    }
+  }
+}

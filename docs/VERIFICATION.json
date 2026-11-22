@@ -1,0 +1,312 @@
+{
+  "verified_at": "2026-11-22T20:56:01.682246+08:00",
+  "timezone": "Asia/Shanghai (UTC+8)",
+  "environment": {
+    "os": "Linux x64",
+    "node": "20.20.2",
+    "pnpm": "9.15.9",
+    "electron": "31.7.7"
+  },
+  "results": {
+    "frozen_install": "passed",
+    "build_all": "passed this version: shared/backend/portal/desktop",
+    "extension_build": "passed Chrome/Firefox manifests0.3.0; same functional JS as real GUI review",
+    "mcp_node_syntax": "passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "unit_and_integration_tests": {
+      "packages/shared": 5,
+      "apps/backend": 8,
+      "apps/desktop": 50
+    },
+    "test_total": 63,
+    "backend_http_e2e": "passed: isolated real Nest HTTP + SQL.js SQLite; actual desktop license activation/API-base normalization/SQLite sync client/restart persistence; fixture signing key, mock payment and console mail only",
+    "gui_acceptance": {
+      "status": "passed within recorded scope",
+      "method": "parent session computerUse interaction, isolated temporary userData/sessionData and localhost HTTP fixture",
+      "checks": [
+        "trial entry into Chinese three-pane workspace",
+        "ordinary and maximized window: no obvious occlusion",
+        "save and preview real localhost page",
+        "edit title to 验收文章 and tag to 验收",
+        "Chinese title search and tag filtering",
+        "move to trash and restore",
+        "permanently delete A only while B remains",
+        "no model/key: explicit keyword fallback without fabricated AI summary",
+        "light/dark theme switching"
+      ],
+      "not_covered": [
+        "arbitrary window sizes: attempted corner drag did not resize",
+        "installer startup",
+        "live AI/payment/online synchronization"
+      ],
+      "evidence": [
+        "docs/screenshots/工作台与本机网页预览-验收截图.webp",
+        "docs/screenshots/回收站选择性删除后保留B-验收截图.webp"
+      ],
+      "temporary_services": "stopped after acceptance",
+      "version_scope": "earlier core workflow; additional 0.2.0 GUI acceptance recorded separately in gui_acceptance_0_2"
+    },
+    "ai_protocol_http_fixture": "passed: actual localhost HTTP success/401/empty/invalid JSON via aiChat; no live AI vendor or billing",
+    "extension_communication": "passed original script/real bridge/SQLite integration AND separate actual Chrome GUI including capture body, duplicates, token failures/rotation, offline, port changes/recovery",
+    "full_backup_restore": "passed: real online SQLite backup/validation/safety copy/data preservation; computerUse native dialogs/restore confirmation/automatic relaunch; original backup A and safety copy A+B independently integrity-checked",
+    "url_case_migration": "passed: scheme/host normalization, case-sensitive path/query, real legacy-hash migration and remote legacy hash compatibility",
+    "configuration_restart": "passed: local_mode/onboarded/AI/update/bridge settings and license/sync cursor persisted across actual SQLite close/reopen",
+    "windows_packaging": {
+      "status": "passed",
+      "targets": [
+        "NSIS x64",
+        "portable x64"
+      ],
+      "command": "pnpm --filter @zhicang/desktop exec electron-builder --win nsis portable --x64 --publish never",
+      "command_exit_code": 0,
+      "host": "Linux x64 + Wine 10.0 including wine32",
+      "inspection": {
+        "version": "0.3.0",
+        "platform": "Windows x64",
+        "runtime": {
+          "bytes": 180861440,
+          "machine": "0x8664",
+          "authenticodePresent": false
+        },
+        "sqliteNative": {
+          "bytes": 1720320,
+          "machine": "0x8664",
+          "authenticodePresent": false,
+          "electronAbi": 125
+        },
+        "packagedBuildSha256": {
+          "out/main/index.js": "68bd6c705362491b5fb85a274bb701801dbdf0e5d80ff464b64ab1e900904668",
+          "out/preload/index.js": "7b107f46a17330dd9ed12f123aeb1d805c516e08002eb2a5bfb634e593f78224",
+          "out/renderer/assets/AIPanel-Dr6AoIxO.js": "3e26e54a2d30487f3678e543174965a39d45984cd59cec07a8bed25296576d76",
+          "out/renderer/assets/AddBookmarkModal-B0GIcjdN.js": "7860cf23bc090cf8980f98ae220d70382da71b6fceb09de15bbdb3fa00fe1ff2",
+          "out/renderer/assets/CommandPalette-BkAVQbNm.js": "2675a047d7e94cf6c26bf39ba114e1b465e36599e96c5adc56b175aa4f66a7fc",
+          "out/renderer/assets/GraphModal-DPRS4qvh.js": "f01401c5eee7104189ab2722a7306075c7979657de26189548b6c62886427539",
+          "out/renderer/assets/OnboardingModal-DPoJQ5k1.js": "6658e279ea8aa15adfac9d94695b896aeab67fd1dc2fee0f02d0d1bc13de7d47",
+          "out/renderer/assets/PasteImportModal-4kybFoRv.js": "53706203b607f215db97473f3d7364c6c95f701efe02b91311a45609a3046023",
+          "out/renderer/assets/SettingsModal-DCpgXjET.js": "a2d9abbd8b6675a8d5fb0b1a6ac9941a3769069d1824333c11ba2675cd89ddcc",
+          "out/renderer/assets/SmartFolderModal-YgcIOH4t.js": "9dbfc08b1d8c0e01eb657617c4a09ca760b3e453328fd3ccdf4a3a9b044698d9",
+          "out/renderer/assets/StatsModal-BkHatqB1.js": "a149b8e48112773fa8e6315e6fe86f42a20ea26432bd531d5eae1e39b853476f",
+          "out/renderer/assets/index-BYgh80T9.js": "369bbd03619d1d6226e0a2a6ce8bd53d732b3da8ddb32cdc31128f8f6dcc60f9",
+          "out/renderer/assets/index-BwiHfBRc.js": "1ffaa351221dae949837969135b6903a052617474e349349f81be606492ea849",
+          "out/renderer/assets/index-CNXtQbfF.js": "56a4973b4afa8dc5e97853d32ed828bca30e91a767e17b75ec2f85fef1f0ad22",
+          "out/renderer/assets/index-CkDxe05i.css": "ec5fa0ba86eaaa925154dd11ad89d61fdc177e92ead3f1fcc9aec2004e465717",
+          "out/renderer/assets/index-CzfXS42l.js": "d8d69cbfd2f9be3c93b825482642972eeb20a157ca572deb533dd6ac99bc6f59",
+          "out/renderer/assets/index-DlQdhF7l.js": "e51931fb570faa6a40af44879cde53fbe27a7eb9307cd01a7868c88596806ecf",
+          "out/renderer/assets/progress-o1GyvgW0.js": "8502d34d103beaa1485f8ee3b54e36f13e4b29730a4e14699d474f7fca965ff2",
+          "out/renderer/assets/row-B0LAnCgt.js": "91a89ae1009f5ca4a1445dc6ac41a7e942a3bf11b6e9aa7dcf7f7612539e38e0",
+          "out/renderer/assets/types-DKxKj5cf.js": "e6ef2dc59c1e3c0765956bce8b65717912b21b12d25cd90e9ed4c92de0111417",
+          "out/renderer/index.html": "a06857c6d7fc8ffca17caa046328b6893dc6bc1f4bcdea9ddbb5e42f3b642c07"
+        },
+        "asarEntries": 3497,
+        "artifacts": [
+          {
+            "name": "ZhiCang-Setup-0.3.0-x64.exe",
+            "bytes": 83935584,
+            "machine": "0x14c",
+            "authenticodePresent": false,
+            "archiveIntegrity": "7za test passed"
+          },
+          {
+            "name": "ZhiCang-Portable-0.3.0-x64.exe",
+            "bytes": 83717753,
+            "machine": "0x14c",
+            "authenticodePresent": false,
+            "archiveIntegrity": "7za test passed"
+          }
+        ],
+        "windowsExecution": "NOT TESTED: static payload/archive inspection on Linux only",
+        "signed": false
+      },
+      "logs": [
+        "docs/verification/windows/build-0.3.0.log",
+        "docs/verification/windows/inspection-0.3.0.log"
+      ],
+      "version": "0.3.0",
+      "initial_failures": "Custom TMPDIR reproducibly crashed Wine; same rcedit default /tmp succeeded. Removed only TMPDIR override; kept resource edits and checks. First inspection rejected hard-coded0.2.0, corrected to compare current source package and all build files byte-for-byte; reran passed."
+    },
+    "gui_acceptance_0_2": {
+      "status": "passed within recorded Linux isolated-profile scope",
+      "confirmed_at": "2026-11-22T19:36:48.357979+08:00",
+      "method": "parent computerUse actual interactions; executor independent read-only SQLite backup/final-state checks",
+      "checks": [
+        "trial → wizard → skip optional services → open settings",
+        "correct isolated data directory",
+        "updates disabled by default; check loading ends with unconfigured reason",
+        "native backup save dialog creates real .zhicang containing A",
+        "native restore selection/confirmation → automatic relaunch: A remains, B absent",
+        "manual restart: no repeated gate/wizard; A only",
+        "no Key connection test explicitly reports required API Key and model",
+        "bridge port 38122 collision error; 38123 save and restart persistence; running/enabled state",
+        "token reset notification and masked token display",
+        "local-mode cloud sync explicitly requires activation, no fabricated success"
+      ],
+      "evidence": [
+        "docs/screenshots/首次运行向导-0.2验收.webp",
+        "docs/screenshots/设置与数据目录-0.2验收.webp",
+        "docs/screenshots/完整备份恢复后仅A保留-0.2验收.webp",
+        "docs/screenshots/无Key连接测试明确报错-0.2验收.webp",
+        "docs/screenshots/重启后桥接端口持久化-0.2验收.webp",
+        "docs/screenshots/重启后工作台仅A保留-0.2验收.webp"
+      ],
+      "backup_check": "docs/verification/GUI-0.2-BACKUP-CHECK.json",
+      "final_state_check": "docs/verification/GUI-0.2-FINAL-STATE.json",
+      "cleanup": "docs/verification/GUI-0.2-CLEANUP.json",
+      "not_covered": [
+        "Windows real install/run/uninstall",
+        "live model, payment, email, production license or online multi-device sync",
+        "actual update feed/download/install"
+      ]
+    },
+    "windows_exes_unchanged_during_documentation_finalization": {
+      "ZhiCang-Setup-0.2.0-x64.exe": "70d315f938236a177a1107ac88fe378a5c9a9f3b6add0fa3eb77109315321382",
+      "ZhiCang-Portable-0.2.0-x64.exe": "a110149fd95a5b8959cc2fb91a51e012c012a3b3a67c043fde20dfd8425bab59"
+    },
+    "gui_acceptance_0_3": {
+      "status": "desktop A/B and actual Chrome extension passed within isolated Linux scope",
+      "desktop": "docs/verification/MAINLINE-GUI-AB.json",
+      "chrome": "docs/verification/MAINLINE-GUI-EXTENSION.json",
+      "tiny_localization": "Chinese URL message + fresh zh preference tested and confirmed in final compiled bundle; not separately visually reviewed",
+      "screenshots": "7 new actual files plus8 retained historical files; one reported bridge-off screenshot missing, not fabricated"
+    },
+    "real_local_model": {
+      "status": "passed real CPU inference/transport/reference/fallback chain",
+      "evidence": "docs/verification/REAL-MODEL-E2E.json",
+      "productionChineseQualityAccepted": false
+    },
+    "wine_runtime_proxy": {
+      "version": "0.3.0",
+      "time": "2026-11-22T20:53:12.691106+08:00",
+      "host": "Wine10 on Linux, NOT real Windows",
+      "privatePrefix": "/workspace/zhicang-build-tools/wineprefix-v030",
+      "actualPortableExe": {
+        "attempted": true,
+        "exitCode": 2,
+        "durationSeconds": 4.8,
+        "guiAcceptance": false
+      },
+      "actualUnpackedWindowsExe": {
+        "attempted": true,
+        "monitorLimitSeconds": 15,
+        "monitorExitCode": 124,
+        "log": "Wine reports missing NTLM/COM/Windows APIs and stack overflow; no GUI acceptance inferred"
+      },
+      "databaseChecks": [
+        {
+          "file": "/workspace/zhicang-wine-runtime-030/profile-unpacked/zhicang.db",
+          "integrity": "ok",
+          "bookmarkCount": 0
+        }
+      ],
+      "status": "attempted but NOT accepted as Windows runtime pass; no further Wine environment work",
+      "noGuiAutomation": true,
+      "logs": [
+        "windows/wine-portable-start-0.3.0.log",
+        "windows/wine-unpacked-start-0.3.0.log"
+      ],
+      "cleanup": "Only own explicit WINEPREFIX server stopped; private regenerable prefix removed after all package checks; shared default .wine untouched"
+    },
+    "linux_native_after_cross_build": "original SHA256 restored and actual Electron SQLite query passed",
+    "final_artifacts": {
+      "ZhiCang-Setup-0.3.0-x64.exe": {
+        "bytes": 83935584,
+        "sha256": "8537f44de4b5d95a89fe14a7e011c0faeff84a01713d06aabf8a928d0771e247"
+      },
+      "ZhiCang-Portable-0.3.0-x64.exe": {
+        "bytes": 83717753,
+        "sha256": "b6c0c0a1d2f9465c484bbbc36fdd02eca306e774fe2c1330423cf1fe306741e7"
+      },
+      "ZhiCang-Chrome-0.3.0.zip": {
+        "bytes": 17056,
+        "sha256": "d7d0e00a8cb72f51b7e06e9c772b065f34a560994f3c5f67cd2fefe20bcc01f1"
+      },
+      "ZhiCang-Firefox-0.3.0.zip": {
+        "bytes": 17133,
+        "sha256": "6a3577a4b1328613c618fa70a6aba8d4067bcc50eb41ee57744fee89e8a800c5"
+      }
+    },
+    "sourceArchiveHash": "See external SHA256SUMS.txt to avoid self-referential source-archive hash.",
+    "split_installer": {
+      "version": "0.3.0",
+      "setup": "ZhiCang-Setup-0.3.0-x64.exe",
+      "setupBytes": 83935584,
+      "setupSha256": "8537f44de4b5d95a89fe14a7e011c0faeff84a01713d06aabf8a928d0771e247",
+      "parts": [
+        {
+          "name": "ZhiCangSetup-0.3.0.part01",
+          "bytes": 24000000,
+          "sha256": "f52911528dd18f05e8afa0764ac62c01a5e52d59acb6f1b607f1b69ca09c2fc5"
+        },
+        {
+          "name": "ZhiCangSetup-0.3.0.part02",
+          "bytes": 24000000,
+          "sha256": "02f27c1a7806894aa88ada8019ebe6c0635d0e0cf2a2afcf1e743246a6b58554"
+        },
+        {
+          "name": "ZhiCangSetup-0.3.0.part03",
+          "bytes": 24000000,
+          "sha256": "c24d81ecd4e3e44a393a99fd52050e070e3453ec4c3838a4eedc4d229741dacd"
+        },
+        {
+          "name": "ZhiCangSetup-0.3.0.part04",
+          "bytes": 11935584,
+          "sha256": "fe3839cf963acb49c68a5389ec6bb386d8daaeb37e0e6a6bcd22351c3819f6db"
+        }
+      ],
+      "cmd": {
+        "name": "JoinSetup-0.3.0.cmd",
+        "bytes": 1665,
+        "sha256": "c74015845753ef30310e24f3310d92a230cfb5f802b68a345a24b46e3e61add8",
+        "encoding": "ASCII/CRLF",
+        "windowsExecution": "not tested; static checks only",
+        "behavior": "quoted dp0 and environment path support spaces/Chinese; verifies existing output without overwrite; no install/no deletion/no security bypass"
+      },
+      "linuxActualRejoin": "passed byte-for-byte and SHA256; temporary reconstructed copy removed",
+      "singleAttachmentLimitBytes": 24000000
+    },
+    "latest_chinese_compiled": {
+      "time": "2026-11-22T20:56:01.682246+08:00",
+      "file": "apps/desktop/out/renderer/assets/index-CzfXS42l.js",
+      "sha256": "d8d69cbfd2f9be3c93b825482642972eeb20a157ca572deb533dd6ac99bc6f59",
+      "message": "Chinese multi-URL guidance present in final bundle",
+      "initialLanguage": "compiled saved zh/en preserved, otherwise zh; no navigator-language English default",
+      "visualRecheck": false
+    },
+    "source_archive_exclusions": [
+      "node_modules",
+      "compiled out/dist/.next/release",
+      "git/IDE/cache metadata",
+      "user DB/backups/model weights",
+      "non-example env/credential/key files",
+      "core dumps"
+    ]
+  },
+  "not_verified": [
+    "Real Windows install/run/upgrade/uninstall, IME/file-lock compatibility; Wine attempt is not a pass",
+    "arbitrary window sizes / drag resizing",
+    "Authenticode signing; macOS build/sign/notarization; actual Firefox GUI/persistent signed install",
+    "Production Chinese AI quality, live vendor credentials/billing, product-managed embedding model first download",
+    "Real payment/mail/production licensing; no account creation/payment/messages/deployment",
+    "PostgreSQL/Docker deployment and real online multi-device synchronization",
+    "Actual update feed/download/install release pipeline"
+  ],
+  "delivery_type": "0.3.0 real unsigned Windows Setup+portable, four <=24000000-byte Setup parts+ASCII/CRLF verification CMD, source ZIP, Chrome/Firefox extension ZIPs, Chinese guide/evidence",
+  "automated_verified_at": "2026-11-22T20:54:12.947091+08:00",
+  "gui_acceptance_record": "docs/verification/GUI-ACCEPTANCE.md",
+  "version": "0.3.0",
+  "original_upload": {
+    "retained_unmodified": true,
+    "bytes": 571204,
+    "sha256": "b6400e66c40f398874c10707ec95ebb3de4ccdefbd4de10e4859183085de5fff"
+  },
+  "boundaries": [
+    "No remote clone/commit/push/deployment",
+    "No real payment/account creation/live credential use",
+    "Previous screenshots retained; additional GUI coverage expanded only by newly recorded actual interactions",
+    "Only own completed temporary Wine prefix cleaned; no other services modified"
+  ],
+  "gui_acceptance_record_0_2": "docs/verification/GUI-0.2-ACCEPTANCE.md",
+  "mainline_history": "docs/verification/VERIFICATION-0.2.0.json retains prior overall results; all old screenshots/attachments retained",
+  "cleanup_0_3": "Authorized desktop/Chrome trees and own HTTP/model services stopped; only task private Wine prefix stopped/deleted, shared Wine unchanged.",
+  "latest_gui_acceptance_record": "docs/MAINLINE-GUI-RESULTS.md"
+}

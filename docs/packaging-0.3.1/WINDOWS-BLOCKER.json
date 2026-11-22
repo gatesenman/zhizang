@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-11-22T23:53:07.141939+08:00",
+  "timezone": "Asia/Shanghai UTC+8",
+  "machineId": "02e378fb-1bc8-4756-a34b-e375a9056b26",
+  "actualOSFromPriorRealTest": "Windows 11 Pro Insider Preview 10.0.27902 x64",
+  "newPacketRoot": "C:\\Users\\Administrator\\ZhiCang-E2E-Packets-031-20261122-2330",
+  "newSetupTransport": "All11 chunks and final guarded PS diagnostic file transferred via official tool. No returned evidence that new Setup assembled or installed; execution state must be checked after reconnection.",
+  "transportChunkBytes": 8000000,
+  "setupSHA256": "16b67174821c252df11e4e8168dd7c42b3468e2016f6f5baa9ee9634084a4db9",
+  "newIsolatedInstallRootPlanned": "E:\\ZhiCang-E2E-030-20261122-2213-8f47a2\\v031",
+  "symptoms": [
+    "Read-only preflight produced no result",
+    "Follow-up own-query stop and .NET-only preflight produced no result",
+    "Minimal [Console]::WriteLine produced no result",
+    "Subsequent sanctioned Read returned: local machine is not connected right now"
+  ],
+  "queuedCommands": [
+    "read-only preflight PID84172",
+    "guarded attempt to terminate only own stalled PID84172 then read-only preflight PID108812",
+    "minimal read-only channel check PID32896"
+  ],
+  "safety": "Only one guarded lifecycle script invocation was attempted after the channel recovered. It returned failed-to-spawn/unreachable; actual execution unconfirmed. No installation command retry, unknown process stop, existing data access, registry spoof or security policy change.",
+  "priorOwnAppLastConfirmed": "0.3.0 main24456/wrapper106932/supervisor31672 at23:00:52 Asia/Shanghai; current state UNCONFIRMED, verify executable path and start time before any stop.",
+  "needed": "Restore sanctioned Windows local execution / desktop app online, then transfer and execute guarded Test-Setup-0.3.1.ps1. No shell-driven GUI.",
+  "preparedScript": "docs/packaging-0.3.1/Test-Setup-0.3.1.ps1 (NOT EXECUTED; install/start/restart/owned bridge/unauth401/uninstall/data retention; aborts existing registration/unknown ZhiCang process/existing test dir).",
+  "publicResearch": "https://forum.cursor.com/t/grok-bot-0-70-2-windows-local-exec-keeps-dropping-temporarily-unreachable-on-a-high-latency-direct-connection-only-stable-with-vpn/174579/19",
+  "cause": "UNKNOWN. Public EPERM/connection reports do not prove the cause of this incident.",
+  "recoveryAttempt": {
+    "readyProbe": "Actual minimal Console command returned CHANNEL_READY at2026-11-22 23:47:49 Asia/Shanghai, exit0",
+    "scriptTransfer": "Guarded Test-Setup-0.3.1.ps1 transferred to new C packet root; final parameter argumentsText avoids PowerShell automatic args collision",
+    "scriptInvocation": "Official machine Shell invocation returned Command failed to spawn: temporarily unreachable. No terminal ID or process ID supplied.",
+    "resultFileRead": "C packet root WINDOWS-031-LIFECYCLE.json not found when checked after invocation; no successful execution evidence",
+    "readOnlyFollowUp": "Only .NET existence/process read was attempted; same failed-to-spawn temporarily unreachable error; no mutating retry",
+    "conclusion": "Execution status of the diagnostic invocation UNCONFIRMED; do NOT label it passed or blindly rerun. Read result file and inspect own v031 path/process state after reconnection."
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "version": "0.3.1",
+  "verified_at": "2026-11-22T23:53:07.141939+08:00",
+  "timezone": "Asia/Shanghai UTC+8",
+  "release_status": "CANDIDATE: Windows Setup regression blocked by local execution channel; NOT fully end-to-end accepted",
+  "results": {
+    "tests": {
+      "shared": 5,
+      "backend": 8,
+      "desktop": 61,
+      "packaging": 5,
+      "total": 79,
+      "status": "passed"
+    },
+    "lint_typecheck": "desktop passed; packaging scripts passed",
+    "build": "desktop main/preload/latest layout renderer and both extension packages passed",
+    "linux_native_restore": "Original SHA256 restored; actual Electron31.7.7 ABI125 Linux SQLite load and integrity_check=ok",
+    "pnpm_patch_replay": "Actual pnpm patch extraction applied the stored patch; exact template SHA matched",
+    "windows_artifact_static_inspection": {
+      "version": "0.3.1",
+      "platform": "Windows x64",
+      "runtime": {
+        "bytes": 180861440,
+        "machine": "0x8664",
+        "authenticodePresent": false
+      },
+      "sqliteNative": {
+        "bytes": 1720320,
+        "machine": "0x8664",
+        "authenticodePresent": false,
+        "electronAbi": 125
+      },
+      "packagedBuildSha256": {
+        "out/main/index.js": "68bd6c705362491b5fb85a274bb701801dbdf0e5d80ff464b64ab1e900904668",
+        "out/preload/index.js": "7b107f46a17330dd9ed12f123aeb1d805c516e08002eb2a5bfb634e593f78224",
+        "out/renderer/assets/AIPanel-B_TXeVGK.js": "c77e1a5697792324d6bae8db6c98a7f51b1d72a09e07728bd46c1d56375dfb80",
+        "out/renderer/assets/AddBookmarkModal-Dks1zFwF.js": "5917f1da951a5f9633d08aa6b11390a123b991c1c8e79ed50e92c0d31f0539e9",
+        "out/renderer/assets/CommandPalette-DVxOU6fu.js": "71844acfe87d8e1770eff43bdae07f8fef5b3edba1e475faec0ae7b44a51c0a7",
+        "out/renderer/assets/GraphModal-BwnqP-t6.js": "009fac33e457182aed4c0f35c7d4929760418772c94cf45fe82d8bad07dc48b7",
+        "out/renderer/assets/OnboardingModal-CccIgpEd.js": "b5fc0ad914f28d7891c45d57fd0949e0938eb90b2ff85b5a3169faec0863a9f9",
+        "out/renderer/assets/PasteImportModal-D2iPnOjQ.js": "2f565b8321b2eb2f58fccd5b530b837e866b023efb6cfdad9fd58b5f55360f10",
+        "out/renderer/assets/SettingsModal-C2co2Z0i.js": "53411b515fc40a07c9d8fd7dce22b47a067ddce642bda44c170ce1e0606ab228",
+        "out/renderer/assets/SmartFolderModal-klId16Uz.js": "3c809ed40fc02ee8cd871d101dc97b7dcff07e3f13f5624c3db12f761b9fd625",
+        "out/renderer/assets/StatsModal-DxzlsQqS.js": "c0b400b2aa68a16abdc4c1b0cf2743541913bb68869103a1d50fb3386ae5c38f",
+        "out/renderer/assets/index-B0HQPzNI.js": "2c8b01fe5601eb0fcc7c9d0fb733759213c3e94aee9e542545680fa877ae4a9b",
+        "out/renderer/assets/index-CAWER7e5.js": "1ca78f4ebdfb12253dc4705959fd3ff856efa79f9c2cb225ed2339fb69cae2f0",
+        "out/renderer/assets/index-CIGQcXjN.js": "9db4db27eb96ef14a5c8a35681752dd69a63d278a31266b2a914d96aeec0ecd8",
+        "out/renderer/assets/index-CXGpHNnj.js": "219fd7f4670fb1d68778adab3a07da2145a3de66068e15bb4bc7b1499d2f4a57",
+        "out/renderer/assets/index-CgYkJP8U.css": "0a43712bdd53cce6ed70556ffaccca7830a527a0ef4cc92e93362d4eaa33793d",
+        "out/renderer/assets/index-ComzrlER.js": "e7e32d9c177eff86755b4e7087bf228145960a677ac4cb9c1e9dc346d3cd97a2",
+        "out/renderer/assets/progress-KINygx_1.js": "39aa84368d13115710f86e34071db12cca0244799a5cce3757447e1fc34ddf59",
+        "out/renderer/assets/row-ChgltagP.js": "23f800923c6b9ef0d130e562167116ce9536258bc01f462e66ffc9cb8b84c0ae",
+        "out/renderer/assets/types-DKxKj5cf.js": "e6ef2dc59c1e3c0765956bce8b65717912b21b12d25cd90e9ed4c92de0111417",
+        "out/renderer/index.html": "0b15fa4b663325118b713e3211d7832aac28d2166d2685e0253994cf6c2c5d27"
+      },
+      "asarEntries": 3497,
+      "artifacts": [
+        {
+          "name": "ZhiCang-Setup-0.3.1-x64.exe",
+          "bytes": 83939318,
+          "machine": "0x14c",
+          "authenticodePresent": false,
+          "archiveIntegrity": "7za test passed"
+        },
+        {
+          "name": "ZhiCang-Portable-0.3.1-x64.exe",
+          "bytes": 83721481,
+          "machine": "0x14c",
+          "authenticodePresent": false,
+          "archiveIntegrity": "7za test passed"
+        }
+      ],
+      "windowsExecution": "NOT TESTED: static payload/archive inspection on Linux only",
+      "signed": false
+    },
+    "split_reassembly": "4 parts <=24000000 each; actual binary reassembly+SHA comparison on Linux passed; generated CMD ASCII/CRLF static/unit checks only",
+    "linux_gui_0_3_1": "parent computerUse passed within docs/layout-polish/GUI-ACCEPTANCE-20261122.md recorded scope",
+    "historical_0_3_0_business_e2e": "Retained original docs/verification evidence; not relabeled as new Windows acceptance",
+    "windows_0_3_0_actual": "Portable/native-SQLite/security baseline passed; original Setup failed0xC0000005 System.dll+0x1581",
+    "windows_0_3_1_actual": "NO RESULT:11 transport parts and guarded PS transferred. Console recovered23:47:49 Asia/Shanghai; single lifecycle invocation returned failed-to-spawn/unreachable. Result file not found; subsequent read-only status call also unreachable. Actual script execution unconfirmed; no install retry."
+  },
+  "not_verified": [
+    "0.3.1 Windows Setup install/start/uninstall/upgrade and portable execution",
+    "0.3.1 CMD execution on Windows",
+    "Windows manual GUI collection/notes/backup/restore workflow",
+    "exact1024x645/1440 window layouts; empty-trash batch workflow",
+    "Authenticode signing and production update channel",
+    "real AI vendor credentials/billing/Chinese production quality",
+    "production payment/email/activation/multidevice cloud sync/Firefox permanent signing"
+  ],
+  "evidence": [
+    "docs/packaging-0.3.1/NSIS-PATCH.json",
+    "docs/packaging-0.3.1/PNPM-PATCH-REPRODUCIBILITY.json",
+    "docs/packaging-0.3.1/WINDOWS-BLOCKER.json",
+    "docs/packaging-0.3.1/windows-0.3.0-original-crash.txt",
+    "docs/layout-polish/GUI-ACCEPTANCE-20261122.md"
+  ]
+}

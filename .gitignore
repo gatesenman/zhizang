@@ -1,0 +1,46 @@
+node_modules/
+dist/
+dist-electron/
+out/
+release/
+# Generic build output. Keep apps/desktop/build/ — it holds Electron packager icons, not artifacts.
+build/
+!apps/desktop/build/
+!apps/desktop/build/**
+.next/
+*.log
+.DS_Store
+*.local
+.env
+.env.*
+!.env.example
+coverage/
+*.tsbuildinfo
+.turbo/
+prisma/dev.db
+prisma/dev.db-journal
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+
+# License/signing keys and certificates must never be committed
+keys/
+!keys/.gitkeep
+!keys/README.md
+*.pem
+*.p12
+*.pfx
+*.key
+
+# Packaged installers / binaries (source repo only)
+*.exe
+*.dmg
+*.AppImage
+*.blockmap
+*.msi
+
+# Electron / local runtime and user data
+userData/
+userdata/
+.electron-user-data/

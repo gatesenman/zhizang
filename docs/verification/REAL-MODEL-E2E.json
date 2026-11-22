@@ -1,0 +1,33 @@
+{
+  "verifiedAt": "2026-11-22 20:44:25 Asia/Shanghai (UTC+8)",
+  "runtime": "real Electron net.fetch (not injected Node fetch)",
+  "server": "official llama.cpp b12359 CPU, localhost only",
+  "model": "SmolLM2-135M-Instruct Q4_K_M; weights SHA256 2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d",
+  "apiKey": "public local test placeholder, not an account credential",
+  "elapsedMs": 1163,
+  "directModelAnswer": "A bookmark is a small, decorative piece of paper or a piece of paper with a small piece of paper attached to it, often used to mark a bookmark or a bookmark holder.",
+  "assistant": {
+    "mode": "keyword",
+    "refs": [
+      {
+        "id": 1,
+        "title": "Design systems handbook",
+        "url": "https://example.test/design-system-real-model"
+      }
+    ],
+    "answer": "模型没有提供有效的收藏引用，已停止展示该生成内容。下方是 1 条真实收藏（本地关键词结果，非 AI 总结），可直接打开或复制。"
+  },
+  "offlineModelFallback": {
+    "mode": "keyword",
+    "refs": [
+      {
+        "id": 1,
+        "title": "Design systems handbook",
+        "url": "https://example.test/design-system-real-model"
+      }
+    ],
+    "answer": "模型请求未成功，已返回 1 条真实收藏（本地关键词结果，非 AI 总结）。你仍可打开或复制下方引用，稍后检查模型配置。"
+  },
+  "grounding": "Invalid/missing citation numbers are rejected; keyword fallback is not labelled an AI summary. This is not a complete semantic hallucination detector.",
+  "boundaries": "Real inference/transport/SQLite-reference chain only; tiny English model is not a production Chinese answer-quality acceptance, no vendor account/billing used"
+}

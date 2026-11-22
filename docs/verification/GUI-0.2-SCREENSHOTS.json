@@ -1,0 +1,38 @@
+[
+  {
+    "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.b8c87eab-f242-4900-bee1-2c971116478a.webp",
+    "path": "docs/screenshots/首次运行向导-0.2验收.webp",
+    "bytes": 63558,
+    "sha256": "1b4105c77c13bc40021872c1e943d2beeadb444a407835aa5983b25e4c3ebc1a"
+  },
+  {
+    "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.9e581360-3ea3-4060-825b-fb0baea3263c.webp",
+    "path": "docs/screenshots/设置与数据目录-0.2验收.webp",
+    "bytes": 68330,
+    "sha256": "74369ed32feb0ebc6d583df6801bf9d1bb6ec84aa36a4d6339be50246dbfe3f7"
+  },
+  {
+    "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.f46219be-1105-4575-8be5-283bc5f6b0e9.webp",
+    "path": "docs/screenshots/完整备份恢复后仅A保留-0.2验收.webp",
+    "bytes": 48566,
+    "sha256": "3c6e5604461b40c9995b49fd2f4fd496f0fdf0594e83321aa303710d7d26621d"
+  },
+  {
+    "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.8e8ba22e-bc58-48e6-ad15-bc8a9c2f4fdf.webp",
+    "path": "docs/screenshots/无Key连接测试明确报错-0.2验收.webp",
+    "bytes": 63148,
+    "sha256": "ab64627aa646e14dd79566dcb8b2a8608dcf6771c8395051b6a5125daf950060"
+  },
+  {
+    "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.24e87ed3-2dc9-4832-bbc0-f1b15d2b5e03.webp",
+    "path": "docs/screenshots/重启后桥接端口持久化-0.2验收.webp",
+    "bytes": 80120,
+    "sha256": "d42ab83913a70e4bb62595717c3f5196b6d1d4172860e53e5d73c5eabbba7ebd"
+  },
+  {
+    "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.29e9a70e-e0e9-44a4-8621-4093cdd84ff7.webp",
+    "path": "docs/screenshots/重启后工作台仅A保留-0.2验收.webp",
+    "bytes": 48634,
+    "sha256": "79fc0c4b84480ad257a508fdf3f7bb777636a22bb0d609c64a679679657114bd"
+  }
+]

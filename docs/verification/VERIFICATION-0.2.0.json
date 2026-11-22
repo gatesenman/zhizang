@@ -1,0 +1,172 @@
+{
+  "verified_at": "2026-11-22T19:36:48.357979+08:00",
+  "timezone": "Asia/Shanghai (UTC+8)",
+  "environment": {
+    "os": "Linux x64",
+    "node": "20.20.2",
+    "pnpm": "9.15.9",
+    "electron": "31.7.7"
+  },
+  "results": {
+    "frozen_install": "passed",
+    "build_all": "passed",
+    "extension_build": "passed",
+    "mcp_node_syntax": "passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "unit_and_integration_tests": {
+      "packages/shared": 5,
+      "apps/backend": 8,
+      "apps/desktop": 29
+    },
+    "test_total": 42,
+    "backend_http_e2e": "passed: isolated real Nest HTTP + SQL.js SQLite; actual desktop license activation/API-base normalization/SQLite sync client/restart persistence; fixture signing key, mock payment and console mail only",
+    "gui_acceptance": {
+      "status": "passed within recorded scope",
+      "method": "parent session computerUse interaction, isolated temporary userData/sessionData and localhost HTTP fixture",
+      "checks": [
+        "trial entry into Chinese three-pane workspace",
+        "ordinary and maximized window: no obvious occlusion",
+        "save and preview real localhost page",
+        "edit title to 验收文章 and tag to 验收",
+        "Chinese title search and tag filtering",
+        "move to trash and restore",
+        "permanently delete A only while B remains",
+        "no model/key: explicit keyword fallback without fabricated AI summary",
+        "light/dark theme switching"
+      ],
+      "not_covered": [
+        "arbitrary window sizes: attempted corner drag did not resize",
+        "installer startup",
+        "live AI/payment/online synchronization"
+      ],
+      "evidence": [
+        "docs/screenshots/工作台与本机网页预览-验收截图.webp",
+        "docs/screenshots/回收站选择性删除后保留B-验收截图.webp"
+      ],
+      "temporary_services": "stopped after acceptance",
+      "version_scope": "earlier core workflow; additional 0.2.0 GUI acceptance recorded separately in gui_acceptance_0_2"
+    },
+    "ai_protocol_http_fixture": "passed: actual localhost HTTP success/401/empty/invalid JSON via aiChat; no live AI vendor or billing",
+    "extension_communication": "passed: exact common.js through real localhost authenticated bridge/SQLite capture; only chrome.storage configuration fixture, not browser GUI",
+    "full_backup_restore": "passed: real online SQLite backup/validation/safety copy/data preservation; computerUse native dialogs/restore confirmation/automatic relaunch; original backup A and safety copy A+B independently integrity-checked",
+    "url_case_migration": "passed: scheme/host normalization, case-sensitive path/query, real legacy-hash migration and remote legacy hash compatibility",
+    "configuration_restart": "passed: local_mode/onboarded/AI/update/bridge settings and license/sync cursor persisted across actual SQLite close/reopen",
+    "windows_packaging": {
+      "status": "passed",
+      "targets": [
+        "NSIS x64",
+        "portable x64"
+      ],
+      "command": "pnpm --filter @zhicang/desktop exec electron-builder --win nsis portable --x64 --publish never",
+      "command_exit_code": 0,
+      "host": "Linux x64 + Wine 10.0 including wine32",
+      "inspection": {
+        "version": "0.2.0",
+        "platform": "Windows x64",
+        "runtime": {
+          "bytes": 180861440,
+          "machine": "0x8664",
+          "authenticodePresent": false
+        },
+        "sqliteNative": {
+          "bytes": 1720320,
+          "machine": "0x8664",
+          "authenticodePresent": false,
+          "electronAbi": 125
+        },
+        "packagedBuildSha256": {
+          "out/main/index.js": "ce39e83b5910d92efd10fb1456f94b6502eb2047705490985d7979eb31d78039",
+          "out/preload/index.js": "33fb5c90359b96a76ff8877cf2c510e9cdb855d3f7e8c988f4254ca72f9ea725",
+          "out/renderer/index.html": "adac39e6c43ab2e4bf8169c4e6f43ffb3d608b488669809e86440136c2f1c167"
+        },
+        "asarEntries": 3497,
+        "artifacts": [
+          {
+            "name": "ZhiCang-Setup-0.2.0-x64.exe",
+            "bytes": 83927096,
+            "machine": "0x14c",
+            "authenticodePresent": false,
+            "archiveIntegrity": "7za test passed"
+          },
+          {
+            "name": "ZhiCang-Portable-0.2.0-x64.exe",
+            "bytes": 83709271,
+            "machine": "0x14c",
+            "authenticodePresent": false,
+            "archiveIntegrity": "7za test passed"
+          }
+        ],
+        "windowsExecution": "NOT TESTED: static payload/archive inspection on Linux only",
+        "signed": false
+      },
+      "logs": [
+        "docs/verification/windows/build.log",
+        "docs/verification/windows/inspection.log"
+      ]
+    },
+    "gui_acceptance_0_2": {
+      "status": "passed within recorded Linux isolated-profile scope",
+      "confirmed_at": "2026-11-22T19:36:48.357979+08:00",
+      "method": "parent computerUse actual interactions; executor independent read-only SQLite backup/final-state checks",
+      "checks": [
+        "trial → wizard → skip optional services → open settings",
+        "correct isolated data directory",
+        "updates disabled by default; check loading ends with unconfigured reason",
+        "native backup save dialog creates real .zhicang containing A",
+        "native restore selection/confirmation → automatic relaunch: A remains, B absent",
+        "manual restart: no repeated gate/wizard; A only",
+        "no Key connection test explicitly reports required API Key and model",
+        "bridge port 38122 collision error; 38123 save and restart persistence; running/enabled state",
+        "token reset notification and masked token display",
+        "local-mode cloud sync explicitly requires activation, no fabricated success"
+      ],
+      "evidence": [
+        "docs/screenshots/首次运行向导-0.2验收.webp",
+        "docs/screenshots/设置与数据目录-0.2验收.webp",
+        "docs/screenshots/完整备份恢复后仅A保留-0.2验收.webp",
+        "docs/screenshots/无Key连接测试明确报错-0.2验收.webp",
+        "docs/screenshots/重启后桥接端口持久化-0.2验收.webp",
+        "docs/screenshots/重启后工作台仅A保留-0.2验收.webp"
+      ],
+      "backup_check": "docs/verification/GUI-0.2-BACKUP-CHECK.json",
+      "final_state_check": "docs/verification/GUI-0.2-FINAL-STATE.json",
+      "cleanup": "docs/verification/GUI-0.2-CLEANUP.json",
+      "not_covered": [
+        "Windows real install/run/uninstall",
+        "live model, payment, email, production license or online multi-device sync",
+        "actual update feed/download/install"
+      ]
+    },
+    "windows_exes_unchanged_during_documentation_finalization": {
+      "ZhiCang-Setup-0.2.0-x64.exe": "70d315f938236a177a1107ac88fe378a5c9a9f3b6add0fa3eb77109315321382",
+      "ZhiCang-Portable-0.2.0-x64.exe": "a110149fd95a5b8959cc2fb91a51e012c012a3b3a67c043fde20dfd8425bab59"
+    }
+  },
+  "not_verified": [
+    "real Windows installer/portable execution, install/uninstall, Windows IME and file locks",
+    "arbitrary window sizes / drag resizing",
+    "Authenticode signing, macOS build/sign/notarization",
+    "live AI vendor/model CDN download",
+    "live payment, email or production authorization",
+    "PostgreSQL/Docker deployment",
+    "real multi-device online synchronization",
+    "real update feed/release pipeline and install update"
+  ],
+  "delivery_type": "unsigned Windows x64 NSIS + portable EXEs; source archive; Chrome/Firefox extension archives; Chinese Windows guide and feature/verification matrix",
+  "automated_verified_at": "2026-11-22T19:24:58.330751+08:00",
+  "gui_acceptance_record": "docs/verification/GUI-ACCEPTANCE.md",
+  "version": "0.2.0",
+  "original_upload": {
+    "retained_unmodified": true,
+    "bytes": 571204,
+    "sha256": "b6400e66c40f398874c10707ec95ebb3de4ccdefbd4de10e4859183085de5fff"
+  },
+  "boundaries": [
+    "No remote clone/commit/push/deployment",
+    "No real payment/account creation/live credential use",
+    "Previous screenshots retained; additional GUI coverage expanded only by newly recorded actual interactions",
+    "Only own completed temporary Wine prefix cleaned; no other services modified"
+  ],
+  "gui_acceptance_record_0_2": "docs/verification/GUI-0.2-ACCEPTANCE.md"
+}

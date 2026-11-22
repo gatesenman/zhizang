@@ -1,0 +1,32 @@
+{
+  "version": "0.3.0",
+  "time": "2026-11-22T20:53:12.691106+08:00",
+  "host": "Wine10 on Linux, NOT real Windows",
+  "privatePrefix": "/workspace/zhicang-build-tools/wineprefix-v030",
+  "actualPortableExe": {
+    "attempted": true,
+    "exitCode": 2,
+    "durationSeconds": 4.8,
+    "guiAcceptance": false
+  },
+  "actualUnpackedWindowsExe": {
+    "attempted": true,
+    "monitorLimitSeconds": 15,
+    "monitorExitCode": 124,
+    "log": "Wine reports missing NTLM/COM/Windows APIs and stack overflow; no GUI acceptance inferred"
+  },
+  "databaseChecks": [
+    {
+      "file": "/workspace/zhicang-wine-runtime-030/profile-unpacked/zhicang.db",
+      "integrity": "ok",
+      "bookmarkCount": 0
+    }
+  ],
+  "status": "attempted but NOT accepted as Windows runtime pass; no further Wine environment work",
+  "noGuiAutomation": true,
+  "logs": [
+    "windows/wine-portable-start-0.3.0.log",
+    "windows/wine-unpacked-start-0.3.0.log"
+  ],
+  "cleanup": "Only own explicit WINEPREFIX server stopped; private regenerable prefix removed after all package checks; shared default .wine untouched"
+}

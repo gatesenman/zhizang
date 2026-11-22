@@ -1,0 +1,9 @@
+{
+  "source": "https://github.com/electron-userland/electron-builder/pull/9769",
+  "dependency": "app-builder-lib@24.13.3",
+  "originalTemplateSha256": "afa9046492317e72e79e022cdb1f42edba4687ea605300bfc01c002f3106201c",
+  "patchedTemplateSha256": "1d2eeeecda89e74ef829252be34042b648f5329685867820c8c953dad64061ad",
+  "patchSha256": "c9bad1d0e88b5f25a71b65a03342b47f6bb200fdee025fb16333eea1323c6d9f",
+  "strategy": "Pinned exact dependency + pnpm patchedDependencies. No renderer edits, no native changes, no registry workarounds.",
+  "windowsFixExecution": "PENDING: new Setup must install on the authorized clean Windows namespace before success is claimed."
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@zhicang/extension",
+  "version": "0.3.1",
+  "private": true,
+  "description": "智藏 ZhiCang 浏览器收藏插件（Chrome / Firefox）",
+  "scripts": {
+    "build": "node build.mjs all",
+    "build:chrome": "node build.mjs chrome",
+    "build:firefox": "node build.mjs firefox"
+  }
+}

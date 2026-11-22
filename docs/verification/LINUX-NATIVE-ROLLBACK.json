@@ -1,0 +1,8 @@
+{
+  "native": "/workspace/e2e-upload-20261122/ZhiCang/node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+  "backup": "/workspace/zhicang-build-tools/better_sqlite3-linux-electron125.node",
+  "sha256": "cab5a6342b57a55baecd725beb3bde699df00ec9a1f9ef3e1ad2143c310cb204",
+  "bytes": 2072840,
+  "format": "ELF Linux x64, Electron ABI125; verified by passing real SQLite desktop tests",
+  "action": "Read-only compared; live module not changed; available rollback source after GUI ends"
+}

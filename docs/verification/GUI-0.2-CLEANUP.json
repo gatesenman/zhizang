@@ -1,0 +1,25 @@
+{
+  "requested_at": "2026-11-22T19:35:55.441568+08:00",
+  "parent_shell_pid": 1048000,
+  "main_pid": 1048004,
+  "confirmed_children": [
+    1048006,
+    1048007,
+    1048033,
+    1048063,
+    1048074
+  ],
+  "action": "SIGTERM to verified GUI main only; children and launcher should exit with it",
+  "scope": "isolated GUI profile only; no other services targeted",
+  "final_process_states": {
+    "1048000": "exited",
+    "1048004": "exited",
+    "1048006": "exited",
+    "1048007": "exited",
+    "1048033": "exited",
+    "1048063": "exited",
+    "1048074": "exited"
+  },
+  "status": "all confirmed GUI launcher/main/child processes exited; no unrelated process signalled",
+  "verified_at": "2026-11-22T19:36:48.357979+08:00"
+}

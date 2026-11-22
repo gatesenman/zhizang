@@ -1,0 +1,449 @@
+[
+  {
+    "path": ".env.example",
+    "status": "modified",
+    "sha256": "3acb5efe396e11e60a3980f6c9faa391c18c16425f7540b365051bec6de614b4"
+  },
+  {
+    "path": "README.md",
+    "status": "modified",
+    "sha256": "782ee38ad1c4499c4a9b77c7f57fdfe41b200d20d7d7bf35cbc716a32a6d6f09"
+  },
+  {
+    "path": "Windows使用说明.md",
+    "status": "added",
+    "sha256": "fdc57790adacb8785c17f8775485858014fe24fab4914597f4c85cf14d5852dd"
+  },
+  {
+    "path": "apps/backend/package.json",
+    "status": "modified",
+    "sha256": "aad975520a91a690c5825ce2d035b06602dea759ac3670d5b95d32bb8c93afb6"
+  },
+  {
+    "path": "apps/backend/src/db/data-source.ts",
+    "status": "modified",
+    "sha256": "4715f5d369f994c5bda72850ed70ccd6e28727e10e30ba2dd513c8c0c51b49f1"
+  },
+  {
+    "path": "apps/backend/src/main.ts",
+    "status": "modified",
+    "sha256": "cf9dde5f98abb2d3c8ac556fe66283d63ab28b2de15dff412110e312a9097fe9"
+  },
+  {
+    "path": "apps/desktop/electron.vite.config.ts",
+    "status": "modified",
+    "sha256": "33256e139373584e06331dad26462d2bf2ace180d0962eb11fc843c888d1cd7c"
+  },
+  {
+    "path": "apps/desktop/package.json",
+    "status": "modified",
+    "sha256": "031f844624ef005d07b01baa1787f28599a4d0ebb07b9276d33743a19dc8ba0d"
+  },
+  {
+    "path": "apps/desktop/src/main/assistant.ts",
+    "status": "added",
+    "sha256": "34b3642a05d761ba7d5ef005f41f3fc80f34b49aa6f9f2c6309d464372ecfb95"
+  },
+  {
+    "path": "apps/desktop/src/main/backup.ts",
+    "status": "added",
+    "sha256": "67dbcc360a2c4a09ed984520ef74b828c2574b04fbc88aad27b645d4a6ebd6ec"
+  },
+  {
+    "path": "apps/desktop/src/main/bridge.ts",
+    "status": "modified",
+    "sha256": "5eb0b0aa0887b1d81c0c291f42bb672349f54c97ffb97352469472070f831ae7"
+  },
+  {
+    "path": "apps/desktop/src/main/db.ts",
+    "status": "modified",
+    "sha256": "a9c92b984297e704335f6989e7067fc0e0ada29db5f0b4c1f6cbedd9633f026d"
+  },
+  {
+    "path": "apps/desktop/src/main/enrich.ts",
+    "status": "modified",
+    "sha256": "318d11e9b65e79e84869961907f8821e9ea76afdcd253586fb7e176ab821935d"
+  },
+  {
+    "path": "apps/desktop/src/main/import-export.ts",
+    "status": "modified",
+    "sha256": "1b54db0c94f568377c0e091574ddcdd77b0c6103efdaa785d303de4ecc0bbce2"
+  },
+  {
+    "path": "apps/desktop/src/main/index.ts",
+    "status": "modified",
+    "sha256": "73c45e8ab7e39b2c63ec23cb9bcbbd2cf039417007d03d5c7e672b4cbc291908"
+  },
+  {
+    "path": "apps/desktop/src/main/license.ts",
+    "status": "modified",
+    "sha256": "bbc86c2abebb0bfebf1e7718727f2ea9fd93251adc39c763b3e23a1ff39ce286"
+  },
+  {
+    "path": "apps/desktop/src/main/service-url.ts",
+    "status": "added",
+    "sha256": "eb3827aa7ad1c91ab7d017104c5dd3baa4fd06c0b4cda8ed503ddaeceb70cb6b"
+  },
+  {
+    "path": "apps/desktop/src/main/sync.ts",
+    "status": "modified",
+    "sha256": "b8b8b74eb02a852ef1188d751d554310bb91d86e08568a541d659c1a920848d4"
+  },
+  {
+    "path": "apps/desktop/src/main/update-policy.ts",
+    "status": "added",
+    "sha256": "d01d261d60fc6f3356d405eb5ba041858c48a9eabb26a875fbc3097d852b8fe7"
+  },
+  {
+    "path": "apps/desktop/src/main/updater.ts",
+    "status": "modified",
+    "sha256": "cfd63eaf3d62783bda4176e870f41c2c3515ab9ec24c64201bdcbe368af2656c"
+  },
+  {
+    "path": "apps/desktop/src/preload/index.ts",
+    "status": "modified",
+    "sha256": "f7fd2d433290afbed1210d8249df5883fbf09ff47b458b534205b7eecd3c5be6"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/App.tsx",
+    "status": "modified",
+    "sha256": "ab33505daf6a218015c97c3e110b254fe63aa42b384b8d5bff2f3da2e5a59195"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/AIPanel.tsx",
+    "status": "modified",
+    "sha256": "afe97984e24122c332d53c2c9acf54e63bf8caa8fcd8e5d4152a6777ffe48395"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/AddBookmarkModal.tsx",
+    "status": "modified",
+    "sha256": "9a894904785835705cf3a500b81cd068968181d3abe73c725ee5d5599174e4ee"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/BookmarkPanel.tsx",
+    "status": "modified",
+    "sha256": "d7f12d6e4e6799f431bd561141304820817b43b71acab2f3dec319ec2191d334"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/LicenseSettings.tsx",
+    "status": "added",
+    "sha256": "154514895e4c6104c7a73addfcec8b84e06aceacf8374925d0d7a060307ae573"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/ListToolbar.tsx",
+    "status": "modified",
+    "sha256": "18fec98ac7376c1f4e61c40681ed23fb0791d0bfc7da94752791e9868f70a6b9"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/OnboardingModal.tsx",
+    "status": "modified",
+    "sha256": "82109d9d8823969450eceae914fcc05080443fd8a5047cf8dbd00eade462d55c"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/SettingsModal.tsx",
+    "status": "modified",
+    "sha256": "83e390be4fbcbd9ea89aab03570f858b1cb0c8f9c7108d3a2ff3f8f6e438ffd6"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/components/WebPreview.tsx",
+    "status": "modified",
+    "sha256": "9317636a2fd4c725146360fbe807fa87fcded10805bcc4c188c1fc90a6dc414d"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/store.ts",
+    "status": "modified",
+    "sha256": "a8736550b1abfde27a47c8f4901e0ff28c8f24e9f7b37ac360af3aca643d8d50"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/styles.css",
+    "status": "modified",
+    "sha256": "c5a6437105d5e0fb3a33b75f0acb527d65304c2afa440dc2126215be477a500a"
+  },
+  {
+    "path": "apps/desktop/src/renderer/src/theme.ts",
+    "status": "modified",
+    "sha256": "8bb808361de8f99787219e2c78dac08b2bb96bbace7c829bbfc78b63a5c4aa64"
+  },
+  {
+    "path": "apps/desktop/test/configuration.test.ts",
+    "status": "added",
+    "sha256": "649a5358391cc7921d10478d8c8147d722d0e14d315c6eae3a5de5aba84fac4a"
+  },
+  {
+    "path": "apps/desktop/test/library.test.ts",
+    "status": "added",
+    "sha256": "fdcf6a1b076d513a284d8c792e01990093060a4609155486e635a3ef42439ee9"
+  },
+  {
+    "path": "apps/desktop/test/store.test.ts",
+    "status": "added",
+    "sha256": "3600b3c2f3cd6878cc9e6d60161a6fa85e248b22d2b9229eccc00c2f0201dbd9"
+  },
+  {
+    "path": "apps/desktop/tsconfig.node.tsbuildinfo",
+    "status": "excluded_or_removed"
+  },
+  {
+    "path": "apps/desktop/tsconfig.web.tsbuildinfo",
+    "status": "excluded_or_removed"
+  },
+  {
+    "path": "apps/extension/common.js",
+    "status": "modified",
+    "sha256": "726c75946eaf4d1d2b3a6b32e5a2ac1bcf702febaa9cd72cebb71900b36e2aa4"
+  },
+  {
+    "path": "apps/extension/manifest.firefox.json",
+    "status": "modified",
+    "sha256": "ad256ebd960e82716f21c56d9e826102272b1f2b419d386886d30d2fd9aff75d"
+  },
+  {
+    "path": "apps/extension/manifest.json",
+    "status": "modified",
+    "sha256": "d2d7f264b046d8db2e1f7f482344fad48d8348653a2860e83c9c7432eba13c7b"
+  },
+  {
+    "path": "apps/extension/options.html",
+    "status": "modified",
+    "sha256": "b8c66ba6489548272152ff412445400f8c4eab78d8c69bd47574f38f35de7a9b"
+  },
+  {
+    "path": "apps/extension/options.js",
+    "status": "modified",
+    "sha256": "d52318dcc87f8b82f450fecf26bed5249f435622b1075836af3f0759551a0d94"
+  },
+  {
+    "path": "apps/portal/tsconfig.tsbuildinfo",
+    "status": "excluded_or_removed"
+  },
+  {
+    "path": "docs/DELIVERY-2026-11.md",
+    "status": "added",
+    "sha256": "81f65647995a75376418fcbd23633d14b7a314823242977c61cab25f9ea6254a"
+  },
+  {
+    "path": "docs/VERIFICATION.json",
+    "status": "added",
+    "sha256": "f60cd7acdc03748825e805e4b1a9ab26b01235ae5ea87c30820f7cec8e953d2c"
+  },
+  {
+    "path": "docs/screenshots/回收站选择性删除后保留B-验收截图.webp",
+    "status": "added",
+    "sha256": "d2e25d18bfe79b70123ed0207f92115d8504d14dda3f8a83588e2a4ca711db31"
+  },
+  {
+    "path": "docs/screenshots/完整备份恢复后仅A保留-0.2验收.webp",
+    "status": "added",
+    "sha256": "3c6e5604461b40c9995b49fd2f4fd496f0fdf0594e83321aa303710d7d26621d"
+  },
+  {
+    "path": "docs/screenshots/工作台与本机网页预览-验收截图.webp",
+    "status": "added",
+    "sha256": "79196bebc12e4120fd6f449e2e66f5a0dc0ce6312b1d57df1bdbf0c4385d1e73"
+  },
+  {
+    "path": "docs/screenshots/无Key连接测试明确报错-0.2验收.webp",
+    "status": "added",
+    "sha256": "ab64627aa646e14dd79566dcb8b2a8608dcf6771c8395051b6a5125daf950060"
+  },
+  {
+    "path": "docs/screenshots/设置与数据目录-0.2验收.webp",
+    "status": "added",
+    "sha256": "74369ed32feb0ebc6d583df6801bf9d1bb6ec84aa36a4d6339be50246dbfe3f7"
+  },
+  {
+    "path": "docs/screenshots/重启后工作台仅A保留-0.2验收.webp",
+    "status": "added",
+    "sha256": "79fc0c4b84480ad257a508fdf3f7bb777636a22bb0d609c64a679679657114bd"
+  },
+  {
+    "path": "docs/screenshots/重启后桥接端口持久化-0.2验收.webp",
+    "status": "added",
+    "sha256": "d42ab83913a70e4bb62595717c3f5196b6d1d4172860e53e5d73c5eabbba7ebd"
+  },
+  {
+    "path": "docs/screenshots/首次运行向导-0.2验收.webp",
+    "status": "added",
+    "sha256": "1b4105c77c13bc40021872c1e943d2beeadb444a407835aa5983b25e4c3ebc1a"
+  },
+  {
+    "path": "docs/verification/GUI-0.2-ACCEPTANCE.md",
+    "status": "added",
+    "sha256": "0ffd29fb8c54ca43b2bbfd97ddf1bf22a38b37048f238f9754a30b74f3a5a87b"
+  },
+  {
+    "path": "docs/verification/GUI-0.2-BACKUP-CHECK.json",
+    "status": "added",
+    "sha256": "8349c32678c5d8c3c4ca3cee3020555d9759ff43924b65dae0b7e95e683d9697"
+  },
+  {
+    "path": "docs/verification/GUI-0.2-CLEANUP.json",
+    "status": "added",
+    "sha256": "4061b1e51a89f790551a4c613af44945576739421b02bb1db40085ee52ce647c"
+  },
+  {
+    "path": "docs/verification/GUI-0.2-FINAL-STATE.json",
+    "status": "added",
+    "sha256": "77e988c57d8868b8d2054a71f30f3f2476a85425f1bdcef26fa4548c15c875ec"
+  },
+  {
+    "path": "docs/verification/GUI-0.2-PENDING.md",
+    "status": "added",
+    "sha256": "ac227d87f72575214222b5ae693d8f9c1784ea89d0bd24a9597b9509f0d57e2a"
+  },
+  {
+    "path": "docs/verification/GUI-0.2-SCREENSHOTS.json",
+    "status": "added",
+    "sha256": "d537cd3bbb493ec146639a9bf66776927e4405f33cfe0ca01824f429b4a5b3a7"
+  },
+  {
+    "path": "docs/verification/GUI-ACCEPTANCE.md",
+    "status": "added",
+    "sha256": "7f58015ca01bed0dfb3274403d956ad40212d44bc8246c2fad9281cb6c7c401d"
+  },
+  {
+    "path": "docs/verification/GUI-CLEANUP.json",
+    "status": "added",
+    "sha256": "7d791b8ab0d4e6e2515e0db8c1cd0ae024957b63a255816ce8d4422d58fda52e"
+  },
+  {
+    "path": "docs/verification/backend-e2e.log",
+    "status": "added",
+    "sha256": "f7a1163570e4e6748e7cec9869f77aa9b1f08576b62a5898f04f054c05c723f1"
+  },
+  {
+    "path": "docs/verification/build.log",
+    "status": "added",
+    "sha256": "d688330a117e24223f6f361dfa2b1615443ddb3dcaa9a0a377134afec3909e81"
+  },
+  {
+    "path": "docs/verification/extension.log",
+    "status": "added",
+    "sha256": "098595525c69d4a46e9fbeeb5a623d74ccef37f97272be80e53db72d81b21820"
+  },
+  {
+    "path": "docs/verification/install.log",
+    "status": "added",
+    "sha256": "4740ded6e9d2cd180b434e264a551ee6fdb07f9b879e4ba47a4f484b07199553"
+  },
+  {
+    "path": "docs/verification/lint.log",
+    "status": "added",
+    "sha256": "2ff0285b9fbb5849f15320bf3354935e3395ac590bad19f6ead62f607e919f95"
+  },
+  {
+    "path": "docs/verification/mcp-syntax.log",
+    "status": "added",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "docs/verification/tests.log",
+    "status": "added",
+    "sha256": "3884e81697dbb0a42eeefd5f5bbbffb9458e239a6ef8a7a3e8aef4d02b453f80"
+  },
+  {
+    "path": "docs/verification/typecheck.log",
+    "status": "added",
+    "sha256": "c737a93f9f5c44439f9f3b5d08bb09e22b57f539f3260ffe8b9139b37b9c15c2"
+  },
+  {
+    "path": "docs/verification/windows/ARTIFACT-VERIFICATION.json",
+    "status": "added",
+    "sha256": "0d570d20b28b3a4d566fbbc5c528edcdb36b44282218d0068f9d5eda7b6166c4"
+  },
+  {
+    "path": "docs/verification/windows/build.log",
+    "status": "added",
+    "sha256": "d539a776203fa149950d8c3ff125866f1d389019644e8bbe2e51eef755c5dd6d"
+  },
+  {
+    "path": "docs/verification/windows/inspection.log",
+    "status": "added",
+    "sha256": "0d570d20b28b3a4d566fbbc5c528edcdb36b44282218d0068f9d5eda7b6166c4"
+  },
+  {
+    "path": "docs/verification/windows/packaging-probe.log",
+    "status": "added",
+    "sha256": "74cadd9e5734147da4908bf164ca29eadb3be4e16decbd229748f5074d85f806"
+  },
+  {
+    "path": "docs/功能覆盖与验证矩阵.md",
+    "status": "added",
+    "sha256": "abfd9a284cd1ce21f71865d85f3bf5def86a300c863fca170152ee235c8f9674"
+  },
+  {
+    "path": "package.json",
+    "status": "modified",
+    "sha256": "eea1f08faf3c5b61a10adbe8e61f8ddbb054974ad9385a0743eda988dd93b7ad"
+  },
+  {
+    "path": "pnpm-lock.yaml",
+    "status": "modified",
+    "sha256": "83cf1b2325a8a2b17253994af2a5d7da4fb2f5d3ecae2f535844dae40f715a7b"
+  },
+  {
+    "path": "scripts/desktop-cloud-smoke.cjs",
+    "status": "added",
+    "sha256": "4162ef0322bd122c1b46d4b8e5f455261c9bd1b2e9aba11f2410609e1561c3a2"
+  },
+  {
+    "path": "scripts/run-backend.sh",
+    "status": "modified",
+    "sha256": "e3e6e74cbce267bdd66a32643949dbb27a2f8ffe90e3b1770e4b17e1d24bee8a"
+  },
+  {
+    "path": "scripts/run-desktop-tests.mjs",
+    "status": "added",
+    "sha256": "7a9dd123080169325021daab057bca61351b3e139378061ccbcbff3843132dbf"
+  },
+  {
+    "path": "scripts/run-desktop.sh",
+    "status": "modified",
+    "sha256": "a722aa8f3a9f4fb2fbaacedefdd444c377baad41006c84b4a2bb9fceccb4f82e"
+  },
+  {
+    "path": "scripts/smoke-backend.mjs",
+    "status": "added",
+    "sha256": "78dad14f9168de04db6f9d8662126b86141f4dd22cfddcc11ee89f947fe80ebb"
+  },
+  {
+    "path": "scripts/verify-windows-artifacts.mjs",
+    "status": "added",
+    "sha256": "578994dc557a3ed39faca1fc0fc69009a2501019614213e7ea449b8920349325"
+  },
+  {
+    "path": "wiki/02-Getting-Started.md",
+    "status": "modified",
+    "sha256": "34cd349f25b6f6bebb6bcd2c732e69c09d44082efad9451dbc0a2c9e163bbc12"
+  },
+  {
+    "path": "wiki/03-Desktop-App.md",
+    "status": "modified",
+    "sha256": "ca1987495fe12775b195d265d6f4a7bcffd52994dfb100b89b7cb3d34aa0e941"
+  },
+  {
+    "path": "wiki/04-Data-Model.md",
+    "status": "modified",
+    "sha256": "3df120bc14ce750b8b829da5876edd0ee1fdc0d929f744b7b8b51cfd6cc3c397"
+  },
+  {
+    "path": "wiki/05-AI-Enrichment.md",
+    "status": "modified",
+    "sha256": "956dc8f6460dcb8b8e928987952eb97a2164f1c42118635c4374c20d2a807938"
+  },
+  {
+    "path": "wiki/06-Backend-And-Licensing.md",
+    "status": "modified",
+    "sha256": "a2d876a6ff254b872f21b170824b4cd4c14256d14be1f815aba259e612f0554a"
+  },
+  {
+    "path": "wiki/10-Build-And-Release.md",
+    "status": "modified",
+    "sha256": "447be8d9ddc51aad7d78cdaf2b647b3c37198bf9a7812acc311d6ab0958f9548"
+  },
+  {
+    "path": "交付说明.md",
+    "status": "added",
+    "sha256": "81ed8af9a0defa6b9b3d0dae9e6bb4f1ee6836a8072cd680b89724256020745a"
+  }
+]

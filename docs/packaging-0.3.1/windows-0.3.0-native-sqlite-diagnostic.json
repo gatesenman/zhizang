@@ -1,0 +1,10 @@
+﻿{
+    "TimeAsiaShanghai":  "2026-11-22T22:51:09",
+    "DiagnosticPID":  63992,
+    "ExitCode":  0,
+    "Stdout":  "{\"scope\":\"synthetic native module diagnostic; not app GUI or business-flow acceptance\",\"platform\":\"win32\",\"arch\":\"x64\",\"electron\":\"31.7.7\",\"node\":\"20.18.0\",\"abi\":\"125\",\"journal\":\"wal\",\"records\":100,\"reopenedRecords\":100,\"rollbackPreservedCount\":true,\"integrity\":\"ok\",\"unicodePreserved\":true,\"backupRecords\":100,\"backupIntegrity\":\"ok\",\"corruptRejected\":true}",
+    "Stderr":  "",
+    "DataDirectory":  "E:\\ZhiCang-E2E-030-20261122-2213-8f47a2\\native-sqlite-probe-2250",
+    "AppProfileTouched":  false,
+    "GUIAutomated":  false
+}

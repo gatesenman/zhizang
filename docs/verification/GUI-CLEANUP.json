@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-11-22T19:06:40.832595+08:00",
+  "gui_pid": 938921,
+  "supervisor_and_http_pid": 938903,
+  "confirmed_owned_descendants": [
+    938923,
+    938924,
+    938954,
+    938980,
+    938990,
+    960627
+  ],
+  "result": "all recorded own processes exited; localhost fixture port 39339 no longer accepting connections",
+  "action": "SIGTERM to own supervisor 938903, which closed its own GUI child and HTTP listener",
+  "other_services": "not modified"
+}

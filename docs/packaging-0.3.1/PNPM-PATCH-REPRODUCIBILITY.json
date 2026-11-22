@@ -1,0 +1,8 @@
+{
+  "checked_at": "2026-11-22T23:40:41.787626+08:00",
+  "command": "pnpm patch app-builder-lib@24.13.3 --edit-dir /workspace/zhicang-build-031/pnpm-patch-check",
+  "pnpm": "9.15.9",
+  "actualPnpmAppliedTemplateSha256": "1d2eeeecda89e74ef829252be34042b648f5329685867820c8c953dad64061ad",
+  "expectedTemplateMatched": true,
+  "meaning": "Actual pnpm package extraction consumed the existing patchedDependencies patch; not a simulated text-only patch test."
+}

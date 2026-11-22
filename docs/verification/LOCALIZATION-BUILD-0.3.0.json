@@ -1,0 +1,8 @@
+{
+  "time": "2026-11-22T20:56:01.682246+08:00",
+  "file": "apps/desktop/out/renderer/assets/index-CzfXS42l.js",
+  "sha256": "d8d69cbfd2f9be3c93b825482642972eeb20a157ca572deb533dd6ac99bc6f59",
+  "message": "Chinese multi-URL guidance present in final bundle",
+  "initialLanguage": "compiled saved zh/en preserved, otherwise zh; no navigator-language English default",
+  "visualRecheck": false
+}

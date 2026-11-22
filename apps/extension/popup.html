@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智藏 ZhiCang</title>
+    <style>
+      :root {
+        --primary: #7c3aed;
+      }
+      body {
+        width: 300px;
+        margin: 0;
+        font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        color: #1f1f1f;
+        background: #fff;
+      }
+      .head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px;
+        background: linear-gradient(135deg, #7c3aed, #9333ea);
+        color: #fff;
+      }
+      .badge {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+      }
+      .body {
+        padding: 12px 14px;
+      }
+      button {
+        width: 100%;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        background: var(--primary);
+        color: #fff;
+        transition: opacity 0.15s;
+      }
+      button.secondary {
+        background: #f3f0ff;
+        color: var(--primary);
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      .status {
+        font-size: 12px;
+        margin-top: 8px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        background: #f6f6f6;
+        color: #666;
+        word-break: break-all;
+      }
+      .ok {
+        color: #16a34a;
+      }
+      .err {
+        color: #dc2626;
+      }
+      .foot {
+        font-size: 11px;
+        color: #999;
+        text-align: center;
+        padding-bottom: 10px;
+      }
+      a {
+        color: var(--primary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <div class="badge">智</div>
+      <div>
+        <div style="font-weight: 700">智藏 ZhiCang</div>
+        <div style="font-size: 11px; opacity: 0.85">收藏助手</div>
+      </div>
+    </div>
+    <div class="body">
+      <button id="saveCurrent">收藏当前页（含正文存档）</button>
+      <button id="saveAll" class="secondary">收藏所有标签页</button>
+      <div id="status" class="status">正在连接桌面端…</div>
+    </div>
+    <div class="foot">未连接？请确保桌面端已运行 · <a href="#" id="opt">设置端口</a></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

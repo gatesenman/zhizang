@@ -1,0 +1,39 @@
+{
+  "version": "0.2.0",
+  "platform": "Windows x64",
+  "runtime": {
+    "bytes": 180861440,
+    "machine": "0x8664",
+    "authenticodePresent": false
+  },
+  "sqliteNative": {
+    "bytes": 1720320,
+    "machine": "0x8664",
+    "authenticodePresent": false,
+    "electronAbi": 125
+  },
+  "packagedBuildSha256": {
+    "out/main/index.js": "ce39e83b5910d92efd10fb1456f94b6502eb2047705490985d7979eb31d78039",
+    "out/preload/index.js": "33fb5c90359b96a76ff8877cf2c510e9cdb855d3f7e8c988f4254ca72f9ea725",
+    "out/renderer/index.html": "adac39e6c43ab2e4bf8169c4e6f43ffb3d608b488669809e86440136c2f1c167"
+  },
+  "asarEntries": 3497,
+  "artifacts": [
+    {
+      "name": "ZhiCang-Setup-0.2.0-x64.exe",
+      "bytes": 83927096,
+      "machine": "0x14c",
+      "authenticodePresent": false,
+      "archiveIntegrity": "7za test passed"
+    },
+    {
+      "name": "ZhiCang-Portable-0.2.0-x64.exe",
+      "bytes": 83709271,
+      "machine": "0x14c",
+      "authenticodePresent": false,
+      "archiveIntegrity": "7za test passed"
+    }
+  ],
+  "windowsExecution": "NOT TESTED: static payload/archive inspection on Linux only",
+  "signed": false
+}

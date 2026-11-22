@@ -1,0 +1,59 @@
+# 智藏 ZhiCang 一键部署：PostgreSQL + 后端 + 付费门户
+# 用法：
+#   cp .env.example .env   # 按需修改
+#   docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zhicang
+      POSTGRES_PASSWORD: zhicang
+      POSTGRES_DB: zhicang
+    volumes:
+      - zhicang_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U zhicang']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - '5432:5432'
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgres://zhicang:zhicang@db:5432/zhicang
+      DB_SYNC: 'true'
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3001}
+      PORTAL_URL: ${PORTAL_URL:-http://localhost:3002}
+      LICENSE_PRIVATE_KEY_PATH: /app/keys/license_private.pem
+      LICENSE_PUBLIC_KEY_PATH: /app/keys/license_public.pem
+    volumes:
+      # 挂载许可证签名密钥（生产请妥善保管，勿入库）
+      - ./keys:/app/keys:ro
+    ports:
+      - '3001:3001'
+
+  portal:
+    build:
+      context: .
+      dockerfile: apps/portal/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:-http://localhost:3001/api}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '3002:3002'
+
+volumes:
+  zhicang_pgdata:

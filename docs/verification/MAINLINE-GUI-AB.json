@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-11-22T20:29:13.689831+08:00",
+  "reportedBy": "parent computerUse actual GUI acceptance, reported2026-11-22 20:26 Asia/Shanghai",
+  "result": "desktop A/B accepted; Chrome extension separate review in progress",
+  "passed": [
+    "manual A/B titles survive background enrichment",
+    "inbox batch folder/tag organization",
+    "existing duplicates keep original data",
+    "trash restore is explicit and keeps notes/tags",
+    "no-result scope broadening",
+    "visible removable filter summary and selection reset",
+    "two note editors quick-switch without cross-write; save persists",
+    "copy notes and source references verified",
+    "AI-disabled actual keyword results and keyboard reference navigation",
+    "multiple-URL guidance and nonHTTP rejection"
+  ],
+  "localizationFollowup": "Reported English multi-URL text not found in current source or built renderer (both already Chinese); inspected screenshot has English base locale. Clarified Chinese message, added assertions and Chinese-first fresh startup while respecting saved English. These tiny source changes are not rebuilt into active GUI yet.",
+  "notCovered": [
+    "current Chrome extension GUI still ongoing",
+    "post-localization rebuilt GUI not yet reviewed",
+    "Windows runtime/installer execution/signing",
+    "production AI/online licensing/payment/mail/cloud/update"
+  ],
+  "screenshots": [
+    {
+      "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.ac77ed38-73ce-4f7e-bd7c-6e30266d2f9f.webp",
+      "file": "主线验收-工作台与笔记.webp",
+      "bytes": 136794,
+      "sha256": "a498ccd222cdffa813ee69574847cf96e16ac88e470180af1070963fb6b708ec"
+    },
+    {
+      "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.0d4e1f2f-a58f-4cba-8972-a2a3d87c9224.webp",
+      "file": "主线验收-引用反馈.webp",
+      "bytes": 138704,
+      "sha256": "68c73ab9d686310a8e9258b07d8b7d40e24a0d2f9c10c1a2f573529387d346c6"
+    },
+    {
+      "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.efb8b245-b09c-4941-8031-d6acf1e2f31e.webp",
+      "file": "主线验收-多链接测试过程.webp",
+      "bytes": 130096,
+      "sha256": "3c4b7bbfe2a7850cd5899e541edc22bf02fe1870088f3463b1e24f3bb7c879e2"
+    },
+    {
+      "source": "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.1be2e416-7b16-4e19-99dd-9af38152a01b.webp",
+      "file": "主线验收-非HTTP拒绝.webp",
+      "bytes": 106710,
+      "sha256": "6e078254f89108d88c4914f805b924d4c8f30a16794d604317d9df37aa84194e"
+    }
+  ]
+}

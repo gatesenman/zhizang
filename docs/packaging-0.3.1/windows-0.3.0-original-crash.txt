@@ -1,0 +1,61 @@
+---
+pid: 66040
+cwd: "C:\\Users\\Administrator\\ZhiCang-E2E-Packets-030-20261122-2213-8f47a2"
+command: "$ErrorActionPreference='Stop';$root='E:\\ZhiCang-E2E-030-20261122-2213-8f47a2';$ownFiles=@(Get-ChildItem -LiteralPath $root -Recurse -File | Select-Object @{Name='Relative';Expression={$_.FullName.Substring($root.Length+1)}},Length);$events=@();try{foreach($e in @(Get-WinEvent -FilterHashtable @{LogName='Application';Id=1000;StartTime=(Get-Date).AddMinutes(-12)} -ErrorAction Stop)){$x=[xml]$e.ToXml();$d=@{};foreach($v in $x.Event.EventData.Data){$d[[string]$v.Name]=[string]$v.'#text'};if($d.AppName -like '*ZhiCang*'){$events+=[pscustomobject]@{TimeAsiaShanghai=[TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($e.TimeCreated,'China Standard Time').ToString('s');AppName=$d.AppName;ModuleName=$d.ModuleName;ModuleVersion=$d.ModuleVersion;ExceptionCode=$d.ExceptionCode;FaultingOffset=$d.FaultingOffset;AppPath=$d.AppPath;ModulePath=$d.ModulePath;ProcessId=$d.ProcessId}}}}catch{$events+=[pscustomobject]@{QueryError=$_.Exception.GetType().Name}};$reg=@();$guid='fd9a587b-1572-58f2-ab07-16cba8ebd5b3';foreach($h in @('CurrentUser','LocalMachine')){foreach($v in @('Registry64','Registry32')){$b=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Enum]::Parse([Microsoft.Win32.RegistryHive],$h),[Enum]::Parse([Microsoft.Win32.RegistryView],$v));try{$k=$b.OpenSubKey(('Software\\'+$guid));if($k){$reg+=[pscustomobject]@{Hive=$h;View=$v;InstallLocation=[string]$k.GetValue('InstallLocation','')};$k.Dispose()}}finally{$b.Dispose()}}};$r=[pscustomobject]@{TimeAsiaShanghai=[TimeZoneInfo]::ConvertTimeBySystemTimeZoneId([DateTime]::UtcNow,'China Standard Time').ToString('s');InstallAttemptExitDecimal=-1073741819;InstallAttemptExitHex='0xC0000005';OwnProcesses=@(Get-CimInstance Win32_Process -Filter \"Name like '%ZhiCang%'\" -Property Name,ProcessId,ParentProcessId,ExecutablePath | Select-Object Name,ProcessId,ParentProcessId,ExecutablePath);OwnFiles=$ownFiles;FaultEvents=$events;FixedIdentityRegistry=$reg};$j=$r|ConvertTo-Json -Depth 6;$j|Set-Content -LiteralPath (Join-Path $root 'evidence\\setup-crash.json') -Encoding UTF8;$j"
+title: "只读收集智藏Setup访问冲突的故障模块及本任务目录/注册项残留，不查看无关事件、不改变安全设置"
+status: succeeded
+started_at: 2026-11-22T14:31:09.765Z
+running_for_ms: 47909    
+---
+{
+  "TimeAsiaShanghai": "2026-11-22T22:31:48",
+  "InstallAttemptExitDecimal": -1073741819,
+  "InstallAttemptExitHex": "0xC0000005",
+  "OwnProcesses": [],
+  "OwnFiles": [
+    {
+      "Relative": "ZHICANG-E2E-OWNER.txt",
+      "Length": 95
+    },
+    {
+      "Relative": "evidence\\join-and-hash.json",
+      "Length": 275
+    },
+    {
+      "Relative": "evidence\\module-probe-result.json",
+      "Length": 217
+    },
+    {
+      "Relative": "evidence\\module-probe.ps1",
+      "Length": 580
+    },
+    {
+      "Relative": "installed-temp\\nsmC499.tmp\\System.dll",
+      "Length": 12288
+    },
+    {
+      "Relative": "installed-temp\\nsmC499.tmp\\UAC.dll",
+      "Length": 14848
+    }
+  ],
+  "FaultEvents": [
+    {
+      "TimeAsiaShanghai": "2026-11-22T22:30:10",
+      "AppName": "ZhiCang-Setup-0.3.0-x64.exe",
+      "ModuleName": "System.dll",
+      "ModuleVersion": "0.0.0.0",
+      "ExceptionCode": "c0000005",
+      "FaultingOffset": "00001581",
+      "AppPath": "C:\\Users\\Administrator\\ZhiCang-E2E-Packets-030-20261122-2213-8f47a2\\ZhiCang-Setup-0.3.0-x64.exe",
+      "ModulePath": "E:\\ZhiCang-E2E-030-20261122-2213-8f47a2\\installed-temp\\nsmC499.tmp\\System.dll",
+      "ProcessId": "0xace0"
+    }
+  ],
+  "FixedIdentityRegistry": []
+}
+
+---
+exit_code: 0
+elapsed_ms: 47909
+ended_at: 2026-11-22T14:31:57.674Z
+---

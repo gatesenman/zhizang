@@ -1,0 +1,44 @@
+{
+  "version": "0.3.0",
+  "recordedAt": "2026-11-22T20:48:35.081708+08:00",
+  "reportedBy": "parent computerUse actual Chrome+desktop GUI report2026-11-22 20:43 Asia/Shanghai",
+  "status": "passed within isolated Linux real-browser scope",
+  "checks": [
+    "Chrome developer-mode unpacked extension loading",
+    "GUI actual bridge token+port connection test",
+    "popup authenticated status without undefined version",
+    "actual localhost article capture appears in desktop with real body",
+    "duplicate capture does not create another record",
+    "wrong token rejected, correct token restores",
+    "bridge disabled promptly fails without spinner; enable restores",
+    "desktop port38132: old extension port fails, updated port restores",
+    "rotated token invalidates old value; new value restores"
+  ],
+  "tokenHandling": "tokens never recorded or included in evidence",
+  "notCovered": [
+    "Windows browser/installer/portable runtime",
+    "Firefox real GUI/signing",
+    "production online accounts/cloud/services"
+  ],
+  "screenshots": [
+    {
+      "file": "扩展验收-收藏进入工作台.webp",
+      "bytes": 137306,
+      "sha256": "55bc591005efaa37d00e4bc4062a791ad0f12888fcebe2469c4fb124322e7ef0"
+    },
+    {
+      "file": "扩展验收-连接恢复.webp",
+      "bytes": 263064,
+      "sha256": "fce36ad359bbbe7acb4500ec241aef9aa0082d5aa61d7eb9915c6df5cbabec1b"
+    },
+    {
+      "file": "扩展验收-错误令牌拒绝.webp",
+      "bytes": 263940,
+      "sha256": "d07d044677fe79774f488772fe3f9ec6522e5d4a29e82dc6904a51fadc51c473"
+    }
+  ],
+  "providedScreenshotMissingOnDisk": [
+    "/tmp/computer-use/sand-subagent-b3b2d731-46fa-4ab1-bd1a-dc0fc4a182c2.2dc0d9eb-eb40-4055-86a5-c14950b6f762.webp"
+  ],
+  "missingEvidenceBoundary": "Bridge-off step passed per actual parent GUI report; supplied screenshot path missing, no replacement image fabricated."
+}

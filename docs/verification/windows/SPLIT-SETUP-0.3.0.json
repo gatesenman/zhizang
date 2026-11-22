@@ -1,0 +1,38 @@
+{
+  "version": "0.3.0",
+  "setup": "ZhiCang-Setup-0.3.0-x64.exe",
+  "setupBytes": 83935584,
+  "setupSha256": "8537f44de4b5d95a89fe14a7e011c0faeff84a01713d06aabf8a928d0771e247",
+  "parts": [
+    {
+      "name": "ZhiCangSetup-0.3.0.part01",
+      "bytes": 24000000,
+      "sha256": "f52911528dd18f05e8afa0764ac62c01a5e52d59acb6f1b607f1b69ca09c2fc5"
+    },
+    {
+      "name": "ZhiCangSetup-0.3.0.part02",
+      "bytes": 24000000,
+      "sha256": "02f27c1a7806894aa88ada8019ebe6c0635d0e0cf2a2afcf1e743246a6b58554"
+    },
+    {
+      "name": "ZhiCangSetup-0.3.0.part03",
+      "bytes": 24000000,
+      "sha256": "c24d81ecd4e3e44a393a99fd52050e070e3453ec4c3838a4eedc4d229741dacd"
+    },
+    {
+      "name": "ZhiCangSetup-0.3.0.part04",
+      "bytes": 11935584,
+      "sha256": "fe3839cf963acb49c68a5389ec6bb386d8daaeb37e0e6a6bcd22351c3819f6db"
+    }
+  ],
+  "cmd": {
+    "name": "JoinSetup-0.3.0.cmd",
+    "bytes": 1665,
+    "sha256": "c74015845753ef30310e24f3310d92a230cfb5f802b68a345a24b46e3e61add8",
+    "encoding": "ASCII/CRLF",
+    "windowsExecution": "not tested; static checks only",
+    "behavior": "quoted dp0 and environment path support spaces/Chinese; verifies existing output without overwrite; no install/no deletion/no security bypass"
+  },
+  "linuxActualRejoin": "passed byte-for-byte and SHA256; temporary reconstructed copy removed",
+  "singleAttachmentLimitBytes": 24000000
+}

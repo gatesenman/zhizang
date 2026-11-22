@@ -1,0 +1,82 @@
+{
+  "checked_at": "2026-11-22T19:34:57.461204+08:00",
+  "scope": "Read-only inspection of isolated GUI backup files; active GUI/profile not modified",
+  "files": [
+    {
+      "path": "/workspace/zhicang-gui-v020-20261122/gui-backup.zhicang",
+      "bytes": 114688,
+      "sha256": "583bbf4eb25272eaa3f8f857d3a9a230a1da27ae7919b2957ffd925d8f34a928",
+      "integrity_check": [
+        "ok"
+      ],
+      "foreign_key_check_rows": 0,
+      "bookmarks": [
+        {
+          "url": "https://example.com",
+          "title": "备份前A",
+          "deleted_at": null,
+          "status": "active"
+        }
+      ],
+      "tables": [
+        "categories",
+        "sqlite_sequence",
+        "bookmarks",
+        "tags",
+        "bookmark_tags",
+        "settings",
+        "smart_folders",
+        "visits",
+        "snapshots",
+        "embeddings",
+        "fts_bookmarks",
+        "fts_bookmarks_data",
+        "fts_bookmarks_idx",
+        "fts_bookmarks_content",
+        "fts_bookmarks_docsize",
+        "fts_bookmarks_config"
+      ]
+    },
+    {
+      "path": "/workspace/zhicang-gui-v020-20261122/profile/backups/before-restore-1795347038287.zhicang",
+      "bytes": 114688,
+      "sha256": "45cc1a7599ae2dc06aff9c93195861f02e5490f7bd1dc752181139cab3a10606",
+      "integrity_check": [
+        "ok"
+      ],
+      "foreign_key_check_rows": 0,
+      "bookmarks": [
+        {
+          "url": "https://example.com",
+          "title": "备份前A",
+          "deleted_at": null,
+          "status": "active"
+        },
+        {
+          "url": "https://example.org",
+          "title": "恢复后应消失B",
+          "deleted_at": null,
+          "status": "active"
+        }
+      ],
+      "tables": [
+        "categories",
+        "sqlite_sequence",
+        "bookmarks",
+        "tags",
+        "bookmark_tags",
+        "settings",
+        "smart_folders",
+        "visits",
+        "snapshots",
+        "embeddings",
+        "fts_bookmarks",
+        "fts_bookmarks_data",
+        "fts_bookmarks_idx",
+        "fts_bookmarks_content",
+        "fts_bookmarks_docsize",
+        "fts_bookmarks_config"
+      ]
+    }
+  ]
+}
