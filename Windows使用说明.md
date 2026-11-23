@@ -1,5 +1,13 @@
 # 智藏 ZhiCang 0.3.1 · Windows 使用说明
 
+预编译安装包下载（GitHub，tag `windows-0.3.1`，避免误触发 `v*` Release 工作流）：
+
+- [ZhiCang-Setup-0.3.1-x64.exe](https://github.com/gatesenman/zhizang/releases/download/windows-0.3.1/ZhiCang-Setup-0.3.1-x64.exe)（83,939,318 字节，SHA256 `16b67174821c252df11e4e8168dd7c42b3468e2016f6f5baa9ee9634084a4db9`）
+- [ZhiCang-Portable-0.3.1-x64.exe](https://github.com/gatesenman/zhizang/releases/download/windows-0.3.1/ZhiCang-Portable-0.3.1-x64.exe)（83,721,481 字节，SHA256 `414c68aee3c4cc4e38fe2dfb7753f762a04222ca73e80254c15185d24e158ccb`）
+
+发行页：https://github.com/gatesenman/zhizang/releases/tag/windows-0.3.1
+
+
 ## 本版状态（请先看）
 
 本版包含最新内容区布局、按需展开详情、稳定批量操作、折叠笔记，以及 NSIS 上游安全字符串读取补丁。安装 EXE/便携 EXE 均为本次真实新构建，不是旧包改名。

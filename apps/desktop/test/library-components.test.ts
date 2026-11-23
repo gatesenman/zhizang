@@ -1,20 +1,26 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { App as AntApp } from 'antd';
 
+// Use createRequire so the Zustand hook can be replaced for isolated render tests.
+// ESM import bindings are live and not assignable, which is why this file cannot use
+// static import() for the store. This also satisfies @typescript-eslint/no-var-requires.
+const load = createRequire(import.meta.url);
+
 // Deliberately controlled renderer state, not an end-to-end database fixture.
 const memory = new Map<string, string>();
 (globalThis as any).localStorage = { getItem: (k: string) => memory.get(k) ?? null, setItem: (k: string, v: string) => memory.set(k, v) };
-const storeModule = require('../src/renderer/src/store');
+const storeModule = load('../src/renderer/src/store');
 const original = storeModule.useStore;
 const initial = original.getState();
 let state = { ...initial };
 storeModule.useStore = Object.assign((selector: any) => selector(state), { getState: () => state });
-const { I18nProvider } = require('../src/renderer/src/i18n');
-const ListToolbar = require('../src/renderer/src/components/ListToolbar').default;
-const BookmarkPanel = require('../src/renderer/src/components/BookmarkPanel').default;
+const { I18nProvider } = load('../src/renderer/src/i18n');
+const ListToolbar = load('../src/renderer/src/components/ListToolbar').default;
+const BookmarkPanel = load('../src/renderer/src/components/BookmarkPanel').default;
 function render(component: any): string {
   return renderToStaticMarkup(React.createElement(I18nProvider, null, React.createElement(AntApp, null, React.createElement(component))));
 }
