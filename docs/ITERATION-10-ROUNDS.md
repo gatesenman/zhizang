@@ -23,3 +23,8 @@
 - 审查发现同毫秒/同标题记录没有 ID 排序键，分页顺序未被 SQL 契约固定；默认列表缺少删除状态+置顶+时间联合排序索引。已有 LIKE 转义/中文笔记回退保留。
 - db.ts 添加非破坏性联合索引与 ID tie-breaker；新增同时间两页无重叠/升降序及真实 EXPLAIN QUERY PLAN 索引命中回归。
 - 初始并行测试遭共享机器 IO 阻塞（子进程 disk-sleep），只终止本任务测试，未算通过；NODE_OPTIONS 不接受该 Node 参数的尝试亦记失败。改用实际支持的串行命令后全通过：在 apps/desktop 下 `ELECTRON_RUN_AS_NODE=1 TS_NODE_PROJECT=tsconfig.test.json ../../node_modules/electron/dist/electron --require ts-node/register --test --test-concurrency=1 test/*.test.ts`，/workspace/zhizang-round-04.log。后续轮暂用同一串行等价命令，最终统一修正测试入口；没有给并发写入期间 OFFSET 分页作快照一致性承诺。
+
+## 第5轮：阅读真实失败与相对资源
+- 审查发现 404/500 页面会作为成功正文缓存，PDF 等非网页响应被当 HTML；重定向后相对图片/链接仍以旧站点根目录解析。
+- enrich.ts 明确校验 HTTP 状态/内容类型，以最终文档 URL 为相对资源基准；可注入 transport 以隔离网络回归。deep-rounds.test.ts 验证 404、PDF、跨源重定向后的文章目录相对链接与标题。
+- 第4轮串行等价测试命令全通过，/workspace/zhizang-round-05.log。响应夹具不是实际外站/GUI 验收；保留现有错误提示、外部打开与离线阅读兜底。

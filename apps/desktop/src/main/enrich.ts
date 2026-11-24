@@ -14,18 +14,19 @@ export interface SiteMeta {
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
-export async function fetchSiteMeta(rawUrl: string): Promise<SiteMeta> {
+export async function fetchSiteMeta(rawUrl: string, transport: typeof fetch = netFetch): Promise<SiteMeta> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await netFetch(rawUrl, {
+    const res = await transport(rawUrl, {
       headers: { 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml' },
       signal: controller.signal,
       redirect: 'follow',
     });
+    assertWebResponse(res);
     const html = await res.text();
     const $ = cheerio.load(html);
-    const origin = new URL(rawUrl).origin;
+    const origin = new URL(res.url || rawUrl).href;
 
     const title =
       $('meta[property="og:title"]').attr('content') ||
@@ -77,11 +78,12 @@ export async function checkLink(url: string): Promise<number | null> {
 }
 
 // 提取正文为可读 HTML（离线快照 / 阅读模式）
-export async function fetchReadable(rawUrl: string): Promise<{ title: string; html: string }> {
+export async function fetchReadable(rawUrl: string, transport: typeof fetch = netFetch): Promise<{ title: string; html: string }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await netFetch(rawUrl, { headers: { 'User-Agent': UA }, signal: controller.signal, redirect: 'follow' });
+    const res = await transport(rawUrl, { headers: { 'User-Agent': UA }, signal: controller.signal, redirect: 'follow' });
+    assertWebResponse(res);
     const raw = await res.text();
     const $ = cheerio.load(raw);
     const title = $('meta[property="og:title"]').attr('content') || $('title').first().text() || rawUrl;
@@ -96,7 +98,7 @@ export async function fetchReadable(rawUrl: string): Promise<{ title: string; ht
         break;
       }
     }
-    const origin = new URL(rawUrl).origin;
+    const origin = new URL(res.url || rawUrl).href;
     node.find('img').each((_: number, el: any) => {
       const src = $(el).attr('src');
       if (src) $(el).attr('src', absolutize(src, origin));
@@ -110,6 +112,12 @@ export async function fetchReadable(rawUrl: string): Promise<{ title: string; ht
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function assertWebResponse(response: Response): void {
+  if (!response.ok) throw new Error(`网页请求失败 (${response.status})`);
+  const type = response.headers.get('content-type') || '';
+  if (type && !/^(text\/(html|plain)|application\/xhtml\+xml)(;|$)/i.test(type)) throw new Error('不支持的网页内容类型');
 }
 
 function absolutize(u: string, origin: string): string {

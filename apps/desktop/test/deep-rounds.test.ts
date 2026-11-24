@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import Database from 'better-sqlite3';
 import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark, addTagToBookmarks, listTags } from '../src/main/db';
 import { importCsv, importJson, exportJson } from '../src/main/import-export';
+import { fetchReadable, fetchSiteMeta } from '../src/main/enrich';
 const folder = mkdtempSync(join(tmpdir(), 'zhicang-deep-rounds-'));
 const path = join(folder, 'live.db');
 initDb(path);
@@ -64,4 +65,17 @@ test('R4 tied timestamps have deterministic nonoverlapping pages; default librar
   assert.deepEqual(queryBookmarks({ domain: 'pages.rounds.test', sort: 'created_asc' }).items.map(x => x.id), ids);
   const plan = getDb().prepare('EXPLAIN QUERY PLAN SELECT * FROM bookmarks WHERE deleted_at IS NULL ORDER BY pinned DESC, created_at DESC, id DESC LIMIT 50').all();
   assert.match(JSON.stringify(plan), /idx_bookmarks_active_created/);
+});
+
+test('R5 reading rejects HTTP/PDF error bodies and resolves relative resources against final document URL', async () => {
+  await assert.rejects(fetchReadable('https://reading.example.test/a', async () => new Response('<h1>Not found</h1>', { status: 404 })), /404/);
+  await assert.rejects(fetchSiteMeta('https://reading.example.test/a', async () => new Response('binary', { headers: { 'Content-Type': 'application/pdf' } })), /内容类型/);
+  const transport: typeof fetch = async () => {
+    const r = new Response('<html><title>real article</title><body><p>内容</p><img src="image.png"><a href="next">Next</a></body></html>', { headers: { 'Content-Type': 'text/html' } });
+    Object.defineProperty(r, 'url', { value: 'https://final.example.test/articles/page.html' }); return r;
+  };
+  const article = await fetchReadable('https://reading.example.test/a', transport);
+  assert.match(article.html, /https:\/\/final.example.test\/articles\/image.png/);
+  assert.match(article.html, /https:\/\/final.example.test\/articles\/next/);
+  assert.equal((await fetchSiteMeta('https://reading.example.test/a', transport)).title, 'real article');
 });
