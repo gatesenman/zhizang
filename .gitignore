@@ -7,7 +7,7 @@ release/
 build/
 !apps/desktop/build/
 !apps/desktop/build/**
-.next/
+.next
 *.log
 .DS_Store
 *.local
@@ -44,3 +44,10 @@ keys/
 userData/
 userdata/
 .electron-user-data/
+
+# electron-vite bundled config loader temporaries
+electron.vite.config.*.mjs
+
+# Python smoke helper bytecode
+__pycache__/
+*.pyc

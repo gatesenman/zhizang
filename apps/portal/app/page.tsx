@@ -1,7 +1,7 @@
 const repo = 'https://github.com/gatesenman/zhizang';
 export default function Home() {
   return <main>
-    <p>智藏 ZhiCang · 0.4.0</p>
+    <p>智藏 ZhiCang · 0.4.1</p>
     <h1>你的收藏，你的知识库。</h1>
     <p>免费开源、本地优先。无需注册、激活码、订阅或设备授权即可管理收藏。</p>
     <nav><a href={repo}>源代码与构建指南</a><a href={`${repo}/releases`}>查看发布版本</a><a href={`${repo}/blob/main/CONTRIBUTING.md`}>参与贡献</a></nav>

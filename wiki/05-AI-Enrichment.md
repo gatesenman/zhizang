@@ -107,3 +107,6 @@ export const netFetch: typeof fetch = (input, init) => net.fetch(input, init) as
 
 
 0.4.0 移除注册码系统，不移除外部 AI API Key 设置或模型地址校验。AI 为可选服务，第三方可能收费。
+
+## 0.4.1 自动抓取与自备服务分离
+main/public-web-fetch.ts只保护自动公网网页/图片/探活，逐跳DNS全地址检查、拒绝凭据、限制流式字节与取消；metadata图片也验证目标。主文档以最终URL解析相对链接。未绑定Chromium/代理DNS，存在rebinding TOCTOU。用户明确配置的AI/嵌入/同步服务仍走原验证与传输，可保留本机HTTP模型；不把自备API Key当注册码，不承诺外部服务免费。

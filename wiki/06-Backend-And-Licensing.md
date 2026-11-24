@@ -1,4 +1,4 @@
-# 06 · 可选自托管同步与账号（0.4.0）
+# 06 · 可选自托管同步与账号（0.4.1）
 
 文件名保留以避免旧链接失效；注册码/许可证服务器已移除。
 
@@ -23,7 +23,7 @@
 
 ## 限制
 
-同步仍是原有 LWW 协议，不是协同编辑：时钟偏差、冲突、5000 条拉取上限/分页仍需后续专项改进。先备份再跨库合并。后端未实现邮箱验证、密码找回、托管运营或客户端会话自动续期，不能作为已验收的公共多租户服务部署。生产依赖审计有未修复严重项，详见 docs/OPEN-SOURCE-0.4.0.md，勿未经升级加固暴露公网。
+0.4.1协议2按urlHash keyset完整分页（<=500条/页，响应体预算），上传<=500条/1MB，服务端JSON2MB。每轮全量遍历而非增量服务日志；本地上传游标独立于服务器墙钟，时钟回退重扫；单飞/逐页校验账号地址，纯hash墓碑防止永久删除复活。旧协议>5000/过大/新版墓碑明确失败，不静默完成。客户端与自托管服务一起升级。LWW仍受设备时钟/同毫秒冲突影响，SQL.js写队列仅单进程，不是协同编辑/多实例一致性。无邮箱验证/找回/自动续期；部署加固与剩余中危见 [当前安全报告](../docs/SECURITY-DEPENDENCIES-0.4.1.md)。
 
 ## 相关源码
 
@@ -32,4 +32,7 @@
 - apps/desktop/src/renderer/src/components/SyncAccountSettings.tsx
 - .env.example、docker-compose.yml
 
-安全整改已升级 Nest 11 / Express 5 / TypeORM 0.3.31，明确拒绝缺失的同步请求体；真实路径与剩余两个 ORM glob/minimatch 中危见 [安全整改](../docs/SECURITY-DEPENDENCIES-0.4.0.md)。
+安全整改已升级 Nest 11 / Express 5 / TypeORM 0.3.31，明确拒绝缺失的同步请求体；真实路径与剩余两个 ORM glob/minimatch 中危见 [安全整改](../docs/SECURITY-DEPENDENCIES-0.4.1.md)。
+
+## 0.4.1 实际关联源码
+shared/types.ts 定义可选 protocol2/nextCursor；backend sync.controller/service.ts 进行分页/有界响应/账号命名空间/写队列事务；main.ts 显式JSON限制；desktop sync.ts/sync-account.ts/db.ts 负责拆批、独立游标、切号隔离与墓碑。真实5005+双客户端HTTP E2E见 scripts/desktop-cloud-smoke.cjs。完整边界见 docs/ITERATION-10-ROUNDS.md。

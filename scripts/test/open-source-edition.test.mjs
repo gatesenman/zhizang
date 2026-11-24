@@ -29,11 +29,11 @@ test('local features and safety invariants remain; external AI keys are not acti
   assert.match(read('apps/backend/src/sync/sync.controller.ts'), /@UseGuards\(JwtAuthGuard\)/);
   assert.match(read('apps/backend/src/sync/sync.controller.ts'), /account:\$\{user.id\}/);
 });
-test('all packages identify MIT 0.4.0 and document third-party costs and rights', () => {
+test('all packages identify MIT 0.4.1 and document third-party costs and rights', () => {
   for (const path of ['package.json', 'apps/desktop/package.json', 'apps/backend/package.json', 'apps/portal/package.json', 'apps/extension/package.json', 'apps/mcp/package.json', 'packages/shared/package.json']) {
-    const manifest = JSON.parse(read(path)); assert.equal(manifest.version, '0.4.0'); assert.equal(manifest.license, 'MIT');
+    const manifest = JSON.parse(read(path)); assert.equal(manifest.version, '0.4.1'); assert.equal(manifest.license, 'MIT');
   }
-  for (const path of ['apps/extension/manifest.json', 'apps/extension/manifest.firefox.json']) assert.equal(JSON.parse(read(path)).version, '0.4.0');
+  for (const path of ['apps/extension/manifest.json', 'apps/extension/manifest.firefox.json']) assert.equal(JSON.parse(read(path)).version, '0.4.1');
   assert.match(read('apps/mcp/src/index.js'), /package\.json/);
   assert.match(read('LICENSE'), /MIT License/);
   assert.match(read('README.md'), /第三方可能收费/);

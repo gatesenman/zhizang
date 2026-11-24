@@ -193,3 +193,6 @@ apps/desktop/src/
 ## 0.4.0 免费开源模式
 
 启动直接初始化收藏库，不再有激活/试用门禁、授权徽章或横幅；store 与 preload 移除 license API。新增 sync.accountStatus/connect/disconnect/setBackendUrl/testServer，仅服务于可选自托管同步；网络页不检查付费资格，但开启自动同步须有已连接账号。见 wiki/06 的旧配置忽略和安全边界。
+
+## 0.4.1 主线与信任边界
+导入拒绝CSV截断并往返状态/访问时间；批量标签事务含标签创建；同时间搜索分页稳定；在途笔记清空意图保留并串行CAS；HTTP错误/非网页不缓存作成功。所有IPC通过ipc-trust.ts限定实际主窗口主帧及精确应用入口。reader为sandbox srcDoc且CSP只data图片，普通文字快照不加载外链图；完整存档才受控抓取内联。用户主动webview仍是联网原站，不等于离线隐私保证。相关源码：main/import-export.ts/db.ts/enrich.ts/index.ts/ipc-trust.ts，renderer/note-draft.ts/components/WebPreview.tsx；DNS与旧媒体限制见当前安全报告。

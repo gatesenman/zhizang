@@ -54,3 +54,11 @@
 - 首次真实 install 发现 builder26 跨工作区误重建 optional SQLite12 并编译失败，新增限定桌面路径/目标平台架构的 postinstall+beforePack native rebuild，后续完整安装成功。依赖改动独立本地提交，不用 overrides。详见 SECURITY-DEPENDENCIES-0.4.1.md。
 - 实际 `pnpm typecheck`、`build:desktop`、`lint`、串行桌面80/80、`test:packaging`5/5、`test:security`5/5、冻结离线锁一致性通过；最终所有工作区入口/完整构建与产物smoke留第10轮执行。当前 audit 生产0C/0H/2M，全部0C/0H/4M，默认命令仍退出1；完整raw before/after保留，按路径说明条件，不声称完全安全。
 - 操作失败也记录：共享根磁盘满导致一次 install/命令启动失败；仅本checkout纯JS包/Next可重建产物临时移RAM，随后恢复纯JS包正常路径（临时路径曾影响类型/打包，不作兼容性通过）。仅清理本任务失败的无用SQLite12编译缓存及out，未清理别人目录；完整安装/类型/构建在恢复后重跑成功。未执行Windows安装/卸载/portable；上游模板审查不等于Windows实测。
+
+## 第10轮：真实综合回归、可复验入口与交付一致性
+- 审查发现测试运行器默认无界文件并行，缺失/空目录反而成功；shared只有类型却有假测试入口；AGENTS仍要求已禁用AppImage，版本/部分wiki仍描述5000上限与旧严重工具链风险。
+- 改 run-tests.mjs 按文件串行、缺失/空目录/缺少project参数非零，隔离NODE_TEST_CONTEXT让嵌套黑盒测试有真实报告；新增typed fixture黑盒回归（最初stdout空被抓出并修正，未计通过），移除shared伪入口。所有包/扩展/项目站统一0.4.1，CI加入tooling与live high审计门槛、无override；README/贡献/更新日志/数据模型/同步/IPC/抓取/构建wiki同步，历史安全原件明确标注历史。
+- 新增可复验Linux包smoke：精确ZIP在可执行磁盘用SHA相同硬链接去重（RAM只存归档/profile），通过实际renderer→preload→全部IPC守卫进行收藏、整理、搜索、笔记CAS、访问、离线读与无Key引用；真正退出/重启再验证持久化、旧授权保留无激活与私有桥接401。离线HTML是临时SQLite夹具，不冒充真实外站。首次探测器误选libvulkan.so.1，已修正后全流程通过，见结构化证据。
+- 全量实际通过：冻结完整安装、build:shared、lint、typecheck、test（后端4/桌面80）、edition4、packaging5、security5、tooling1、build:all、Chrome/Firefox扩展构建、5005+真实双端同步HTTP E2E；Next生产HTTP200/旧商业路由404，MCP真实stdio0.4.1/4工具，builder26 Linux ZIP打包/CRC/Main-Preload字节/ASAR/运行重启smoke。日志 /workspace/zhizang-round-10-*.log；见 DELIVERY-0.4.1.md 与 security/0.4.1/validation.json。
+- 当前audit生产0C/0H/2M、全部0C/0H/4M，默认audit非零；high阈值0只是阻止严重项，不抹中危。提交前源码候选与全部Git历史Gitleaks/敏感路径检查、diff审阅，清洁ZIP与commit摘要放专用artifacts目录；不提交真实env/凭据/收藏库/安装包/依赖/缓存。
+- 未测Windows/macOS安装/人工GUI/真实AI、模型下载/浏览器扩展GUI/线上签名更新/Docker/Postgres部署；已有headless截图不等同这些验收。仍有LWW时钟/同毫秒、全量带宽、SQL.js单进程、DNS TOCTOU与旧媒体联网、素材权属待核实等边界，按当前安全/交付文档说明停止扩大范围。

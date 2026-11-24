@@ -63,6 +63,6 @@ pnpm build:extension   # 生成 apps/extension/dist/zhicang-chrome.zip 与 zhica
 - 桥接路由见 [wiki/03 · 本地桥接服务](./03-Desktop-App.md#本地桥接服务)
 
 
-## 0.4.0 开源版
+## 0.4.1 开源版
 
-Chrome / Firefox manifest 与 package.json 同为 0.4.0；本机桥接安全令牌保留，不是注册码。新增版本一致性边界测试；扩展构建不代表浏览器 GUI 验收完成。
+Chrome / Firefox manifest 与 package.json 同为 0.4.1；本机桥接安全令牌保留，不是注册码。新增版本一致性边界测试；扩展构建不代表浏览器 GUI 验收完成。

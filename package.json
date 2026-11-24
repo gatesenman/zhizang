@@ -1,6 +1,6 @@
 {
   "name": "zhicang",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "智藏 ZhiCang · 免费开源、本地优先的 AI 收藏管理工具",
   "packageManager": "pnpm@9.15.1",
@@ -31,7 +31,8 @@
     "test:backend:e2e": "pnpm build:shared && pnpm build:backend && node scripts/smoke-backend.mjs",
     "test:packaging": "node --test scripts/test/windows-packaging.test.mjs",
     "test:edition": "node --test scripts/test/open-source-edition.test.mjs",
-    "test:security": "node --test scripts/test/security-dependencies.test.mjs"
+    "test:security": "node --test scripts/test/security-dependencies.test.mjs",
+    "test:tooling": "node --test scripts/test/test-runner.test.mjs"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.18.0",

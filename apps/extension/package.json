@@ -1,6 +1,6 @@
 {
   "name": "@zhicang/extension",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "智藏 ZhiCang 浏览器收藏插件（Chrome / Firefox）",
   "scripts": {

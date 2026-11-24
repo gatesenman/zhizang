@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Reject known high/critical dependency advisories (moderates documented)
+        run: pnpm audit --audit-level high
+
       # 共享包先产出 dist，供其余包的类型检查 / 构建消费
       - name: Build shared package
         run: pnpm --filter @zhicang/shared build
@@ -39,7 +42,7 @@ jobs:
         run: pnpm -r --if-present test
 
       - name: Open-source edition boundaries and packaging guards
-        run: pnpm test:edition && pnpm test:packaging && pnpm test:security
+        run: pnpm test:edition && pnpm test:packaging && pnpm test:security && pnpm test:tooling
 
       - name: Build backend
         run: pnpm --filter @zhicang/backend build

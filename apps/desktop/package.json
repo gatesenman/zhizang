@@ -1,6 +1,6 @@
 {
   "name": "@zhicang/desktop",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "智藏 ZhiCang 桌面端",
   "main": "out/main/index.js",

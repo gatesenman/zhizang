@@ -15,7 +15,7 @@ pnpm --filter @zhicang/desktop dist:mac        # macOS（本仓库配置为 zip�
 
 | 平台 | 产物 | 备注 |
 | --- | --- | --- |
-| Windows | `ZhiCang-Setup-<version>-x64.exe`、`ZhiCang-Portable-<version>-x64.exe` | 0.4.0 升级后未实际打包/实机验收 |
+| Windows | `ZhiCang-Setup-<version>-x64.exe`、`ZhiCang-Portable-<version>-x64.exe` | 0.4.1 未实际Windows打包/实机验收 |
 | Linux | `ZhiCang-<version>-linux-<arch>.zip` | 解压运行 `@zhicangdesktop`；无 AppRun，暂不支持自动更新 |
 | macOS | `ZhiCang-<version>-mac.zip` | 未签名 app 未验收；正式分发需签名/公证，不建议移除系统隔离标记 |
 
@@ -136,4 +136,8 @@ Docker 构建复制 .npmrc 与 patches，保证 frozen-lockfile 可重现补丁�
 
 ## 0.4.0 有边界的安全依赖整改
 
-Node 24、Electron 45.4.1 / SQLite 13.2.0 Node-API、Next 16 Webpack、Nest 11；Windows 打包补丁保留。Linux ZIP 替代 AppImage，beforePack 钩子拒绝 AppImage，即使手动传入该 target 也会失败。旧打包器及 Vite 工具链仍需后续专门迁移，不能宣称全部安全。完整当前结果、路径与未测项见 [安全整改](../docs/SECURITY-DEPENDENCIES-0.4.0.md)。
+Node 24、Electron 45.4.1 / SQLite 13.2.0 Node-API、Next 16 Webpack、Nest 11；Windows 打包补丁保留。Linux ZIP 替代 AppImage，beforePack 钩子拒绝 AppImage，即使手动传入该 target 也会失败。旧打包器及 Vite 工具链仍需后续专门迁移，不能宣称全部安全。本段是0.4.0历史状态，当前已迁移builder26/Vite7，见 [0.4.1当前安全报告](../docs/SECURITY-DEPENDENCIES-0.4.1.md)。
+
+## 0.4.1 当前工具链/CI
+builder26.18.0的NSIS上游修复精确SHA守卫，旧24补丁仅历史；electron-vite6/Vite7.3.8/plugin-react5.2.0。packaging/rebuild-native.cjs显式限定桌面SQLite13与目标平台/架构，postinstall+beforePack执行；npmRebuild=false避免跨工作区误重建后端optional12，不是跳过原生检查。Linux继续ZIP并解包启动；AppImage需独立产物验收后再开放。Windows/macOS未实测，不从Linux结果推断。
+CI统一Node24，串行按文件测试；缺失/空目录失败，shared只有类型无伪单测入口；edition/packaging/security/tooling、实际同步E2E、各构建及live high审计门槛。中危完整保留，不把high门槛说成零漏洞。当前交付/人工截图需求见 docs/DELIVERY-0.4.1.md；源码ZIP由git archive产出，不包含.git/env/node_modules/out/.next/release或用户数据库。

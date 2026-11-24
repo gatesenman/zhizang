@@ -1,6 +1,6 @@
 {
   "name": "@zhicang/mcp",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "description": "智藏 ZhiCang MCP server — 让 Claude Desktop / Cursor 等 AI 客户端检索与管理你的收藏",

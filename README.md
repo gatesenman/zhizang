@@ -1,4 +1,4 @@
-# 智藏 ZhiCang · 0.4.0 免费开源版
+# 智藏 ZhiCang · 0.4.1 免费开源版
 
 本地优先的 AI 收藏管理桌面应用，支持 Windows / macOS / Linux。**无需注册码、激活、试用期、付费解锁或设备绑定**；本地收藏不要求账号、不依赖授权服务器。
 
@@ -12,7 +12,7 @@
 
 ## 安全状态（请先阅读）
 
-已完成一轮有边界的依赖整改：生产依赖审计为 **0 critical / 0 high / 2 moderate**；含开发/打包工具仍为 **1 critical / 11 high / 14 moderate / 1 low**，不是“完全安全”。Electron 45、Next 16、Nest 11 已迁移。Linux 改为 ZIP，并由打包钩子拒绝存在动态库搜索路径漏洞的 AppImage 目标；旧打包器仍有供应链风险。详见 [路径、暴露条件与验证记录](./docs/SECURITY-DEPENDENCIES-0.4.0.md) 及原始 before/after JSON。**未经部署加固不要直接暴露公网**。
+十轮主线迭代之后，生产依赖审计 **0 critical / 0 high / 2 moderate**；全部开发/打包依赖 **0 critical / 0 high / 4 moderate**，不是“完全安全”。Electron45、Next16、Nest11、builder26、Vite7已迁移；NSIS上游修复逐项审查并由SHA守卫保护，Linux仍只ZIP（AppImage等待独立产物验收）。见 [当前路径/触发条件](./docs/SECURITY-DEPENDENCIES-0.4.1.md)、[十轮真实记录](./docs/ITERATION-10-ROUNDS.md) 与 [交付/人工验证指南](./docs/DELIVERY-0.4.1.md)。**未经部署加固不要直接暴露公网**。
 
 ## 从源码运行
 
@@ -40,7 +40,7 @@ pnpm dev:portal                   # 开源项目介绍站 http://localhost:3002
 
 后端未设置 DATABASE_URL 时使用 SQL.js SQLite（仅单进程、小型开发场景），生产建议 PostgreSQL。环境配置见 [.env.example](./.env.example)；Docker 示例见 `docker-compose.yml`，默认数据库账号仅供开发，切勿原样部署到公网。部署需配置强随机 JWT_SECRET、HTTPS、数据库凭据、访问控制与备份策略。首次空库可临时 DB_SYNC=true 初始化，现有生产库应 DB_SYNC=false 并先备份审查；示例不包含生产迁移管理工具。
 
-桌面设置 → 同步账号：填写自己信任的同步服务 HTTPS 地址（仅本机调试允许 HTTP），注册/登录后手动同步或在网络服务页启用自动同步。更换服务或账号会关闭自动同步、重置游标，不会删除本地收藏。登录密码不持久化；会话令牌保存在本机设置数据库，需保护数据目录与备份。会话过期应重新登录。
+桌面设置 → 同步账号：填写自己信任的同步服务 HTTPS 地址（仅本机调试允许 HTTP），注册/登录后手动同步或在网络服务页启用自动同步。更换服务或账号会关闭自动同步、重置游标，不会删除本地收藏。登录密码不持久化；会话令牌保存在本机设置数据库，需保护数据目录与备份。会话过期应重新登录。0.4.1客户端与自托管服务应一起升级：协议2按键分页解除5000条静默截断；上传分批、每轮全量分页拉取、hash删除墓碑避免复活。全量遍历有带宽成本，LWW仍有设备时钟/同毫秒冲突限制，不是协同编辑。
 
 0.3.1 的激活码、公钥、设备绑定、支付订单、发码邮件模块已移除，原授权设置和旧后端商业数据表不主动删除。旧邮箱命名空间的云数据不会自动归属于新注册账号，详见 [后端迁移与安全](./wiki/06-Backend-And-Licensing.md)。
 
@@ -64,6 +64,8 @@ pnpm test:backend:e2e
 pnpm test:packaging
 pnpm test:edition
 pnpm test:security
+pnpm test:tooling
+pnpm audit --audit-level high  # 中危仍需阅读原始完整审计
 pnpm build:all
 pnpm build:extension
 pnpm --filter @zhicang/desktop dist:linux  # Linux ZIP；暂禁 AppImage
@@ -71,10 +73,10 @@ pnpm --filter @zhicang/desktop dist:win    # Windows Setup + Portable
 pnpm --filter @zhicang/desktop dist:mac    # macOS zip
 ```
 
-打包产物在 `apps/desktop/release/`，不提交到源码仓库。未签名安装包、跨平台 GUI、真实外部 AI 和部署环境必须另外验收；编译通过不代表 GUI 验证通过。当前验证见 [安全整改](./docs/SECURITY-DEPENDENCIES-0.4.0.md)；[初始开源迭代](./docs/OPEN-SOURCE-0.4.0.md) 为历史阶段。Linux ZIP 解压后运行 `@zhicangdesktop`，暂不支持 AppImage 自动更新，请手动更新程序并保留原用户数据目录。
+打包产物在 `apps/desktop/release/`，不提交到源码仓库。未签名安装包、跨平台 GUI、真实外部 AI 和部署环境必须另外验收；编译通过不代表 GUI 验证通过。当前验证见 [安全整改](./docs/SECURITY-DEPENDENCIES-0.4.1.md)；[初始开源迭代](./docs/OPEN-SOURCE-0.4.0.md) 为历史阶段。Linux ZIP 解压后运行 `@zhicangdesktop`，暂不支持 AppImage 自动更新，请手动更新程序并保留原用户数据目录。
 
 ## 目录与贡献
 
 `apps/desktop` 桌面、`apps/backend` 可选同步 API、`apps/portal` 开源介绍站、`apps/extension` 插件、`apps/mcp` MCP、`packages/shared` 领域类型。
 
-见 [CONTRIBUTING.md](./CONTRIBUTING.md) 与 [wiki](./wiki/README.md)。历史 0.2/0.3 验收记录及旧截图仅说明对应旧版本，不能作为 0.4.0 GUI / 发布完成的证据。
+见 [CONTRIBUTING.md](./CONTRIBUTING.md) 与 [wiki](./wiki/README.md)。历史 0.2/0.3 验收记录及旧截图仅说明对应旧版本，不能作为 0.4.1 GUI / 发布完成的证据。

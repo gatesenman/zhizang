@@ -1,6 +1,6 @@
 {
   "name": "@zhicang/shared",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
@@ -20,8 +20,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.esm.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "lint": "eslint src --ext .ts --max-warnings 0",
-    "test": "node ../../scripts/run-tests.mjs"
+    "lint": "eslint src --ext .ts --max-warnings 0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -128,3 +128,6 @@ erDiagram
 ## 0.4.0 变更
 
 shared 移除许可证类型与签发/验签工具，不再依赖 jsonwebtoken。桌面收藏 schema 与数据目录不变，旧授权 settings 行保留但忽略。服务端不再注册商业 entities；保留 User/Setting/TagDict/SyncItem，不主动 drop 旧表。同步命名空间迁移规则见 wiki/06。
+
+## 0.4.1 无损与分页
+initDb完整迁移/种子/哈希/恢复包在事务，失败关闭句柄；旧授权与自备Key保留。bookmarks新增非破坏联合排序索引(deleted_at,pinned DESC,created_at DESC,id DESC)，列表用id固定平局顺序，不承诺并发OFFSET快照。sync_tombstones只有url_hash主键与updated_at时间，不保留正文/URL；永久删除留下墓碑并跨重启上传，新建可覆盖旧墓碑。设置last_sync_local_v2是本地上传截止点，和服务端时间分离。POSIX主库0600并非加密。相关源码：main/db.ts、sync.ts；真实回归deep-rounds.test.ts及desktop-cloud-smoke。
