@@ -1,6 +1,6 @@
 # 0.4.1：十轮真实主线迭代
 
-起点：705e9313b587d5d61637aae5897a91743570cd73（不是重计前三轮开源/依赖整改）。日期 2026-11-24，Asia/Shanghai UTC+8。按用户要求在既有本机 checkout 工作，不使用云代理、不触碰用户目录；最终只 push 一次功能分支，PR 到 main、不合并。
+起点：705e9313b587d5d61637aae5897a91743570cd73（不是重计前三轮开源/依赖整改）。日期 2026-11-24，Asia/Shanghai UTC+8。按用户要求在既有本机 checkout 工作，不使用云代理、不触碰用户目录；PR 到 main、不合并；首次交付曾采用单次push偏好，CI收尾允许正常追加补丁，禁止force push或改写已推历史。
 
 开始前已 fetch/read：远程 main 为 8c596e971a5923092204cbf1d2eb2c80e2acda9c，尚无同名远程分支/同主题 PR。PR #1（fix/ci-eslint-and-windows-packages）修改 README、Windows使用说明、library-components.test.ts；本工作不合并/改写其分支，最终 PR 明示这些重叠。
 
@@ -62,3 +62,10 @@
 - 全量实际通过：冻结完整安装、build:shared、lint、typecheck、test（后端4/桌面80）、edition4、packaging5、security5、tooling1、build:all、Chrome/Firefox扩展构建、5005+真实双端同步HTTP E2E；Next生产HTTP200/旧商业路由404，MCP真实stdio0.4.1/4工具，builder26 Linux ZIP打包/CRC/Main-Preload字节/ASAR/运行重启smoke。日志 /workspace/zhizang-round-10-*.log；见 DELIVERY-0.4.1.md 与 security/0.4.1/validation.json。
 - 当前audit生产0C/0H/2M、全部0C/0H/4M，默认audit非零；high阈值0只是阻止严重项，不抹中危。提交前源码候选与全部Git历史Gitleaks/敏感路径检查、diff审阅，清洁ZIP与commit摘要放专用artifacts目录；不提交真实env/凭据/收藏库/安装包/依赖/缓存。
 - 未测Windows/macOS安装/人工GUI/真实AI、模型下载/浏览器扩展GUI/线上签名更新/Docker/Postgres部署；已有headless截图不等同这些验收。仍有LWW时钟/同毫秒、全量带宽、SQL.js单进程、DNS TOCTOU与旧媒体联网、素材权属待核实等边界，按当前安全/交付文档说明停止扩大范围。
+
+## 第10轮后续：PR2 CI最小收尾（不重新计轮次）
+- 真实远端情况：5080c8b的PR事件完整成功，但push事件两次在规模同步PASS后外层fetch报UND_ERR_SOCKET/other side closed；没有把其中一次成功当作全绿。
+- 诊断：smoke-backend.mjs用spawnSync等待长子进程，阻塞父HTTP客户端处理keep-alive定时器/关闭事件。先做2.8s简化实验未复现，不计作证明；再在CI同版Node24.22.3中，用真实5005+双端客户端并仅将子进程寿命保持至少8.5s做对照：旧版实际exit1/UND_ERR_SOCKET/未输出最终PASS，新版exit0且完整HTTP断言通过。证据 security/0.4.1/ci-keepalive-regression.json。
+- 最小修改：spawnSync→spawn+await once(close)，stdout/stderr持续转发，180s超时、真实子退出码assert以及全部401/400/413/隔离/LWW/墓碑等断言原样保留；不重试POST、不吞fetch错误、不删测试。tooling增加防同步等待/退出断言丢失的守卫。
+- 本地实际通过lint/typecheck、后端4+桌面80、edition4/packaging5/security5/tooling2；真实完整同步E2E连续3次，其中2次由Electron内嵌Node24.22.3运行。生产代码与依赖未改变，原Linux精确包/阅读/IPC验证仍对应相同构建字节，不冒充本次重做了GUI/Windows验收。
+- 本次正常补丁提交/push到原PR2，不改PR1、不force、不改已推历史；这不是新增功能轮次。最终commit的push与PR事件两套CI必须分别核对；具体运行URL/结论及重新扫描后的源码ZIP/manifest/SHA记录在外侧最终DELIVERY-0.4.1.json，不能用旧SHA或本地通过代替远端检查。

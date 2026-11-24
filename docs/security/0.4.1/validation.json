@@ -11,7 +11,7 @@
     "edition_tests": 4,
     "packaging_tests": 5,
     "security_tests": 5,
-    "tooling_tests": 1,
+    "tooling_tests": 2,
     "all_workspace_builds": "PASS",
     "chrome_firefox_extension_build": "PASS",
     "real_5005_plus_two_client_http_sync_persistence": "PASS",
@@ -48,5 +48,14 @@
     "source_candidate_findings": 0,
     "all_git_history_precommit_findings": 0,
     "final_history_and_archive": "see external DELIVERY-0.4.1.json generated after commit"
+  },
+  "ci_follow_up": {
+    "code": "async spawn/await close; timeout and assertions retained; no HTTP retries",
+    "local_full_validation": "PASS lint/types/backend4/desktop80/edition4/packaging5/security5/tooling2",
+    "real_sync_repeats": 3,
+    "matching_ci_node": "24.22.3 for two repeats and delayed before/after experiment",
+    "delayed_before_after": "original fails UND_ERR_SOCKET; async succeeds; ci-keepalive-regression.json",
+    "remote_final_checks": "verify both push and pull_request on final head; concrete run URLs/results in external final delivery metadata",
+    "runtime_scope": "no application or dependency change; existing exact Linux runtime evidence retained, not a new manual GUI claim"
   }
 }

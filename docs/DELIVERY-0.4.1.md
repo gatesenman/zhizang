@@ -9,7 +9,7 @@
 | 完整冻结安装 + 桌面限定原生重建 | 成功；另有冻结离线ignore-scripts锁一致性检查（不将其冒充完整安装） |
 | pnpm lint / typecheck | 通过；Next typegen与桌面main/renderer均包含 |
 | pnpm test | 桌面80、后端4全部通过；shared是类型定义，以构建/消费端检查，不设0测试伪成功 |
-| test:edition / packaging / security / tooling | 4 / 5 / 5 / 1 全通过 |
+| test:edition / packaging / security / tooling | 4 / 5 / 5 / 2 全通过 |
 | build:all / build:extension | shared、Nest、Next Webpack、Electron Vite、Chrome/Firefox全部成功 |
 | test:backend:e2e | 真实Nest/SQL.js HTTP + 两个独立Electron/SQLite客户端，5005+分页、未来服务时间后继续上传、账号隔离、墓碑不复活及重启持久化成功；规模夹具全局限流500，非生产默认120限流压测 |
 | Next production HTTP | 0.4.1免费页200，buy/activate/pricing404 |
@@ -48,3 +48,6 @@ ZHICANG_USER_DATA_DIR="$(mktemp -d -t zhizang-gui-XXXXXX)" pnpm dev:desktop
 ## 获取与边界
 
 清洁源码归档：`/workspace/zhizang-artifacts/zhizang-0.4.1-source.zip`；SHA256及最终commit/测试/扫描摘要在同目录 DELIVERY-0.4.1.json。源码不含.git、真实env/凭据、依赖、构建缓存、安装包、用户收藏/笔记数据库；apps/desktop/build的图标是已跟踪源码资产，保留第三方权属限制，非构建缓存。未发布安装包或合并main。
+
+## PR2 CI收尾修复
+5080c8b首次交付曾出现push事件外层HTTP keep-alive失败（同SHA的PR事件成功不能抵消）。现将规模客户端等待改为异步spawn/close，保持全部失败断言与180s超时，没有HTTP重试或伪PASS。CI同版Node24.22.3真实8.5s延迟对照：旧代码复现UND_ERR_SOCKET退出1，新代码完整通过；另三次真实同步E2E通过。见十轮记录后续与 ci-keepalive-regression.json。最终源ZIP必须含此修复，最终commit/两套最新CI/ZIP SHA在同目录交付摘要核对；历史失败日志保留。没有以“单次push偏好”为安全限制停止收尾。

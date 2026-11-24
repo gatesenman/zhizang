@@ -1,7 +1,7 @@
 // Local-only integration test: disposable DB and account fixtures, no real services.
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { createServer } from 'node:net';
 import { randomUUID } from 'node:crypto';
@@ -56,13 +56,15 @@ try {
   assert.equal((await post('/auth/login', { ...credentials, password: 'wrong-password' })).status, 401);
   assert.equal((await post('/auth/register', credentials)).status, 400);
   assert.equal((await post('/auth/login', credentials)).status, 201);
-  const client = spawnSync(require('electron'), [join(root, 'scripts/desktop-cloud-smoke.cjs')], {
-    cwd: root, encoding: 'utf8', timeout: 180000,
+  // Do not block the parent HTTP client's event loop across server keep-alive expiry.
+  const client = spawn(require('electron'), [join(root, 'scripts/desktop-cloud-smoke.cjs')], {
+    cwd: root, timeout: 180000,
     env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', TS_NODE_PROJECT: join(root, 'apps/desktop/tsconfig.test.json'), ZHICANG_TEST_SERVER: `http://127.0.0.1:${port}` },
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
-  if (client.stdout) process.stdout.write(client.stdout);
-  if (client.stderr) process.stderr.write(client.stderr);
-  assert.equal(client.status, 0, 'Actual desktop account/sync client must pass');
+  client.stdout.pipe(process.stdout); client.stderr.pipe(process.stderr);
+  const [clientCode] = await once(client, 'close');
+  assert.equal(clientCode, 0, 'Actual desktop account/sync client must pass');
   assert.equal((await post('/sync', { since: 0, items: [] })).status, 401);
   assert.equal((await post('/sync', { since: 0, items: [] }, token + 'tampered')).status, 401);
   assert.equal((await fetch(base + '/sync', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })).status, 400, 'missing body is rejected, not a 500 after Express 5 migration');

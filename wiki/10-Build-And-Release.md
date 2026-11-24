@@ -141,3 +141,5 @@ Node 24、Electron 45.4.1 / SQLite 13.2.0 Node-API、Next 16 Webpack、Nest 11�
 ## 0.4.1 当前工具链/CI
 builder26.18.0的NSIS上游修复精确SHA守卫，旧24补丁仅历史；electron-vite6/Vite7.3.8/plugin-react5.2.0。packaging/rebuild-native.cjs显式限定桌面SQLite13与目标平台/架构，postinstall+beforePack执行；npmRebuild=false避免跨工作区误重建后端optional12，不是跳过原生检查。Linux继续ZIP并解包启动；AppImage需独立产物验收后再开放。Windows/macOS未实测，不从Linux结果推断。
 CI统一Node24，串行按文件测试；缺失/空目录失败，shared只有类型无伪单测入口；edition/packaging/security/tooling、实际同步E2E、各构建及live high审计门槛。中危完整保留，不把high门槛说成零漏洞。当前交付/人工截图需求见 docs/DELIVERY-0.4.1.md；源码ZIP由git archive产出，不包含.git/env/node_modules/out/.next/release或用户数据库。
+
+PR2 CI收尾：集成脚本等待真实桌面子进程必须异步spawn/await close，禁止阻塞父HTTP keep-alive事件循环。保留180s超时/退出码/全部HTTP断言，不重试POST掩盖失败；Node24.22.3真实延迟对照及后续见十轮记录。最后commit的push与PR事件检查都须分别核对。

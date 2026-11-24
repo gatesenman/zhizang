@@ -23,3 +23,11 @@ test('R10 cross-platform runner fails unreadable/empty directories and executes 
     assert.match(readFileSync(runner, 'utf8'), /--test-concurrency=1/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('CI sync smoke waits asynchronously and still asserts the actual child exit code', () => {
+  const source = readFileSync(join(root, 'scripts/smoke-backend.mjs'), 'utf8');
+  assert.ok(!source.includes('spawnSync'), 'a long synchronous child blocks HTTP keep-alive events');
+  assert.match(source, /const \[clientCode\] = await once\(client, 'close'\)/);
+  assert.match(source, /assert\.equal\(clientCode, 0/);
+  assert.match(source, /timeout: 180000/);
+});
