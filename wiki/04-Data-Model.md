@@ -104,14 +104,14 @@ erDiagram
 
 ## 后端实体（`apps/backend/src/db/entities.ts`，TypeORM）
 
-> 时间列类型按 `DATABASE_URL` 是否存在自动切换 timestamp / datetime，兼容 Postgres 与 SQLite。
+> 时间列由 TypeORM 按数据库类型处理；桌面模型不变。
 
 | 实体 | 说明 |
 | --- | --- |
 | `User` | 邮箱唯一、密码哈希、角色（user/admin） |
-| `Setting` | 后台可配置项键值表（支付/邮件/登录渠道等） |
-| `TagDict` | 全局标签词典（后台维护，供 AI 富化对齐） |
-| `SyncItem` | 云同步记录：`(email, urlHash)` 唯一，payload 为 JSON 的 `SyncPushItem` |
+| `Setting` | 站点/注册策略键值表（旧商业设置保留但不再读取） |
+| `TagDict` | 原有标签词典表（兼容保留，暂无管理 API） |
+| `SyncItem` | 云同步记录：`(email, urlHash)` 唯一，email 列现存储 account:<UUID> 命名空间，payload 为 JSON 的 `SyncPushItem` |
 
 ## 相关源码
 

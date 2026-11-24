@@ -10,6 +10,10 @@
 - **跨设备同步可选、自托管**。账号只保护自己的同步数据，不是软件授权；不提供默认官方服务器，也不承诺第三方服务器免费。
 - MIT 适用于项目自有代码/文档。见 [LICENSE](./LICENSE) 与 [第三方声明](./THIRD_PARTY_NOTICES.md)。
 
+## 安全状态（请先阅读）
+
+本次不是依赖安全升级：生产依赖审计仍有 **4 critical / 56 high / 76 moderate / 14 low**（详见 [验证记录](./docs/OPEN-SOURCE-0.4.0.md)）。继承的 Electron / Next.js 等版本需要单独升级回归；**不要将当前后端或项目站未经加固直接暴露公网**。源码构建/测试通过不表示已达到生产安全标准。
+
 ## 从源码运行
 
 推荐 Node.js 20 LTS、pnpm 9.15.1。Linux 安装需具备 make / C++ 编译器、Python 3 和 Electron 运行库（GTK / NSS / ALSA）；原生 SQLite 依赖按 Electron ABI 构建。
@@ -34,7 +38,7 @@ pnpm dev:portal                   # 开源项目介绍站 http://localhost:3002
 # 或三者一起：pnpm dev:all
 ```
 
-后端未设置 DATABASE_URL 时使用 SQL.js SQLite（仅单进程、小型开发场景），生产建议 PostgreSQL。环境配置见 [.env.example](./.env.example)；Docker 示例见 `docker-compose.yml`，默认数据库账号仅供开发，切勿原样部署到公网。部署需配置强随机 JWT_SECRET、HTTPS、数据库凭据、访问控制与备份策略。
+后端未设置 DATABASE_URL 时使用 SQL.js SQLite（仅单进程、小型开发场景），生产建议 PostgreSQL。环境配置见 [.env.example](./.env.example)；Docker 示例见 `docker-compose.yml`，默认数据库账号仅供开发，切勿原样部署到公网。部署需配置强随机 JWT_SECRET、HTTPS、数据库凭据、访问控制与备份策略。首次空库可临时 DB_SYNC=true 初始化，现有生产库应 DB_SYNC=false 并先备份审查；示例不包含生产迁移管理工具。
 
 桌面设置 → 同步账号：填写自己信任的同步服务 HTTPS 地址（仅本机调试允许 HTTP），注册/登录后手动同步或在网络服务页启用自动同步。更换服务或账号会关闭自动同步、重置游标，不会删除本地收藏。登录密码不持久化；会话令牌保存在本机设置数据库，需保护数据目录与备份。会话过期应重新登录。
 

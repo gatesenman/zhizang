@@ -30,14 +30,13 @@ graph TB
   AIClient -->|MCP 协议| MCP
   Desktop -->|富化/问答| LLM
   Desktop -->|可选账号同步| Backend
-  Portal -->|下单/管理| Backend
   Backend --> PG
 ```
 
 ## Monorepo 与依赖
 
 - 工作区定义：`pnpm-workspace.yaml`（`apps/*`、`packages/*`）。
-- 共享类型与许可证验签集中在 `@zhicang/shared`，被桌面端、后端、门户复用，保证领域模型一致。
+- 共享领域类型集中在 `@zhicang/shared`，被桌面端与后端复用，保证领域模型一致。
 - 根 `package.json` 暴露聚合脚本：`dev:all` / `start:*` / `dist:desktop` / `deploy` / `build:extension`。
 - 依赖布局采用 **hoisted**（根 `.npmrc` 设 `node-linker=hoisted`），以保证 electron-builder 能正确收集原生依赖（见 [wiki/10](./10-Build-And-Release.md)）。
 

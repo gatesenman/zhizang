@@ -33,8 +33,21 @@ test('all packages identify MIT 0.4.0 and document third-party costs and rights'
   for (const path of ['package.json', 'apps/desktop/package.json', 'apps/backend/package.json', 'apps/portal/package.json', 'apps/extension/package.json', 'apps/mcp/package.json', 'packages/shared/package.json']) {
     const manifest = JSON.parse(read(path)); assert.equal(manifest.version, '0.4.0'); assert.equal(manifest.license, 'MIT');
   }
+  for (const path of ['apps/extension/manifest.json', 'apps/extension/manifest.firefox.json']) assert.equal(JSON.parse(read(path)).version, '0.4.0');
+  assert.match(read('apps/mcp/src/index.js'), /package\.json/);
   assert.match(read('LICENSE'), /MIT License/);
   assert.match(read('README.md'), /第三方可能收费/);
   assert.match(read('THIRD_PARTY_NOTICES.md'), /素材/);
   assert.doesNotMatch(read('apps/portal/app/page.tsx'), /fetch\(|checkout|payment\//);
+});
+
+test('container recipes preserve patch reproducibility and exclude credentials from contexts', () => {
+  for (const path of ['apps/backend/Dockerfile', 'apps/portal/Dockerfile']) {
+    assert.match(read(path), /COPY patches patches/);
+    assert.match(read(path), /\.npmrc/);
+  }
+  assert.doesNotMatch(read('apps/portal/Dockerfile'), /COPY .*portal\/public/);
+  assert.match(read('.dockerignore'), /\*\*\/\.env/);
+  assert.match(read('.dockerignore'), /\*\*\/node_modules/);
+  assert.match(read('apps/backend/src/db/data-source.ts'), /synchronize: process.env.DB_SYNC === 'true'/);
 });

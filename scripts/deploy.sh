@@ -17,21 +17,30 @@ fi
 if [ ! -f .env ]; then
   echo "==> 未发现 .env，已从 .env.example 生成，请按需修改后重试。"
   cp .env.example .env
+  echo "请先配置 JWT_SECRET；首次空数据库初始化可临时设置 DB_SYNC=true，随后改回 false。" >&2
+  exit 1
 fi
 
 echo "==> 构建并启动服务"
 $DC up -d --build
 
 echo "==> 等待后端就绪…"
+READY=0
 for i in $(seq 1 30); do
   if curl -fsS http://localhost:3001/api/health >/dev/null 2>&1 || curl -fsS http://localhost:3001/api >/dev/null 2>&1; then
+    READY=1
     break
   fi
   sleep 2
 done
 
+if [ "$READY" != 1 ]; then
+  echo "后端未就绪；请检查服务日志，不能视为部署成功。" >&2
+  exit 1
+fi
+
 echo ""
-echo "部署完成："
+echo "开发示例已启动（公网部署前请完成安全配置）："
 echo "  后端 API : http://localhost:3001/api"
 echo "  开源项目站 : http://localhost:3002"
 echo "  数据库   : postgres://zhicang:zhicang@localhost:5432/zhicang"

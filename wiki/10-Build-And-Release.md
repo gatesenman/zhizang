@@ -131,3 +131,5 @@ Windows 0.2.0 安装/使用/构建与验证边界见根目录 `Windows使用说�
 ## 0.4.0 开源版
 
 构建不再注入 ZHICANG_LICENSE_PUBLIC_KEY；shared 无 jsonwebtoken 依赖，后端仍保留账号 JWT。部署不生成或挂载许可证密钥。CI 增加 edition 边界与后端账号同步 E2E；实际验证及未测项见 docs/OPEN-SOURCE-0.4.0.md。旧版产物名和踩坑表仅是历史记录，不是 0.4.0 验收结论。
+
+Docker 构建复制 .npmrc 与 patches，保证 frozen-lockfile 可重现补丁；不再复制不存在的 portal/public。根 .dockerignore 排除凭据、用户数据、依赖与产物。PostgreSQL 仅 DB_SYNC=true 时自动同步 schema；新空库可临时启用初始化，现有生产库先备份审查。未在 Docker 引擎中实际构建，见验证记录边界。

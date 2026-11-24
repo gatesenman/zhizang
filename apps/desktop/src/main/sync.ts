@@ -18,30 +18,30 @@ export interface SyncResult {
 // 双向同步：把本地自上次同步以来的变更推送到云端，并拉取云端变更（last-write-wins）
 export async function runSync(transport: typeof fetch = netFetch): Promise<SyncResult> {
   try {
-  const session = getSyncSession();
-  if (!session) throw new Error('请在设置中连接自己的同步账号（本地功能不受影响）');
-  const token = session.token;
-  const since = getLastSyncAt();
-  const local: SyncPushItem[] = changedSince(since);
+    const session = getSyncSession();
+    if (!session) throw new Error('请在设置中连接自己的同步账号（本地功能不受影响）');
+    const token = session.token;
+    const since = getLastSyncAt();
+    const local: SyncPushItem[] = changedSince(since);
 
-  const res = await transport(`${getBackendUrl().replace(/\/$/, '')}/sync`, {
-    method: 'POST',
-    redirect: 'error',
-    signal: AbortSignal.timeout(30000),
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ since, items: local }),
-  });
-  if (!res.ok) {
-    const t = await res.text().catch(() => '');
-    throw new Error(`同步失败 (${res.status}) ${t.slice(0, 120)}`);
-  }
-  const data = (await res.json()) as SyncResponse;
-  if (!data || !Array.isArray(data.items) || !Number.isFinite(data.serverTime)) throw new Error('同步响应格式无效，未更新同步游标');
-  if (getSyncSession()?.token !== token) throw new Error('同步账号已更改，未应用旧响应');
-  const { applied } = applyRemote(data.items || []);
-  setSetting(LAST_SYNC_KEY, String(data.serverTime || Date.now()));
-  setSetting('sync_last_error', '');
-  return { pushed: local.length, pulled: applied, serverTime: data.serverTime };
+    const res = await transport(`${getBackendUrl().replace(/\/$/, '')}/sync`, {
+      method: 'POST',
+      redirect: 'error',
+      signal: AbortSignal.timeout(30000),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ since, items: local }),
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => '');
+      throw new Error(`同步失败 (${res.status}) ${t.slice(0, 120)}`);
+    }
+    const data = (await res.json()) as SyncResponse;
+    if (!data || !Array.isArray(data.items) || !Number.isFinite(data.serverTime)) throw new Error('同步响应格式无效，未更新同步游标');
+    if (getSyncSession()?.token !== token) throw new Error('同步账号已更改，未应用旧响应');
+    const { applied } = applyRemote(data.items || []);
+    setSetting(LAST_SYNC_KEY, String(data.serverTime || Date.now()));
+    setSetting('sync_last_error', '');
+    return { pushed: local.length, pulled: applied, serverTime: data.serverTime };
   } catch (e) {
     setSetting('sync_last_error', String((e as Error).message ?? e));
     throw e;

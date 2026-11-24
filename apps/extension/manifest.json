@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "智藏 ZhiCang 收藏助手",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "一键把当前页 / 所有标签页 / 链接收藏到智藏 ZhiCang 桌面端，支持正文存档。",
   "permissions": [
     "tabs",

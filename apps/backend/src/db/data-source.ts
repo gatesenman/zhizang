@@ -11,7 +11,7 @@ export function buildDbOptions(): TypeOrmModuleOptions {
       type: 'postgres',
       url,
       entities,
-      synchronize: process.env.DB_SYNC !== 'false',
+      synchronize: process.env.DB_SYNC === 'true',
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
     };
   }

@@ -3,7 +3,8 @@
 FROM node:20-bookworm-slim AS build
 WORKDIR /app
 RUN corepack enable
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json .npmrc ./
+COPY patches patches
 COPY packages/shared/package.json packages/shared/
 COPY apps/portal/package.json apps/portal/
 RUN pnpm install --frozen-lockfile
@@ -16,13 +17,13 @@ FROM node:20-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN corepack enable
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc LICENSE THIRD_PARTY_NOTICES.md ./
+COPY patches patches
 COPY packages/shared/package.json packages/shared/
 COPY apps/portal/package.json apps/portal/
 RUN pnpm install --frozen-lockfile --prod
 COPY --from=build /app/packages/shared/dist packages/shared/dist
 COPY --from=build /app/apps/portal/.next apps/portal/.next
-COPY --from=build /app/apps/portal/public apps/portal/public
 COPY --from=build /app/apps/portal/next.config.* apps/portal/
 EXPOSE 3002
 CMD ["pnpm", "--filter", "@zhicang/portal", "start"]
