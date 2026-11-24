@@ -1,8 +1,8 @@
 {
   "name": "zhicang",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
-  "description": "智藏 ZhiCang · AI 驱动的收藏夹管理桌面程序（跨端 + 授权 + 付费门户）",
+  "description": "智藏 ZhiCang · 免费开源、本地优先的 AI 收藏管理工具",
   "packageManager": "pnpm@9.15.1",
   "engines": {
     "node": ">=20"
@@ -42,5 +42,6 @@
     "patchedDependencies": {
       "app-builder-lib@24.13.3": "patches/app-builder-lib@24.13.3.patch"
     }
-  }
+  },
+  "license": "MIT"
 }

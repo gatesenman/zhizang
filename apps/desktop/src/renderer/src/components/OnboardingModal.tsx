@@ -82,7 +82,7 @@ export default function OnboardingModal({
       footer={<Space>{step > 0 && <Button disabled={busy} onClick={() => setStep(step - 1)}>上一步</Button>}{step === 0 && <Button icon={<ImportOutlined />} loading={busy} onClick={importYaml}>{t('onboarding.importYamlTree')}</Button>}<Button type="primary" disabled={busy} onClick={() => step < 2 ? setStep(step + 1) : void finish()}>{step === 2 ? '完成并开始使用' : step === 0 ? '暂不选择，下一步' : '下一步'}</Button></Space>}
     >
       <Steps size="small" current={step} items={[{ title: '分类目录' }, { title: '可选服务' }, { title: '开始使用' }]} style={{ marginBottom: 20 }} />
-      {step === 0 && <><Alert type="info" showIcon message="本地模式无需激活，不要求购买或填写 API Key" description="收藏、搜索、标签、离线阅读、完整备份都在本机运行；云同步仍需有效商业许可证。" style={{ marginBottom: 12 }} />
+      {step === 0 && <><Alert type="info" showIcon message="本地模式免费开源，不要求购买或填写 API Key" description="收藏、搜索、标签、离线阅读、完整备份都在本机运行；云同步仍需有效商业许可证。" style={{ marginBottom: 12 }} />
       <Text type="secondary">
         {t('onboarding.desc')}
       </Text>

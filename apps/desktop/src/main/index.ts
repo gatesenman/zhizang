@@ -1,7 +1,7 @@
 import { metadataPatch, mayReplaceDescription } from './enrichment-policy';
 import { captureBookmark } from './capture';
 import { saveFullBackup, restoreFullBackup } from './backup';
-import { validateLlmConfig, normalizeApiBase } from './service-url';
+import { validateLlmConfig, normalizeSyncBase } from './service-url';
 import { netFetch } from './net-fetch';
 import { askBookmarks } from './assistant';
 import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron';
@@ -80,15 +80,8 @@ import {
   importCategoriesYaml,
   importCsv,
 } from './import-export';
-import {
-  getLicenseStatus,
-  activate,
-  deactivate,
-  getDeviceId,
-  getBackendUrl,
-  setBackendUrl,
-} from './license';
-import { runSync, getLastSyncAt, getSyncConfig, setSyncConfig, initAutoSync } from './sync';
+import { getBackendUrl, setBackendUrl, getSyncAccountStatus, connectSyncAccount, disconnectSyncAccount } from './sync-account';
+import { runSync, getLastSyncAt, getSyncConfig, setSyncConfig, initAutoSync, scheduleAutoSync } from './sync';
 import { initAutoUpdate, checkForUpdates, getUpdateStatus, downloadUpdate } from './updater';
 
 // Portable builds keep data next to the executable; installers use Electron's AppData location.
@@ -474,9 +467,9 @@ function registerIpc(): void {
     await aiChat(cfg, [{ role: 'user', content: '请只回复 OK，用于连接测试。' }]);
     return { ok: true, elapsedMs: Date.now() - start };
   });
-  ipcMain.handle('license:testServer', async (_e, base: string) => {
-    const res = await netFetch(normalizeApiBase(base) + '/health', { signal: AbortSignal.timeout(10000) });
-    if (!res.ok) throw new Error('授权服务连接失败 HTTP ' + res.status);
+  ipcMain.handle('sync:testServer', async (_e, base: string) => {
+    const res = await netFetch(normalizeSyncBase(base) + '/health', { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error('同步服务连接失败 HTTP ' + res.status);
     const data: any = await res.json();
     if (!data.ok) throw new Error('响应不是智藏健康检查');
     return { ok: true };
@@ -551,13 +544,11 @@ function registerIpc(): void {
     denseSearch(Float32Array.from(vec), k),
   );
 
-  // 授权
-  ipcMain.handle('license:status', () => getLicenseStatus());
-  ipcMain.handle('license:activate', (_e, email: string, code: string) => activate(email, code));
-  ipcMain.handle('license:deactivate', () => deactivate());
-  ipcMain.handle('license:deviceId', () => getDeviceId());
-  ipcMain.handle('license:getBackendUrl', () => getBackendUrl());
-  ipcMain.handle('license:setBackendUrl', (_e, url: string) => setBackendUrl(url));
+  // Optional self-hosted sync account; no application activation.
+  ipcMain.handle('sync:accountStatus', () => getSyncAccountStatus());
+  ipcMain.handle('sync:connect', (_e, email: string, password: string, register: boolean) => connectSyncAccount(email, password, register));
+  ipcMain.handle('sync:disconnect', () => { disconnectSyncAccount(); scheduleAutoSync(); });
+  ipcMain.handle('sync:setBackendUrl', (_e, url: string) => { setBackendUrl(url); scheduleAutoSync(); });
 
   // 导入导出
   ipcMain.handle('io:backup', async () => {

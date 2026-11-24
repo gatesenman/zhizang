@@ -1,8 +1,8 @@
 import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { join } from 'node:path';
-import { ActivationCode, DeviceBinding, Order, Product, Setting, SyncItem, TagDict, User } from './entities';
+import { Setting, SyncItem, TagDict, User } from './entities';
 
-const entities = [User, ActivationCode, DeviceBinding, Setting, Product, Order, TagDict, SyncItem];
+const entities = [User, Setting, TagDict, SyncItem];
 
 export function buildDbOptions(): TypeOrmModuleOptions {
   const url = process.env.DATABASE_URL;

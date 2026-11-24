@@ -1,6 +1,6 @@
 import type { SyncPushItem, SyncResponse } from '@zhicang/shared';
 import { changedSince, applyRemote, getSetting, setSetting } from './db';
-import { getBackendUrl, getLicenseToken, getLicenseStatus } from './license';
+import { getBackendUrl, getSyncSession } from './sync-account';
 import { netFetch } from './net-fetch';
 
 const LAST_SYNC_KEY = 'last_sync_at';
@@ -17,9 +17,10 @@ export interface SyncResult {
 
 // 双向同步：把本地自上次同步以来的变更推送到云端，并拉取云端变更（last-write-wins）
 export async function runSync(transport: typeof fetch = netFetch): Promise<SyncResult> {
-  const token = getLicenseToken();
-  if (!token || !getLicenseStatus().activated) throw new Error('未激活或许可证失效，无法同步');
   try {
+  const session = getSyncSession();
+  if (!session) throw new Error('请在设置中连接自己的同步账号（本地功能不受影响）');
+  const token = session.token;
   const since = getLastSyncAt();
   const local: SyncPushItem[] = changedSince(since);
 
@@ -35,6 +36,7 @@ export async function runSync(transport: typeof fetch = netFetch): Promise<SyncR
   }
   const data = (await res.json()) as SyncResponse;
   if (!data || !Array.isArray(data.items) || !Number.isFinite(data.serverTime)) throw new Error('同步响应格式无效，未更新同步游标');
+  if (getSyncSession()?.token !== token) throw new Error('同步账号已更改，未应用旧响应');
   const { applied } = applyRemote(data.items || []);
   setSetting(LAST_SYNC_KEY, String(data.serverTime || Date.now()));
   setSetting('sync_last_error', '');
@@ -46,7 +48,7 @@ export async function runSync(transport: typeof fetch = netFetch): Promise<SyncR
 }
 
 // ---------- 定时自动同步 ----------
-const AUTO_ENABLED_KEY = 'sync_auto_enabled';
+const AUTO_ENABLED_KEY = 'sync_auto_enabled_v2';
 const AUTO_INTERVAL_KEY = 'sync_auto_interval_min';
 const DEFAULT_INTERVAL_MIN = 30;
 const MIN_INTERVAL_MIN = 5;
@@ -66,7 +68,7 @@ export function getSyncConfig(): SyncConfig {
 
 let autoTimer: ReturnType<typeof setInterval> | null = null;
 
-// 启动 / 重启定时器：仅在开启时生效；每次执行前由 runSync 校验是否已激活。
+// 启动 / 重启定时器：仅在开启时生效；每次执行前由 runSync 校验同步账号。
 // 返回当前生效配置，供设置页回显。变更间隔或开关后调用即可热更新。
 export function scheduleAutoSync(): SyncConfig {
   if (autoTimer) {
@@ -77,7 +79,7 @@ export function scheduleAutoSync(): SyncConfig {
   if (!cfg.enabled) return cfg;
   const ms = cfg.intervalMin * 60 * 1000;
   autoTimer = setInterval(() => {
-    // 未激活 / 网络异常时静默跳过，不打断用户。
+    // 未登录 / 网络异常时静默跳过，不打断用户。
     runSync().catch(() => undefined);
   }, ms);
   if (autoTimer.unref) autoTimer.unref();
@@ -85,7 +87,7 @@ export function scheduleAutoSync(): SyncConfig {
 }
 
 export function setSyncConfig(cfg: Partial<SyncConfig>): SyncConfig {
-  if (cfg.enabled && !getLicenseStatus().activated) throw new Error('请先激活有效许可证，再开启自动同步');
+  if (cfg.enabled && !getSyncSession()) throw new Error('请先连接自己的同步账号');
   if (cfg.intervalMin != null && !Number.isFinite(cfg.intervalMin)) throw new Error('同步间隔无效');
   if (cfg.enabled != null) setSetting(AUTO_ENABLED_KEY, cfg.enabled ? '1' : '0');
   if (cfg.intervalMin != null) {

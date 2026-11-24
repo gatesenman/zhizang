@@ -1,6 +1,5 @@
-import LicenseSettings from './LicenseSettings';
+import SyncAccountSettings from './SyncAccountSettings';
 import { cleanIpcError } from '../util';
-import { useStore } from '../store';
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Select, Input, Switch, Slider, InputNumber, Button, Typography, App as AntApp, Tabs, Alert, Space } from 'antd';
 import { LLM_PRESETS, EMBEDDING_PRESETS } from '@zhicang/shared/types';
@@ -20,7 +19,6 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
   });
   const [appVersion, setAppVersion] = useState<string>('');
   const [updateText, setUpdateText] = useState<string>('');
-  const license = useStore((s) => s.license);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [bridgeEnabled, setBridgeEnabled] = useState(true);
@@ -117,7 +115,6 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
         const u = new URL(updateUrl);
         if (u.username || u.password || u.search || u.hash || (u.protocol !== 'https:' && !(u.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(u.hostname)))) throw new Error('更新源必须为发行方提供的 HTTPS 地址');
       }
-      if (autoSync.enabled && !license.activated) throw new Error('请先激活许可证，再开启自动同步');
       await window.api.settings.setLlm(cfg);
       const bridge = await window.api.bridge.configure({ enabled: bridgeEnabled, port: bridgePort });
       setBridgeState(bridge.running ? '桥接正在运行' : '桥接已关闭');
@@ -252,10 +249,10 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
   // --- Tab: 网络服务 ---
   const tabNetwork = (
     <Form layout="vertical">
-      <Alert type="info" showIcon message={license.activated ? '云同步授权有效' : '本地模式：云同步需先在授权页激活'} description={syncError ? '上次同步错误：' + syncError : '自动同步错误会保留在此处，不会伪装为同步成功。'} style={{ marginBottom: 16 }} />
+      <Alert type="info" showIcon message="可选的自托管同步，不影响免费本地功能" description={syncError ? '上次同步错误：' + syncError : '自动同步错误会保留在此处，不会伪装为同步成功。'} style={{ marginBottom: 16 }} />
       <Form.Item label="启用本机插件 / MCP 桥接"><Switch checked={bridgeEnabled} onChange={setBridgeEnabled} /><Typography.Paragraph type="secondary">{bridgeState}。修改端口、开关或重置令牌后即时重启桥接；旧令牌失效，插件需更新配置。</Typography.Paragraph></Form.Item>
       <Form.Item label={t('settings.autoSync')} extra={t('settings.autoSyncExtra')}>
-        <Switch disabled={!license.activated && !autoSync.enabled} checked={autoSync.enabled} onChange={(v) => setAutoSync((s) => ({ ...s, enabled: v }))} />
+        <Switch checked={autoSync.enabled} onChange={(v) => setAutoSync((s) => ({ ...s, enabled: v }))} />
       </Form.Item>
       {autoSync.enabled && (
         <Form.Item label={t('settings.syncInterval')}>
@@ -312,7 +309,7 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
 
   const tabItems = [
     { key: 'general', label: t('settings.tabGeneral'), children: tabGeneral },
-    { key: 'license', label: '授权 / 云服务', children: <LicenseSettings /> },
+    { key: 'sync-account', label: '同步账号', children: <SyncAccountSettings /> },
     { key: 'ai', label: t('settings.tabAi'), children: tabAi },
     { key: 'graph', label: t('settings.tabGraph'), children: tabGraph },
     { key: 'network', label: t('settings.tabNetwork'), children: tabNetwork },

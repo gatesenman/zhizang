@@ -15,8 +15,6 @@ export type {
   SyncResponse,
   LlmConfig,
   AiEnrichResult,
-  LicensePayload,
-  LicenseStatus,
   EmbeddingMode,
   EmbeddingConfig,
   EmbeddingStatus,
@@ -29,4 +27,3 @@ export type {
   RolePreset,
 } from './types';
 export { LLM_PRESETS, EMBEDDING_PRESETS, CATEGORY_ROLE_PRESETS } from './types';
-export { signLicense, verifyLicense, normalizeDeviceId } from './license';

@@ -10,7 +10,6 @@ import {
   SearchOutlined,
   BulbOutlined,
   RobotOutlined,
-  SafetyCertificateOutlined,
   SyncOutlined,
   BarChartOutlined,
   ToolOutlined,
@@ -25,7 +24,6 @@ import Sidebar from './components/Sidebar';
 import BookmarkPanel from './components/BookmarkPanel';
 import ListToolbar from './components/ListToolbar';
 import WebPreview from './components/WebPreview';
-import LicenseGate from './components/LicenseGate';
 import { useStore } from './store';
 import { libraryPreviewState } from './library-presentation';
 import { useI18n } from './i18n';
@@ -52,7 +50,6 @@ export default function App(): React.ReactElement {
   const toggleDark = useStore((s) => s.toggleDark);
   const dark = useStore((s) => s.dark);
   const aiStatus = useStore((s) => s.aiStatus);
-  const license = useStore((s) => s.license);
   const applyUpdatedBookmark = useStore((s) => s.applyUpdatedBookmark);
   const setAiStatus = useStore((s) => s.setAiStatus);
   const loadBookmarks = useStore((s) => s.loadBookmarks);
@@ -74,8 +71,6 @@ export default function App(): React.ReactElement {
   const [graphOpen, setGraphOpen] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [onboardOpen, setOnboardOpen] = useState(false);
-  const [trial, setTrial] = useState(false);
-  const [trialBannerHidden, setTrialBannerHidden] = useState(false);
   const selectedId = useStore((s) => s.selectedId);
   const bookmarks = useStore((s) => s.bookmarks);
   const [collapsedPreviewId, setCollapsedPreviewId] = useState<number | null>(null);
@@ -102,7 +97,7 @@ export default function App(): React.ReactElement {
   const [linkProgress, setLinkProgress] = useState<{ checked: number; total: number } | null>(null);
 
   useEffect(() => {
-    init().then(async () => { setTrial((await window.api.settings.get('local_mode')) === '1'); }).catch((e) => setInitError(String(e?.message ?? e))).finally(() => setInitializing(false));
+    init().catch((e) => setInitError(String(e?.message ?? e))).finally(() => setInitializing(false));
     const offUpd = window.api.on('bookmark:updated', (b) => {
       applyUpdatedBookmark(b);
       void loadTags();
@@ -149,13 +144,12 @@ export default function App(): React.ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const entered = license.activated || trial;
   useEffect(() => {
-    if (!entered) return;
+    if (initializing || initError) return;
     window.api.settings.get('onboarded').then((v: string | null) => {
       if (v !== '1') setOnboardOpen(true);
     });
-  }, [entered]);
+  }, [initializing, initError]);
 
   // 深色模式同步到 <body>：Antd 的弹窗/抽屉/下拉/全局提示通过 portal 渲染到 body，
   // 不在 App 根节点内，需把 zc-dark 挂到 body 才能让这些浮层与全局背景一并跟随主题。
@@ -210,19 +204,12 @@ export default function App(): React.ReactElement {
   };
 
   const doSync = async (): Promise<void> => {
-    if (!license.activated) {
-      message.warning(t('header.syncNeedActivate'));
-      return;
-    }
     const r = await runSync();
     if (r) message.success(t('header.syncDone', { pushed: r.pushed, pulled: r.pulled }));
   };
 
   if (initializing || initError) return <div className="zc-startup"><div className="zc-logo-badge">智</div><h2>{initError ? '启动失败' : '正在打开知识库…'}</h2>{initError && <><p>{initError}</p><Button onClick={() => window.location.reload()}>重新加载</Button></>}</div>;
 
-  if (!license.activated && !trial) {
-    return <LicenseGate onTrial={() => { window.api.settings.set('local_mode', '1').then(() => setTrial(true)).catch((e) => message.error(String(e))); }} />;
-  }
 
   const processing = (aiStatus.counts.processing ?? 0) + (aiStatus.counts.pending ?? 0);
 
@@ -359,36 +346,10 @@ export default function App(): React.ReactElement {
               {lang === 'zh' ? 'EN' : '中'}
             </Button>
           </Tooltip>
-          <Tooltip title={license.activated ? t('header.licensedTip', { email: license.email ?? '' }) : t('header.trialTip')}>
-            <Badge dot={!license.activated} color="orange">
-              <Button aria-label={lang === 'zh' ? '授权信息' : 'License'} icon={<SafetyCertificateOutlined />} onClick={() => setSettingsOpen(true)} type={license.activated ? 'default' : 'dashed'} />
-            </Badge>
-          </Tooltip>
           <Button aria-label={lang === 'zh' ? '设置' : 'Settings'} icon={<SettingOutlined />} onClick={() => setSettingsOpen(true)} />
         </Space>
       </div>
 
-      {!license.activated && trial && !trialBannerHidden && (
-        <div
-          style={{
-            background: dark ? 'rgba(212,136,6,0.16)' : '#fffbe6',
-            borderBottom: dark ? '1px solid rgba(212,136,6,0.4)' : '1px solid #ffe58f',
-            padding: '4px 16px',
-            fontSize: 12,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <SafetyCertificateOutlined style={{ color: '#d48806' }} />
-          <span>{t('header.trialBanner')}</span>
-          <span style={{ flex: 1 }} />
-          <CloseOutlined
-            onClick={() => setTrialBannerHidden(true)}
-            style={{ cursor: 'pointer', color: '#bfa23a' }}
-          />
-        </div>
-      )}
 
       <div className="zc-body">
         <Sidebar />

@@ -1,4 +1,4 @@
-# 智藏 ZhiCang 一键部署：PostgreSQL + 后端 + 付费门户
+# 智藏 ZhiCang 一键部署：PostgreSQL + 后端 + 开源项目站
 # 用法：
 #   cp .env.example .env   # 按需修改
 #   docker compose up -d --build
@@ -33,13 +33,6 @@ services:
       DATABASE_URL: postgres://zhicang:zhicang@db:5432/zhicang
       DB_SYNC: 'true'
       JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string}
-      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3001}
-      PORTAL_URL: ${PORTAL_URL:-http://localhost:3002}
-      LICENSE_PRIVATE_KEY_PATH: /app/keys/license_private.pem
-      LICENSE_PUBLIC_KEY_PATH: /app/keys/license_public.pem
-    volumes:
-      # 挂载许可证签名密钥（生产请妥善保管，勿入库）
-      - ./keys:/app/keys:ro
     ports:
       - '3001:3001'
 

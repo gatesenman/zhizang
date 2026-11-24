@@ -1,6 +1,6 @@
 {
   "name": "@zhicang/desktop",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "description": "智藏 ZhiCang 桌面端",
   "main": "out/main/index.js",
@@ -93,5 +93,6 @@
     "portable": {
       "artifactName": "ZhiCang-Portable-${version}-${arch}.${ext}"
     }
-  }
+  },
+  "license": "MIT"
 }

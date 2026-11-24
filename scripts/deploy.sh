@@ -19,15 +19,6 @@ if [ ! -f .env ]; then
   cp .env.example .env
 fi
 
-# 许可证密钥校验
-if [ ! -f keys/license_private.pem ]; then
-  echo "==> 未发现 keys/license_private.pem，正在生成 RS256 密钥对…"
-  mkdir -p keys
-  openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out keys/license_private.pem
-  openssl rsa -pubout -in keys/license_private.pem -out keys/license_public.pem
-  chmod 600 keys/license_private.pem
-fi
-
 echo "==> 构建并启动服务"
 $DC up -d --build
 
@@ -42,7 +33,7 @@ done
 echo ""
 echo "部署完成："
 echo "  后端 API : http://localhost:3001/api"
-echo "  付费门户 : http://localhost:3002"
+echo "  开源项目站 : http://localhost:3002"
 echo "  数据库   : postgres://zhicang:zhicang@localhost:5432/zhicang"
 echo ""
 echo "查看日志： $DC logs -f"

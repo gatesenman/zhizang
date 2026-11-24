@@ -182,24 +182,6 @@ export interface AiEnrichResult {
   suggestedCategory: string;
 }
 
-// 许可证 / 授权
-export interface LicensePayload {
-  sub: string; // user id / email
-  deviceId: string;
-  code: string;
-  plan: string;
-  iat?: number;
-  exp?: number;
-}
-
-export interface LicenseStatus {
-  activated: boolean;
-  plan?: string;
-  expireAt?: number | null;
-  email?: string;
-  reason?: string;
-}
-
 // ===== 知识图谱 / 语义检索 =====
 
 // 嵌入向量来源：
