@@ -53,3 +53,15 @@ test('R3 failed mixed-ID tag batch rolls back bookmarks AND tag creation; empty 
   addTagToBookmarks([b.id, b.id], 'new-tag');
   assert.deepEqual(getBookmark(b.id)?.tags, ['new-tag', 'old-tag']);
 });
+
+test('R4 tied timestamps have deterministic nonoverlapping pages; default library traversal has a covering order index', () => {
+  const ids: number[] = [];
+  for (let i = 0; i < 12; i++) ids.push(createBookmark({ url: 'https://pages.rounds.test/' + i, title: 'same pagination title' }).id);
+  getDb().prepare("UPDATE bookmarks SET created_at=123456 WHERE url LIKE 'https://pages.rounds.test/%'").run();
+  const a = queryBookmarks({ domain: 'pages.rounds.test', limit: 6 }).items.map(x => x.id);
+  const b = queryBookmarks({ domain: 'pages.rounds.test', limit: 6, offset: 6 }).items.map(x => x.id);
+  assert.deepEqual([...a, ...b], [...ids].reverse());
+  assert.deepEqual(queryBookmarks({ domain: 'pages.rounds.test', sort: 'created_asc' }).items.map(x => x.id), ids);
+  const plan = getDb().prepare('EXPLAIN QUERY PLAN SELECT * FROM bookmarks WHERE deleted_at IS NULL ORDER BY pinned DESC, created_at DESC, id DESC LIMIT 50').all();
+  assert.match(JSON.stringify(plan), /idx_bookmarks_active_created/);
+});

@@ -153,6 +153,7 @@ function migrate(): void {
   addColumnIfMissing('bookmarks', 'snapshot', 'INTEGER DEFAULT 0');
   addColumnIfMissing('bookmarks', 'snapshot_at', 'INTEGER');
   db.exec('CREATE INDEX IF NOT EXISTS idx_bookmarks_deleted ON bookmarks(deleted_at)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_bookmarks_active_created ON bookmarks(deleted_at, pinned DESC, created_at DESC, id DESC)');
 
   migrateFts();
 }
@@ -750,7 +751,7 @@ export function queryBookmarks(q: BookmarkQuery): { items: Bookmark[]; total: nu
   const limit = Number.isFinite(q.limit) ? Math.max(1, Math.min(100000, Math.floor(q.limit!))) : 50;
   const offset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0;
   const rows = db
-    .prepare(`SELECT b.* ${from} ${whereSql} ORDER BY ${pinnedFirst}${order} LIMIT ? OFFSET ?`)
+    .prepare(`SELECT b.* ${from} ${whereSql} ORDER BY ${pinnedFirst}${order}, b.id ${q.sort === 'created_asc' || q.sort === 'title_asc' ? 'ASC' : 'DESC'} LIMIT ? OFFSET ?`)
     .all(...params, limit, offset) as any[];
   const items = rows.map((r) => mapBookmark(r, getBookmarkTags(r.id)));
   return { items, total };

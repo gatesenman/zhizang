@@ -18,3 +18,8 @@
 - 审查收件箱/多选/回收站恢复链路：已有筛选换页清选、回收站/撤销测试保持；发现批量打标签在事务外建标签，混入失效 ID 时会遗留孤儿标签，空批次也会建标签。
 - 修改 db.ts 将标签创建纳入整批事务、空批次不写入、拒绝空白标签。deep-rounds.test.ts 用真实 FK 失败验证整批回滚，验证重复 ID 幂等和原标签保留。
 - 回归 `pnpm --filter @zhicang/desktop test` 全通过，/workspace/zhizang-round-03.log；未声称可视撤销交互已重新验收。
+
+## 第4轮：可预测分页与列表查询计划
+- 审查发现同毫秒/同标题记录没有 ID 排序键，分页顺序未被 SQL 契约固定；默认列表缺少删除状态+置顶+时间联合排序索引。已有 LIKE 转义/中文笔记回退保留。
+- db.ts 添加非破坏性联合索引与 ID tie-breaker；新增同时间两页无重叠/升降序及真实 EXPLAIN QUERY PLAN 索引命中回归。
+- 初始并行测试遭共享机器 IO 阻塞（子进程 disk-sleep），只终止本任务测试，未算通过；NODE_OPTIONS 不接受该 Node 参数的尝试亦记失败。改用实际支持的串行命令后全通过：在 apps/desktop 下 `ELECTRON_RUN_AS_NODE=1 TS_NODE_PROJECT=tsconfig.test.json ../../node_modules/electron/dist/electron --require ts-node/register --test --test-concurrency=1 test/*.test.ts`，/workspace/zhizang-round-04.log。后续轮暂用同一串行等价命令，最终统一修正测试入口；没有给并发写入期间 OFFSET 分页作快照一致性承诺。
