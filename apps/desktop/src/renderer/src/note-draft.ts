@@ -36,7 +36,7 @@ export class NoteDraft {
   private emit(patch: Partial<NoteState>): void { this.state = { ...this.state, ...patch }; this.listeners.forEach((fn) => fn()); }
   private persist(): void {
     try {
-      if (this.state.text === this.base) this.options.storage.removeItem(this.key);
+      if (this.state.text === this.base && !this.running) this.options.storage.removeItem(this.key);
       else this.options.storage.setItem(this.key, JSON.stringify({ text: this.state.text, base: this.base }));
       this.emit({ durable: true });
     } catch { this.emit({ durable: false, error: '本机草稿保存失败，请立即保存到数据库或复制笔记' }); }
@@ -69,7 +69,7 @@ export class NoteDraft {
         } catch (e) { this.emit({ status: 'error', error: String((e as Error).message ?? e) }); this.persist(); return; }
       }
     };
-    this.running = work().finally(() => { this.running = null; }); return this.running;
+    this.running = work().finally(() => { this.running = null; this.persist(); }); return this.running;
   };
   useSaved = (): void => { this.base = this.server; this.emit({ text: this.server, status: 'saved', error: '' }); this.persist(); };
   keepDraft = (): void => { this.base = this.server; this.emit({ status: 'pending', error: '' }); this.persist(); void this.flush(); };

@@ -28,3 +28,8 @@
 - 审查发现 404/500 页面会作为成功正文缓存，PDF 等非网页响应被当 HTML；重定向后相对图片/链接仍以旧站点根目录解析。
 - enrich.ts 明确校验 HTTP 状态/内容类型，以最终文档 URL 为相对资源基准；可注入 transport 以隔离网络回归。deep-rounds.test.ts 验证 404、PDF、跨源重定向后的文章目录相对链接与标题。
 - 第4轮串行等价测试命令全通过，/workspace/zhizang-round-05.log。响应夹具不是实际外站/GUI 验收；保留现有错误提示、外部打开与离线阅读兜底。
+
+## 第6轮：笔记在途清空也要可恢复
+- 审查 NoteDraft 的 SQLite CAS/冲突/引用复用：已有版本冲突与切换保护保留；发现先保存 A、请求未返回时清空至旧 base，会提前删除本机草稿；若此刻崩溃，A 可能提交而清空意图丢失。
+- note-draft.ts 在请求在途时即使 text==旧 base 也保留草稿，全部串行 CAS 结束才清理。deep-rounds.test.ts 用 Promise 屏障+真实 SQLite 保存验证清空意图持久化、两次 CAS、最终空笔记与草稿清理。
+- 第4轮串行等价完整桌面测试通过，/workspace/zhizang-round-06.log；没有模拟成用户真的崩溃重启或可视编辑器已验收。

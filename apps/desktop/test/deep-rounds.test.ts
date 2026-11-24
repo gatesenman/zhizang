@@ -4,9 +4,10 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
-import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark, addTagToBookmarks, listTags } from '../src/main/db';
+import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark, addTagToBookmarks, listTags, saveBookmarkNotes } from '../src/main/db';
 import { importCsv, importJson, exportJson } from '../src/main/import-export';
 import { fetchReadable, fetchSiteMeta } from '../src/main/enrich';
+import { NoteDraft, noteDraftKey } from '../src/renderer/src/note-draft';
 const folder = mkdtempSync(join(tmpdir(), 'zhicang-deep-rounds-'));
 const path = join(folder, 'live.db');
 initDb(path);
@@ -78,4 +79,18 @@ test('R5 reading rejects HTTP/PDF error bodies and resolves relative resources a
   assert.match(article.html, /https:\/\/final.example.test\/articles\/image.png/);
   assert.match(article.html, /https:\/\/final.example.test\/articles\/next/);
   assert.equal((await fetchSiteMeta('https://reading.example.test/a', transport)).title, 'real article');
+});
+
+test('R6 clearing a note during an in-flight save remains durably recoverable and final CAS saves the clear', async () => {
+  const b = createBookmark({ url: 'https://rounds.example.test/note-race' });
+  const records = new Map<string,string>();
+  const storage = { getItem: (k: string) => records.get(k) ?? null, setItem: (k: string,v: string) => { records.set(k,v); }, removeItem: (k: string) => { records.delete(k); } };
+  let release!: () => void; const held = new Promise<void>(resolve => { release = resolve; }); let calls = 0;
+  const draft = new NoteDraft({ bookmark: b, storage, delay: 100000, save: async (id, notes, expected) => { if (++calls === 1) await held; return saveBookmarkNotes(id, notes, expected); } });
+  draft.edit('in flight text'); const saving = draft.flush(); draft.edit('');
+  assert.equal(JSON.parse(records.get(noteDraftKey(b))!).text, '', 'cleared intent must survive a crash before the earlier save resolves');
+  release(); await saving;
+  assert.equal(calls, 2); assert.equal(getBookmark(b.id)?.notes, '');
+  assert.equal(draft.snapshot().status, 'saved'); assert.equal(records.has(noteDraftKey(b)), false);
+  draft.detach();
 });
