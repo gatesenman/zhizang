@@ -29,7 +29,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:backend:e2e": "pnpm build:shared && pnpm build:backend && node scripts/smoke-backend.mjs",
-    "test:packaging": "node --test scripts/test/windows-packaging.test.mjs",
+    "test:packaging": "node --test scripts/test/windows-packaging.test.mjs scripts/test/windows-release.test.mjs",
     "test:edition": "node --test scripts/test/open-source-edition.test.mjs",
     "test:security": "node --test scripts/test/security-dependencies.test.mjs",
     "test:tooling": "node --test scripts/test/test-runner.test.mjs"
@@ -43,5 +43,9 @@
     "vite": "7.3.8"
   },
   "pnpm": {},
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gatesenman/zhizang.git"
+  }
 }

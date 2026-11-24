@@ -98,5 +98,10 @@
     "beforePack": "./packaging/safe-packaging.cjs",
     "npmRebuild": false
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gatesenman/zhizang.git",
+    "directory": "apps/desktop"
+  }
 }
