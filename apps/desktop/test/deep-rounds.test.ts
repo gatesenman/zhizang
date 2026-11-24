@@ -4,7 +4,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
-import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting } from '../src/main/db';
+import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark } from '../src/main/db';
+import { importCsv, importJson, exportJson } from '../src/main/import-export';
 const folder = mkdtempSync(join(tmpdir(), 'zhicang-deep-rounds-'));
 const path = join(folder, 'live.db');
 initDb(path);
@@ -24,4 +25,19 @@ test('R1 failed upgrade rolls back earlier migration writes and closes the handl
   assert.equal(getSetting('license_token'), 'expired-fixture-only');
   assert.equal(getSetting('llm'), 'external-key-fixture-only');
   assert.ok(getBookmark(b.id));
+});
+
+test('R2 CSV broken quotes are rejected before writes; BOM/multiline and JSON archived metadata survive roundtrip', () => {
+  const count = queryBookmarks({}).total;
+  assert.throws(() => importCsv('url,title\nhttps://rounds.example.test/half,ok\nhttps://rounds.example.test/bad,"broken'), /引号/);
+  assert.equal(queryBookmarks({}).total, count);
+  assert.equal(importCsv('\ufeffurl,title\r\nhttps://rounds.example.test/csv,"multi\nline"').imported, 1);
+  assert.equal(importCsv('url,title\nhttps://rounds.example.test/csv,duplicate').skipped, 1);
+  const b = createBookmark({ url: 'https://rounds.example.test/archive-roundtrip' });
+  updateBookmark(b.id, { status: 'archived', visitedAt: 12345 });
+  const record = JSON.parse(exportJson()).bookmarks.find((x: any) => x.id === b.id);
+  record.url = 'https://rounds.example.test/archive-restored';
+  assert.equal(importJson(JSON.stringify({ bookmarks: [record] })).imported, 1);
+  const restored = queryBookmarks({ keyword: 'archive-restored' }).items[0];
+  assert.equal(restored.status, 'archived'); assert.equal(restored.visitedAt, 12345);
 });
