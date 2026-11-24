@@ -23,13 +23,20 @@ export function initDb(dbPath = join(app.getPath('userData'), 'zhicang.db')): Da
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
   db.function('url_hostname', { deterministic: true }, (value: unknown) => { try { return new URL(String(value)).hostname.toLowerCase(); } catch { return ''; } });
-  migrate();
-  migrateUrlHashes();
-  seed();
-  migrateLegacySystemCategories();
-  // 上次未完成（中断）的任务重新排队
-  db.prepare("UPDATE bookmarks SET ai_state = 'pending' WHERE ai_state = 'processing'").run();
-  return db;
+  try {
+    // A failed upgrade must not leave half-migrated user data or a locked handle.
+    db.transaction(() => {
+      migrate();
+      migrateUrlHashes();
+      seed();
+      migrateLegacySystemCategories();
+      db.prepare("UPDATE bookmarks SET ai_state = 'pending' WHERE ai_state = 'processing'").run();
+    })();
+    return db;
+  } catch (error) {
+    db.close();
+    throw error;
+  }
 }
 
 export function getDb(): Database.Database {
