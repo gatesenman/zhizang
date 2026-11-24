@@ -65,6 +65,7 @@ try {
   assert.equal(client.status, 0, 'Actual desktop account/sync client must pass');
   assert.equal((await post('/sync', { since: 0, items: [] })).status, 401);
   assert.equal((await post('/sync', { since: 0, items: [] }, token + 'tampered')).status, 401);
+  assert.equal((await fetch(base + '/sync', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })).status, 400, 'missing body is rejected, not a 500 after Express 5 migration');
   const sync = await post('/sync', { since: 0, items: [] }, token);
   assert.equal(sync.status, 201); assert.ok((await sync.json()).serverTime);
   const item = { urlHash: 'fixture-hash', url: 'https://example.test/sync', title: '同步收藏', description: '', tags: ['测试'], favorite: true, pinned: false, readState: 'unread', notes: '云端往返', status: 'active', deleted: false, updatedAt: Date.now() };

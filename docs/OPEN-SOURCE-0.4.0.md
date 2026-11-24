@@ -1,4 +1,6 @@
-# 0.4.0 免费开源迭代记录
+# 0.4.0 初始免费开源迭代记录（历史阶段）
+
+> 以下保存安全依赖整改前的三轮真实过程，不代表当前依赖/打包状态。Electron 31、原漏洞计数和旧 AppImage 测试均为历史证据。当前事实、Linux ZIP 与剩余阻塞见 [安全整改记录](./SECURITY-DEPENDENCIES-0.4.0.md)。
 
 ## 第一轮：盘点与实现
 
@@ -56,7 +58,7 @@
 ```bash
 pnpm install --frozen-lockfile && pnpm build:shared
 ZHICANG_USER_DATA_DIR=/tmp/zhicang-0.4-gui pnpm dev:desktop
-# 或运行当前平台自己构建的 AppImage；务必隔离数据目录，不覆盖现有收藏。
+# 当前请运行自己构建的 Linux ZIP 中的 @zhicangdesktop；AppImage 已因安全原因禁止。
 ```
 
 1. 新库直接出现工作台/分类向导，无激活页、试用横幅、付费入口或授权徽章。

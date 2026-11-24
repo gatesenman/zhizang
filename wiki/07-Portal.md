@@ -8,3 +8,7 @@ Next.js 项目站提供产品主线介绍、源码/贡献/发布链接、隐私�
 
 - apps/portal/app/{page.tsx,layout.tsx,globals.css}
 - apps/portal/package.json
+
+## 0.4.0 安全迁移
+
+Next 16.4.6 使用 Webpack（dev/build 均显式 `--webpack`）；类型检查先 `next typegen`。React 18.3.1 仍受 Next 16 支持但已标为 deprecated，未扩展为全工作区 React 19 迁移。项目站不提供购买/激活/支付流程。

@@ -15,7 +15,7 @@
 | AI 能力 | 自动抓取标题/描述/图标、AI 生成描述/标签/分类（OpenAI 兼容，**出厂默认 DeepSeek**，预置通义/智谱/OpenAI，支持自定义 KEY）、右侧 AI 面板自然语言检索（无 Key 降级关键词检索） |
 | 知识图谱 | 本地知识图谱（类 Obsidian，力导向图：收藏=节点，分类/标签/语义相似=边，可缩放拖拽、点节点开收藏）+ 语义检索（一句话高亮命中收藏）。嵌入向量来源可选：本地模型（transformers.js 在线安装、之后离线）/ API `/embeddings` / TF-IDF 兜底，默认本地，向量保存在本机；API 模式会向配置的服务发送文本 |
 | 存档 / 导入 | 网站完整静态化存档（正文+图片内联 data URI，断网可读）、批量粘贴链接导入、HTML/JSON/CSV/YAML 导入导出、失效链接检测、重复检测合并、智能文件夹、访问统计热力图 |
-| 桌面更新 | **electron-updater 自动更新**（GitHub Releases 渠道，静默下载 + 重启安装，更新弹窗中/英本地化） |
+| 桌面更新 | 默认停用；发行者配置可信 HTTPS generic feed 后仍需用户确认下载/重启。Linux ZIP 暂手动更新，不提供默认 GitHub 发布渠道 |
 | 国际化 | **中/英双语**（桌面渲染层 + 主进程更新弹窗），一键切换、随系统语言自动探测 |
 | 安全加固 | 后端 helmet 安全头 + 全局限流（throttler）；本地桥接服务 token 鉴权 + Origin/Host 校验 |
 | 集成 | 浏览器插件（Chrome MV3 / Firefox，桥接携带访问令牌）、MCP server（Claude Desktop / Cursor，`ZHICANG_BRIDGE_TOKEN`） |
@@ -24,16 +24,17 @@
 
 | 模块 | 选型 |
 | --- | --- |
-| 桌面端 | Electron 31 + React 18 + TypeScript + Ant Design 5 + Vite（electron-vite）+ better-sqlite3（SQLite + FTS5） |
-| 门户 | Next.js 14（App Router）+ React 18 |
-| 插件 | 原生 JS，Chrome MV3 / Firefox MV2，webextension-polyfill |
+| 桌面端 | Electron 45 + React 18 + TypeScript + Ant Design 5 + Vite（electron-vite）+ better-sqlite3 13（Node-API / SQLite + FTS5） |
+| 可选同步后端 | NestJS 11 + Express 5 + TypeORM（SQL.js / PostgreSQL），普通账号 JWT，不是软件授权 |
+| 门户 | Next.js 16（App Router）+ React 18 |
+| 插件 | 原生 JS，Chrome MV3 / Firefox MV2，四行浏览器 API 别名垫片 |
 | MCP | Node + `@modelcontextprotocol/sdk`（stdio 传输） |
 | 工程 | pnpm monorepo（workspace）、共享类型包 `@zhicang/shared` |
 
 ## 仓库结构
 
 ```
-marktree/
+zhizang/
 ├── apps/
 │   ├── desktop/      # 桌面端（Electron）       —— 见 wiki/03
 │   ├── backend/      # 后端（NestJS）            —— 见 wiki/06

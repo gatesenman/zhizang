@@ -8,7 +8,7 @@ pnpm build:shared
 pnpm dev:desktop
 ```
 
-推荐 Node 20 LTS / pnpm 9.15.1；Linux 原生编译依赖 make、C++、Python 3，Electron 运行需 GTK/NSS/ALSA 等系统库。ABI 错误运行 `pnpm --filter @zhicang/desktop rebuild`。
+推荐 Node 24 LTS（最低 22.12.0） / pnpm 9.15.1；Linux 原生编译依赖 make、C++、Python 3，Electron 运行需 GTK/NSS/ALSA 等系统库。桌面 better-sqlite3 13 使用 Node-API 预编译。缺失 Electron 二进制时先运行 `pnpm --filter @zhicang/desktop exec install-electron`；原生模块错误运行 `pnpm --filter @zhicang/desktop rebuild`。
 
 可选同步：`pnpm dev:backend`（默认 localhost:3001/api），设置账号后再开启同步。可选项目站 `pnpm dev:portal`（localhost:3002）。`pnpm dev:all` 一起运行三者；`pnpm deploy` 是开发用 Docker 示例，公网部署前必须更改示例凭据并审查安全配置。
 

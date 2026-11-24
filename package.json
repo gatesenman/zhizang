@@ -5,7 +5,7 @@
   "description": "智藏 ZhiCang · 免费开源、本地优先的 AI 收藏管理工具",
   "packageManager": "pnpm@9.15.1",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev:desktop": "pnpm --filter @zhicang/desktop dev",
@@ -30,7 +30,8 @@
     "test": "pnpm -r --if-present test",
     "test:backend:e2e": "pnpm build:shared && pnpm build:backend && node scripts/smoke-backend.mjs",
     "test:packaging": "node --test scripts/test/windows-packaging.test.mjs",
-    "test:edition": "node --test scripts/test/open-source-edition.test.mjs"
+    "test:edition": "node --test scripts/test/open-source-edition.test.mjs",
+    "test:security": "node --test scripts/test/security-dependencies.test.mjs"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.18.0",

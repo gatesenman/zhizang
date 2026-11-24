@@ -1,6 +1,6 @@
 # 智藏 ZhiCang 后端镜像（NestJS）。从仓库根目录构建：
 #   docker build -f apps/backend/Dockerfile -t zhicang-backend .
-FROM node:20-bookworm-slim AS build
+FROM node:24-bookworm-slim AS build
 WORKDIR /app
 RUN corepack enable
 # 仅复制清单以利用缓存
@@ -15,7 +15,7 @@ COPY apps/backend apps/backend
 RUN pnpm --filter @zhicang/shared build \
  && pnpm --filter @zhicang/backend build
 
-FROM node:20-bookworm-slim AS runtime
+FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN corepack enable

@@ -12,11 +12,11 @@
 
 ## 安全状态（请先阅读）
 
-本次不是依赖安全升级：生产依赖审计仍有 **4 critical / 56 high / 76 moderate / 14 low**（详见 [验证记录](./docs/OPEN-SOURCE-0.4.0.md)）。继承的 Electron / Next.js 等版本需要单独升级回归；**不要将当前后端或项目站未经加固直接暴露公网**。源码构建/测试通过不表示已达到生产安全标准。
+已完成一轮有边界的依赖整改：生产依赖审计为 **0 critical / 0 high / 2 moderate**；含开发/打包工具仍为 **1 critical / 11 high / 14 moderate / 1 low**，不是“完全安全”。Electron 45、Next 16、Nest 11 已迁移。Linux 改为 ZIP，并由打包钩子拒绝存在动态库搜索路径漏洞的 AppImage 目标；旧打包器仍有供应链风险。详见 [路径、暴露条件与验证记录](./docs/SECURITY-DEPENDENCIES-0.4.0.md) 及原始 before/after JSON。**未经部署加固不要直接暴露公网**。
 
 ## 从源码运行
 
-推荐 Node.js 20 LTS、pnpm 9.15.1。Linux 安装需具备 make / C++ 编译器、Python 3 和 Electron 运行库（GTK / NSS / ALSA）；原生 SQLite 依赖按 Electron ABI 构建。
+推荐 Node.js 24 LTS（最低 22.12.0）、pnpm 9.15.1。Linux 安装需具备 make / C++ 编译器、Python 3 和 Electron 运行库（GTK / NSS / ALSA）；桌面 SQLite 13 使用 Node-API 预编译；不支持的平台仍可能需要本机编译。Electron 45 安装采用首次使用下载，可先执行 `pnpm --filter @zhicang/desktop exec install-electron`（需联网）。
 
 ```bash
 pnpm install --frozen-lockfile
@@ -63,14 +63,15 @@ pnpm test
 pnpm test:backend:e2e
 pnpm test:packaging
 pnpm test:edition
+pnpm test:security
 pnpm build:all
 pnpm build:extension
-pnpm --filter @zhicang/desktop dist:linux  # Linux AppImage
+pnpm --filter @zhicang/desktop dist:linux  # Linux ZIP；暂禁 AppImage
 pnpm --filter @zhicang/desktop dist:win    # Windows Setup + Portable
 pnpm --filter @zhicang/desktop dist:mac    # macOS zip
 ```
 
-打包产物在 `apps/desktop/release/`，不提交到源码仓库。未签名安装包、跨平台 GUI、真实外部 AI 和部署环境必须另外验收；编译通过不代表 GUI 验证通过。当前版本验证记录见 [迭代记录](./docs/OPEN-SOURCE-0.4.0.md)。
+打包产物在 `apps/desktop/release/`，不提交到源码仓库。未签名安装包、跨平台 GUI、真实外部 AI 和部署环境必须另外验收；编译通过不代表 GUI 验证通过。当前验证见 [安全整改](./docs/SECURITY-DEPENDENCIES-0.4.0.md)；[初始开源迭代](./docs/OPEN-SOURCE-0.4.0.md) 为历史阶段。Linux ZIP 解压后运行 `@zhicangdesktop`，暂不支持 AppImage 自动更新，请手动更新程序并保留原用户数据目录。
 
 ## 目录与贡献
 

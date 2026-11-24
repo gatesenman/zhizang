@@ -31,3 +31,5 @@
 - apps/desktop/src/main/{sync-account.ts,sync.ts,service-url.ts}
 - apps/desktop/src/renderer/src/components/SyncAccountSettings.tsx
 - .env.example、docker-compose.yml
+
+安全整改已升级 Nest 11 / Express 5 / TypeORM 0.3.31，明确拒绝缺失的同步请求体；真实路径与剩余两个 ORM glob/minimatch 中危见 [安全整改](../docs/SECURITY-DEPENDENCIES-0.4.0.md)。

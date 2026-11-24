@@ -8,7 +8,7 @@ import { assertWindowsPackaging, windowsBuilderLibrary } from '../assert-windows
 import { createSplitSetup, MAX_PART_BYTES } from '../create-windows-split.mjs';
 const root = new URL('../../', import.meta.url);
 test('actual pinned builder includes exact reviewed upstream backport', () => assert.equal(assertWindowsPackaging().builder, '24.13.3'));
-test('pnpm persists the patch without unrelated dependency upgrades', () => {
+test('pnpm preserves the reviewed NSIS patch across dependency maintenance', () => {
   const pkg = JSON.parse(readFileSync(new URL('package.json', root)));
   assert.equal(pkg.pnpm.patchedDependencies['app-builder-lib@24.13.3'], 'patches/app-builder-lib@24.13.3.patch');
   assert.match(readFileSync(new URL('pnpm-lock.yaml', root), 'utf8'), /app-builder-lib@24\.13\.3\(patch_hash=/);

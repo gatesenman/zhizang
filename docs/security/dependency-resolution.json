@@ -1,0 +1,94 @@
+{
+  "backend": {
+    "nest": {
+      "p": "node_modules/@nestjs/core/package.json",
+      "version": "11.2.11"
+    },
+    "platform": {
+      "p": "node_modules/@nestjs/platform-express/package.json",
+      "version": "11.2.11"
+    },
+    "express": {
+      "p": "node_modules/@nestjs/platform-express/node_modules/express/package.json",
+      "version": "5.2.1"
+    },
+    "proxyAddr": {
+      "p": "node_modules/proxy-addr/package.json",
+      "version": "2.0.8"
+    },
+    "bodyParser": {
+      "p": "node_modules/body-parser/package.json",
+      "version": "2.4.0"
+    },
+    "multer": {
+      "p": "node_modules/multer/package.json",
+      "version": "2.5.0"
+    },
+    "typeorm": {
+      "p": "node_modules/typeorm/package.json",
+      "version": "0.3.31"
+    },
+    "glob": {
+      "p": "node_modules/typeorm/node_modules/glob/package.json",
+      "version": "10.5.0"
+    },
+    "minimatch": {
+      "p": "node_modules/typeorm/node_modules/minimatch/package.json",
+      "version": "9.0.9"
+    },
+    "expressTypes": {
+      "p": "node_modules/@types/express/package.json",
+      "version": "5.0.6"
+    }
+  },
+  "desktop": {
+    "electron": {
+      "p": "node_modules/electron/package.json",
+      "version": "45.4.1"
+    },
+    "sqlite": {
+      "p": "apps/desktop/node_modules/better-sqlite3/package.json",
+      "version": "13.2.0"
+    },
+    "updater": {
+      "p": "node_modules/electron-updater/package.json",
+      "version": "6.8.12"
+    },
+    "updateRuntime": {
+      "p": "node_modules/electron-updater/node_modules/builder-util-runtime/package.json",
+      "version": "9.7.1"
+    },
+    "yaml": {
+      "p": "node_modules/js-yaml/package.json",
+      "version": "4.3.2"
+    },
+    "cheerio": {
+      "p": "node_modules/cheerio/package.json",
+      "version": "1.2.0"
+    },
+    "undici": {
+      "p": "node_modules/undici/package.json",
+      "version": "7.30.2"
+    }
+  },
+  "portal": {
+    "next": {
+      "p": "node_modules/next/package.json",
+      "version": "16.4.6"
+    },
+    "react": {
+      "p": "node_modules/react/package.json",
+      "version": "18.3.1"
+    }
+  },
+  "mcp": {
+    "sdk": {
+      "p": "node_modules/@modelcontextprotocol/sdk/package.json",
+      "version": "1.32.2"
+    },
+    "zod": {
+      "p": "node_modules/zod/package.json",
+      "version": "4.6.7"
+    }
+  }
+}

@@ -6,7 +6,7 @@
 
 ```bash
 pnpm dist:desktop                              # 当前平台
-pnpm --filter @zhicang/desktop dist:linux      # Linux AppImage
+pnpm --filter @zhicang/desktop dist:linux      # Linux ZIP；暂禁 AppImage
 pnpm --filter @zhicang/desktop dist:win        # Windows NSIS + portable (.exe)
 pnpm --filter @zhicang/desktop dist:mac        # macOS（本仓库配置为 zip；正规 .dmg 需 macOS 签名）
 ```
@@ -15,11 +15,11 @@ pnpm --filter @zhicang/desktop dist:mac        # macOS（本仓库配置为 zip�
 
 | 平台 | 产物 | 备注 |
 | --- | --- | --- |
-| Windows | `ZhiCang-Setup-0.2.0-x64.exe`、`ZhiCang-Portable-0.2.0-x64.exe` | 实际生成并通过静态/归档校验；Windows 实机未验收 |
-| Linux | `ZhiCang-<version>.AppImage` | 免安装；需 FUSE，或用 `--appimage-extract` 解包运行 |
-| macOS | `ZhiCang-<version>-mac.zip` | 未签名 app；首次打开需 `xattr -dr com.apple.quarantine ZhiCang.app` 或右键打开 |
+| Windows | `ZhiCang-Setup-<version>-x64.exe`、`ZhiCang-Portable-<version>-x64.exe` | 0.4.0 升级后未实际打包/实机验收 |
+| Linux | `ZhiCang-<version>-linux-<arch>.zip` | 解压运行 `@zhicangdesktop`；无 AppRun，暂不支持自动更新 |
+| macOS | `ZhiCang-<version>-mac.zip` | 未签名 app 未验收；正式分发需签名/公证，不建议移除系统隔离标记 |
 
-> **必须锁定 `electronVersion`**：`apps/desktop/package.json` 的 `build.electronVersion` 固定为 `31.7.7`。pnpm monorepo 下 electron-builder 无法从扁平 node_modules 自动推断 Electron 版本，缺失该字段会导致 `pnpm install`（含 `postinstall: electron-builder install-app-deps`）报错；显式锁定后安装与打包均干净。
+> **必须锁定 `electronVersion`**：`apps/desktop/package.json` 的 `build.electronVersion` 固定为 `45.4.1`。pnpm monorepo 下 electron-builder 无法从扁平 node_modules 自动推断 Electron 版本，缺失该字段会导致 `pnpm install`（含 `postinstall: electron-builder install-app-deps`）报错；显式锁定后安装与打包均干净。
 
 ## 自动更新（electron-updater）
 
@@ -39,7 +39,8 @@ pnpm --filter @zhicang/desktop dist:mac        # macOS（本仓库配置为 zip�
 
 ```bash
 pnpm lint        # eslint . --ext .ts,.tsx,.js,.cjs,.mjs --max-warnings 0（零警告门槛）
-pnpm typecheck   # pnpm -r --if-present typecheck（各包 tsc --noEmit）
+pnpm typecheck   # pnpm -r --if-present typecheck（各包 tsc --noEmit；Next 16 先 typegen）
+pnpm test:security # 原始审计、固定版本、Linux 安全目标
 pnpm test        # pnpm -r --if-present test（各包 node --test）
 ```
 
@@ -74,7 +75,7 @@ pnpm --filter @zhicang/{backend,portal,desktop,extension} build  # desktop 仅�
    ```
    - `cheerio` / `yaml` / `@zhicang/shared`被打进 `out/main/index.js`，不再依赖 node_modules 解析。
    - 只有原生模块 `better-sqlite3` 保持 external（无法 bundle），由 electron-builder 解包到 asar 外。
-3. **HTML 解析使用 `cheerio/slim`**：cheerio 1.2 默认引入 `undici`，而 undici 依赖实验性 `node:sqlite`（Electron 的 Node 20 不含），改用 `cheerio/slim` 规避。
+3. **HTML 解析使用 `cheerio/slim`**：沿用 `cheerio/slim` 的精简入口，避免无用 undici/node:sqlite 依赖；原 Electron 31 / Node 20 的缺失模块问题属于历史原因。
 
 ### 踩坑记录（回归用）
 
@@ -85,7 +86,7 @@ pnpm --filter @zhicang/{backend,portal,desktop,extension} build  # desktop 仅�
 | `No such built-in module: node:sqlite` | bundle 引入 undici | 改用 `cheerio/slim` |
 | `Cannot find module 'jws'` | `@zhicang/shared`→jsonwebtoken 依赖链未进 asar | 内联打包 `@zhicang/shared` |
 | `Cannot find module 'bindings'` | better-sqlite3 原生子依赖未进 asar | `.npmrc` 改 hoisted 后重装 |
-| `pnpm install --frozen-lockfile` 退出 1（postinstall 阶段） | `electron-builder install-app-deps` 在 pnpm 扁平 node_modules 下推断不出 Electron 版本 | `apps/desktop/package.json` 加 `build.electronVersion: "31.7.7"` |
+| `pnpm install --frozen-lockfile` 退出 1（postinstall 阶段） | `electron-builder install-app-deps` 在 pnpm 扁平 node_modules 下推断不出 Electron 版本 | `apps/desktop/package.json` 加 `build.electronVersion: "45.4.1"` |
 | 知识图谱本地模型加载被 CSP 拦截 | 默认 CSP 不允许 CDN 脚本 / WASM eval | `renderer/index.html` 的 `script-src` 增加 `'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net`，transformers.js 与模型按需在线加载、之后浏览器缓存离线可用 |
 | 新增收藏富化报 `fetch failed`、favicon 抓不到（dev 正常、打包 / 代理环境失败） | `enrich.ts` 用 Node `undici` fetch，不复用系统代理与 OS 证书库 | 全部对外请求改用 Electron `net.fetch`（Chromium 网络栈）；favicon 渲染层再加逐级回退。详见 [wiki/05](./05-AI-Enrichment.md) |
 | 新增重复 URL 报 `Error invoking remote method 'bookmarks:create'` | 重复时 `createBookmark` 抛异常，IPC 拒绝并把原始错误透传到渲染层 | handler 捕获后返回 `{ bookmark, duplicate:true }`，前端友好提示并定位现有收藏。详见 [wiki/03](./03-Desktop-App.md) |
@@ -93,8 +94,7 @@ pnpm --filter @zhicang/{backend,portal,desktop,extension} build  # desktop 仅�
 
 > 知识图谱前端用纯 JS 的 `react-force-graph-2d`（canvas 力导向，无原生依赖），可正常被 vite 打包；transformers.js 与嵌入模型**不打进安装包**，运行时从 CDN 动态加载并缓存（控制安装包体积、首次需联网）。
 
-> 修改桌面端依赖或 `electron.vite.config.ts` 后，务必解包 AppImage 实测启动（不能只测 dev 模式）：
-> `./ZhiCang-0.1.0.AppImage --appimage-extract && ./squashfs-root/@zhicangdesktop --no-sandbox`，确认无 `Cannot find module` 且桥接 `listening on 127.0.0.1:38121`。
+> 修改桌面依赖后必须解压当前 Linux ZIP，隔离数据目录后以普通用户启动 `@zhicangdesktop`，不能仅测 dev；确认 SQLite、桥接及模块解析。不要以 root 运行日常应用。
 
 ## 浏览器插件打包
 
@@ -121,9 +121,9 @@ pnpm build:extension   # → apps/extension/dist/zhicang-chrome.zip, zhicang-fir
 - `apps/extension/build.mjs`（自包含跨平台 zip 打包器）
 
 
-## 2026-11 本地交付补充
+## 历史 0.2/0.3 本地交付补充（非本轮验收）
 
-本次新增 `scripts/run-desktop-tests.mjs`：桌面测试用 Electron 的 Node 运行时，匹配 postinstall 的 SQLite ABI。`pnpm test:backend:e2e` 使用标准 Node 启动临时后端，测试数据结束清理，仅 mock 支付与 console 邮件。测试/构建日志见 docs/verification，完整命令见交付说明。本次已生成未签名 Windows x64 NSIS/portable EXE，并验证 PE/ASAR/原生模块/归档完整性；未在 Windows 实机安装运行，未发布。GUI 已通过父会话 computerUse 完成隔离库中的核心流程验收，见 docs/verification/GUI-ACCEPTANCE.md；普通/最大化布局通过，任意尺寸未验证。GUI 或构建通过均不等于安装包及商业发布验收。原 build.publish 默认已移除，新源须由发行者正确配置。
+以下仅保存旧版记录。旧版新增 `scripts/run-desktop-tests.mjs`：桌面测试用 Electron 的 Node 运行时，匹配 postinstall 的 SQLite ABI。`pnpm test:backend:e2e` 使用标准 Node 启动临时后端，测试数据结束清理，仅 mock 支付与 console 邮件。测试/构建日志见 docs/verification，完整命令见交付说明。本次已生成未签名 Windows x64 NSIS/portable EXE，并验证 PE/ASAR/原生模块/归档完整性；未在 Windows 实机安装运行，未发布。GUI 已通过父会话 computerUse 完成隔离库中的核心流程验收，见 docs/verification/GUI-ACCEPTANCE.md；普通/最大化布局通过，任意尺寸未验证。GUI 或构建通过均不等于安装包及商业发布验收。原 build.publish 默认已移除，新源须由发行者正确配置。
 
 Windows 0.2.0 安装/使用/构建与验证边界见根目录 `Windows使用说明.md`、`交付说明.md` 以及 `docs/功能覆盖与验证矩阵.md`。
 
@@ -133,3 +133,7 @@ Windows 0.2.0 安装/使用/构建与验证边界见根目录 `Windows使用说�
 构建不再注入 ZHICANG_LICENSE_PUBLIC_KEY；shared 无 jsonwebtoken 依赖，后端仍保留账号 JWT。部署不生成或挂载许可证密钥。CI 增加 edition 边界与后端账号同步 E2E；实际验证及未测项见 docs/OPEN-SOURCE-0.4.0.md。旧版产物名和踩坑表仅是历史记录，不是 0.4.0 验收结论。
 
 Docker 构建复制 .npmrc 与 patches，保证 frozen-lockfile 可重现补丁；不再复制不存在的 portal/public。根 .dockerignore 排除凭据、用户数据、依赖与产物。PostgreSQL 仅 DB_SYNC=true 时自动同步 schema；新空库可临时启用初始化，现有生产库先备份审查。未在 Docker 引擎中实际构建，见验证记录边界。
+
+## 0.4.0 有边界的安全依赖整改
+
+Node 24、Electron 45.4.1 / SQLite 13.2.0 Node-API、Next 16 Webpack、Nest 11；Windows 打包补丁保留。Linux ZIP 替代 AppImage，beforePack 钩子拒绝 AppImage，即使手动传入该 target 也会失败。旧打包器及 Vite 工具链仍需后续专门迁移，不能宣称全部安全。完整当前结果、路径与未测项见 [安全整改](../docs/SECURITY-DEPENDENCIES-0.4.0.md)。
