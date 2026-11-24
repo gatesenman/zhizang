@@ -1,4 +1,5 @@
 import { app } from 'electron';
+import { chmodSync } from 'node:fs';
 import { join } from 'path';
 import Database from 'better-sqlite3';
 import { createHash } from 'crypto';
@@ -20,10 +21,11 @@ let db: Database.Database;
 
 export function initDb(dbPath = join(app.getPath('userData'), 'zhicang.db')): Database.Database {
   db = new Database(dbPath);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
-  db.function('url_hostname', { deterministic: true }, (value: unknown) => { try { return new URL(String(value)).hostname.toLowerCase(); } catch { return ''; } });
   try {
+    if (process.platform !== 'win32' && dbPath !== ':memory:') chmodSync(dbPath, 0o600);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    db.function('url_hostname', { deterministic: true }, (value: unknown) => { try { return new URL(String(value)).hostname.toLowerCase(); } catch { return ''; } });
     // A failed upgrade must not leave half-migrated user data or a locked handle.
     db.transaction(() => {
       migrate();
@@ -428,7 +430,7 @@ export function createBookmark(input: {
   tags?: string[];
 }): Bookmark {
   const parsed = new URL(input.url.trim());
-  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('仅支持 HTTP / HTTPS 网页链接');
+  if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error('仅支持不含用户名/密码的 HTTP / HTTPS 网页链接');
   input = { ...input, url: input.url.trim() };
   const urlHash = hashUrl(input.url);
   const tombstone = db.prepare('SELECT updated_at FROM sync_tombstones WHERE url_hash = ?').get(urlHash) as { updated_at: number } | undefined;

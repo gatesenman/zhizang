@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio/slim';
 import type { AiEnrichResult, Bookmark, LlmConfig } from '@zhicang/shared';
 import { validateLlmConfig } from './service-url';
 import { netFetch } from './net-fetch';
+import { abortable, assertPublicWebUrl, publicWebFetch, readLimitedText, readLimitedBytes } from './public-web-fetch';
 
 export interface SiteMeta {
   title: string;
@@ -14,7 +15,7 @@ export interface SiteMeta {
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
-export async function fetchSiteMeta(rawUrl: string, transport: typeof fetch = netFetch): Promise<SiteMeta> {
+export async function fetchSiteMeta(rawUrl: string, transport: typeof fetch = publicWebFetch, checkAsset: (url: string) => Promise<void> = assertPublicWebUrl): Promise<SiteMeta> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
@@ -23,8 +24,8 @@ export async function fetchSiteMeta(rawUrl: string, transport: typeof fetch = ne
       signal: controller.signal,
       redirect: 'follow',
     });
-    assertWebResponse(res);
-    const html = await res.text();
+    await assertWebResponse(res);
+    const html = await readLimitedText(res);
     const $ = cheerio.load(html);
     const origin = new URL(res.url || rawUrl).href;
 
@@ -36,12 +37,14 @@ export async function fetchSiteMeta(rawUrl: string, transport: typeof fetch = ne
       $('meta[name="description"]').attr('content') ||
       $('meta[property="og:description"]').attr('content') ||
       '';
-    const image = absolutize($('meta[property="og:image"]').attr('content') || '', origin);
+    let image = absolutize($('meta[property="og:image"]').attr('content') || '', origin);
     let favicon =
       $('link[rel="icon"]').attr('href') ||
       $('link[rel="shortcut icon"]').attr('href') ||
       '/favicon.ico';
     favicon = absolutize(favicon, origin);
+    const safeAsset = async (url: string): Promise<string> => { if (!url) return ''; try { await abortable(checkAsset(url), controller.signal); return url; } catch { return ''; } };
+    [favicon, image] = await Promise.all([safeAsset(favicon), safeAsset(image)]);
 
     $('script, style, noscript, svg, nav, footer, header').remove();
     const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
@@ -64,12 +67,12 @@ export async function checkLink(url: string): Promise<number | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
   try {
-    let res = await netFetch(url, { method: 'HEAD', headers: { 'User-Agent': UA }, signal: controller.signal, redirect: 'follow' });
+    let res = await publicWebFetch(url, { method: 'HEAD', headers: { 'User-Agent': UA }, signal: controller.signal, redirect: 'follow' });
     // 部分站点不支持 HEAD，回退 GET
     if (res.status === 405 || res.status === 501) {
-      res = await netFetch(url, { method: 'GET', headers: { 'User-Agent': UA }, signal: controller.signal, redirect: 'follow' });
+      res = await publicWebFetch(url, { method: 'GET', headers: { 'User-Agent': UA }, signal: controller.signal, redirect: 'follow' });
     }
-    return res.status;
+    const status = res.status; await res.body?.cancel(); return status;
   } catch {
     return null;
   } finally {
@@ -78,13 +81,13 @@ export async function checkLink(url: string): Promise<number | null> {
 }
 
 // 提取正文为可读 HTML（离线快照 / 阅读模式）
-export async function fetchReadable(rawUrl: string, transport: typeof fetch = netFetch): Promise<{ title: string; html: string }> {
+export async function fetchReadable(rawUrl: string, transport: typeof fetch = publicWebFetch): Promise<{ title: string; html: string }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await transport(rawUrl, { headers: { 'User-Agent': UA }, signal: controller.signal, redirect: 'follow' });
-    assertWebResponse(res);
-    const raw = await res.text();
+    await assertWebResponse(res);
+    const raw = await readLimitedText(res);
     const $ = cheerio.load(raw);
     const title = $('meta[property="og:title"]').attr('content') || $('title').first().text() || rawUrl;
     $('script, style, noscript, iframe, svg, nav, footer, header, form, button, input').remove();
@@ -114,10 +117,10 @@ export async function fetchReadable(rawUrl: string, transport: typeof fetch = ne
   }
 }
 
-function assertWebResponse(response: Response): void {
-  if (!response.ok) throw new Error(`网页请求失败 (${response.status})`);
+async function assertWebResponse(response: Response): Promise<void> {
+  if (!response.ok) { await response.body?.cancel(); throw new Error(`网页请求失败 (${response.status})`); }
   const type = response.headers.get('content-type') || '';
-  if (type && !/^(text\/(html|plain)|application\/xhtml\+xml)(;|$)/i.test(type)) throw new Error('不支持的网页内容类型');
+  if (type && !/^(text\/(html|plain)|application\/xhtml\+xml)(;|$)/i.test(type)) { await response.body?.cancel(); throw new Error('不支持的网页内容类型'); }
 }
 
 function absolutize(u: string, origin: string): string {
@@ -170,11 +173,11 @@ async function imageToDataUri(url: string): Promise<string | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
-    const res = await netFetch(url, { headers: { 'User-Agent': UA }, signal: controller.signal });
+    const res = await publicWebFetch(url, { headers: { 'User-Agent': UA }, signal: controller.signal });
     if (!res.ok) return null;
     const type = res.headers.get('content-type') || 'image/png';
     if (!type.startsWith('image/')) return null;
-    const buf = Buffer.from(await res.arrayBuffer());
+    const buf = Buffer.from(await readLimitedBytes(res, 1_500_000));
     if (buf.length > 1_500_000) return null;
     return `data:${type};base64,${buf.toString('base64')}`;
   } finally {

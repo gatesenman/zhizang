@@ -41,3 +41,10 @@
 - 新增/更新 deep-rounds、open-source、backend/sync 单测与真实 desktop-cloud-smoke：两份独立 Electron/SQLite 库经实际 Nest/SQL.js HTTP 往返5005+条，未来服务器时间不影响后续上传，永久删除跨端/重启不复活。最初真实 E2E 报413后查明默认100KB瓶颈并修复，未把失败计通过。
 - `pnpm build:shared`、`pnpm typecheck`、backend 单测、串行全部桌面测试通过（round-07*.log）；`pnpm test:backend:e2e`最终通过（/workspace/zhizang-round-07-e2e.log）。规模夹具将临时服务全局配额设500，不是默认限流/负载测试，生产默认120不变，认证仍真实执行。
 - 边界：协议2要求客户端与自托管服务一起升级；目前每轮全量分页拉取，以带宽换正确性，不冒称增量服务端变更日志。LWW 对真实设备时钟偏差、同毫秒冲突仍有固有限制；多进程/高并发 SaaS 不在 SQL.js 小型自托管保证范围。
+
+## 第8轮：自动网页、IPC 与私密数据边界
+- 审查发现：自动元数据/离线抓取可重定向到私网、正文/同步响应无流式字节上限；IPC 只凭通道名，没有限定真实主窗口/主帧/应用入口；阅读沙箱仍会自动加载远程跟踪图片。
+- 新增 public-web-fetch.ts：仅自动网页 GET/HEAD，逐跳 DNS 全地址/IPv4/IPv6 私网与保留段检查、拒绝 URL 口令、去除认证/Cookie/Key、取消/超时与流式大小限制；metadata 新图片也验证目标，离线阅读 CSP 仅允许 data 图片（完整存档通过受控抓取内联）。显式自备 AI/同步服务不走公网限制，本地 HTTP AI 测试保留。旧 URL/配置不擅自删除。
+- 新增 ipc-trust.ts，index.ts 全部 IPC 统一检查真实 sender/mainFrame/准确入口 URL；db.ts 新收藏拒绝 URL 内嵌口令，POSIX 主 SQLite 文件0600（不是加密，不保证历史 WAL/导出备份/Windows ACL）；同步响应限10MB，后端先查键/载荷长度再按响应预算取数据，避免500篇长笔记同时实例化。
+- 回归首次抓出 Node BlockList IPv4 映射导致错误封禁全部公网的实现缺陷，已分离 IPv4/IPv6 集合修复；初次 lint 常量循环错误亦修复，不计作通过。最终 `pnpm lint`、`pnpm typecheck`、第4轮串行桌面命令80/80通过（round-08*.log）；`pnpm test:backend:e2e` 真实5005+跨端分页/认证隔离/持久化全部通过。
+- 限制：DNS 校验与 Chromium/代理实际连接未绑定，仍有 DNS rebinding TOCTOU，严苛部署需网络出口策略；旧收藏/同步来的媒体 URL 与用户主动原站 webview 仍可能联网，不能宣称完全无追踪/完整 SSRF 防护。IPC 源码回归与模拟事件不是 Windows/GUI 验收；必要人工检查见最终交付指南。

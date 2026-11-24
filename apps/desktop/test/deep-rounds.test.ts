@@ -1,6 +1,6 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
@@ -79,7 +79,7 @@ test('R5 reading rejects HTTP/PDF error bodies and resolves relative resources a
   const article = await fetchReadable('https://reading.example.test/a', transport);
   assert.match(article.html, /https:\/\/final.example.test\/articles\/image.png/);
   assert.match(article.html, /https:\/\/final.example.test\/articles\/next/);
-  assert.equal((await fetchSiteMeta('https://reading.example.test/a', transport)).title, 'real article');
+  assert.equal((await fetchSiteMeta('https://reading.example.test/a', transport, async () => undefined)).title, 'real article');
 });
 
 test('R6 clearing a note during an in-flight save remains durably recoverable and final CAS saves the clear', async () => {
@@ -111,4 +111,10 @@ test('R7 permanent deletions retain only a hash/timestamp tombstone and cannot r
   const chunks = chunkSyncItems(Array.from({ length: 12 }, () => ({ ...before, notes: '汉'.repeat(100000) })));
   assert.ok(chunks.length > 1);
   for (const chunk of chunks) assert.ok(Buffer.byteLength(JSON.stringify(chunk)) < 1_010_000);
+});
+
+test('R8 desktop credential-bearing database is owner-only on POSIX; URLs cannot carry hidden passwords', () => {
+  if (process.platform !== 'win32') assert.equal(statSync(path).mode & 0o777, 0o600);
+  assert.throws(() => createBookmark({ url: 'https://secret:password@public.example.test/' }), /用户名/);
+  assert.equal(getSetting('llm'), 'external-key-fixture-only');
 });

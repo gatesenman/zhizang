@@ -2,6 +2,7 @@ import type { SyncPushItem, SyncResponse } from '@zhicang/shared';
 import { changedSince, applyRemote, getSetting, setSetting } from './db';
 import { getBackendUrl, getSyncSession } from './sync-account';
 import { netFetch } from './net-fetch';
+import { readLimitedText } from './public-web-fetch';
 
 const LAST_SYNC_KEY = 'last_sync_local_v2';
 
@@ -50,7 +51,9 @@ async function runSyncOnce(transport: typeof fetch): Promise<SyncResult> {
         body: JSON.stringify({ protocol: 2, since: 0, items, pushOnly, ...(cursor ? { cursor } : {}) }),
       });
       if (!res.ok) throw new Error(`同步失败 (${res.status})`);
-      const data = (await res.json()) as SyncResponse;
+      const text = await readLimitedText(res, 10_000_000);
+      let data: SyncResponse;
+      try { data = JSON.parse(text) as SyncResponse; } catch { throw new Error('同步响应格式无效，未更新同步游标'); }
       if (!currentAccount()) throw new Error('同步账号已更改，未应用旧响应');
       if (!data || !Array.isArray(data.items) || !Number.isFinite(data.serverTime)) throw new Error('同步响应格式无效，未更新同步游标');
       if (data.protocol !== 2 || (data.nextCursor !== null && (typeof data.nextCursor !== 'string' || !data.nextCursor || data.nextCursor.length > 256))) throw new Error('同步服务器需升级至分页协议 2，未更新同步游标');

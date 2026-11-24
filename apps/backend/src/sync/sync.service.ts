@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import type { SyncPushItem, SyncResponse } from '@zhicang/shared';
 import { SyncItem } from '../db/entities';
 
@@ -46,18 +46,28 @@ export class SyncService {
           payload: JSON.stringify(it), updatedAtMs: String(it.updatedAt), deleted: it.deleted }));
       }
       if (options.protocol === 2 && options.pushOnly) return { items: [], serverTime: Date.now(), protocol: 2 as const, nextCursor: null };
-      // v2 deliberately traverses all keys: client clocks are not safe server change cursors.
-      const pageSize = options.protocol === 2 ? 500 : 5000;
-      const where = options.protocol === 2
-        ? { email, ...(options.cursor ? { urlHash: MoreThan(options.cursor) } : {}) }
-        : { email, updatedAtMs: MoreThan(String(since)) };
-      const rows = await repo.find({ where, order: options.protocol === 2 ? { urlHash: 'ASC' } : { updatedAtMs: 'ASC' }, take: pageSize + 1 });
-      if (options.protocol !== 2 && rows.length > pageSize) throw new BadRequestException('请升级客户端使用分页同步，未推进游标');
-      const page = rows.slice(0, pageSize);
-      const out = page.map((r) => ({ ...JSON.parse(r.payload), updatedAt: Number(r.updatedAtMs), deleted: r.deleted })) as SyncPushItem[];
-      if (options.protocol !== 2 && out.some((it) => it.deleted && !it.url)) throw new BadRequestException('删除墓碑需要新版分页客户端');
-      return { items: out, serverTime: Date.now(), ...(options.protocol === 2 ? { protocol: 2 as const,
-        nextCursor: rows.length > pageSize ? page[page.length - 1].urlHash : null } : {}) };
+      // Read only keys/sizes first, so 500 long notes are not materialized in memory.
+      if (options.protocol === 2) {
+        const query = repo.createQueryBuilder('item').select('item.id', 'id').addSelect('item.urlHash', 'key')
+          .addSelect('LENGTH(item.payload)', 'size').where('item.email = :email', { email });
+        if (options.cursor) query.andWhere('item.urlHash > :cursor', { cursor: options.cursor });
+        const keys = await query.orderBy('item.urlHash', 'ASC').take(501).getRawMany<{ id: string; key: string; size: number }>();
+        const page: typeof keys = []; let bytes = 0;
+        for (const key of keys) {
+          const size = Number(key.size) * 4 + 512; // conservative UTF-8 upper bound
+          if (page.length >= 500 || (page.length && bytes + size > 1_000_000)) break;
+          page.push(key); bytes += size;
+        }
+        const selected = page.length ? await repo.find({ where: { id: In(page.map((key) => key.id)) } }) : [];
+        const byId = new Map(selected.map((row) => [row.id, row]));
+        const out = page.map((key) => { const row = byId.get(key.id)!; return { ...JSON.parse(row.payload), updatedAt: Number(row.updatedAtMs), deleted: row.deleted }; }) as SyncPushItem[];
+        return { items: out, serverTime: Date.now(), protocol: 2 as const, nextCursor: keys.length > page.length ? page[page.length - 1].key : null };
+      }
+      const rows = await repo.find({ where: { email, updatedAtMs: MoreThan(String(since)) }, order: { updatedAtMs: 'ASC' }, take: 5001 });
+      if (rows.length > 5000 || rows.reduce((size, row) => size + row.payload.length * 4, 0) > 5_000_000) throw new BadRequestException('请升级客户端使用分页同步，未推进游标');
+      const out = rows.map((r) => ({ ...JSON.parse(r.payload), updatedAt: Number(r.updatedAtMs), deleted: r.deleted })) as SyncPushItem[];
+      if (out.some((it) => it.deleted && !it.url)) throw new BadRequestException('删除墓碑需要新版分页客户端');
+      return { items: out, serverTime: Date.now() };
     });
     const result = this.queue.then(work, work);
     this.queue = result.then(() => undefined, () => undefined);
