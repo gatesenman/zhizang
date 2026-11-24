@@ -13,3 +13,8 @@
 - 审查发现 CSV 未闭合引号会静默吞入后续行，JSON 往返将 archived/dead 状态及访问时间丢失；BOM/重复导入路径原本可用，不重复发明。
 - 修改 import-export.ts：CSV 解析结束前拒绝未闭合引号（任何写入之前），JSON 恢复合法 status/visitedAt；deep-rounds.test.ts 覆盖恶意截断、BOM、多行标题、去重、archived 跨记录往返。
 - 回归 `pnpm --filter @zhicang/desktop test` 全通过，/workspace/zhizang-round-02.log。HTML/JSON/CSV 为手动导入，不自动读取用户文件；没有宣称全量 GUI 通过。
+
+## 第3轮：批处理原子性与空操作
+- 审查收件箱/多选/回收站恢复链路：已有筛选换页清选、回收站/撤销测试保持；发现批量打标签在事务外建标签，混入失效 ID 时会遗留孤儿标签，空批次也会建标签。
+- 修改 db.ts 将标签创建纳入整批事务、空批次不写入、拒绝空白标签。deep-rounds.test.ts 用真实 FK 失败验证整批回滚，验证重复 ID 幂等和原标签保留。
+- 回归 `pnpm --filter @zhicang/desktop test` 全通过，/workspace/zhizang-round-03.log；未声称可视撤销交互已重新验收。

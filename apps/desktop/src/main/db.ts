@@ -588,9 +588,11 @@ export function moveBookmarks(ids: number[], categoryId: number | null): void {
 }
 
 export function addTagToBookmarks(ids: number[], tag: string): void {
-  const tagId = ensureTag(tag);
+  if (typeof tag !== 'string' || !tag.trim()) throw new Error('标签不能为空');
+  if (!ids.length) return;
   const now = Date.now();
   const tx = db.transaction((arr: number[]) => {
+    const tagId = ensureTag(tag);
     const link = db.prepare('INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag_id) VALUES (?, ?)');
     const touch = db.prepare('UPDATE bookmarks SET updated_at = ? WHERE id = ?');
     for (const id of arr) {

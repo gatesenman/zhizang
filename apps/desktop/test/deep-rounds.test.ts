@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
-import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark } from '../src/main/db';
+import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark, addTagToBookmarks, listTags } from '../src/main/db';
 import { importCsv, importJson, exportJson } from '../src/main/import-export';
 const folder = mkdtempSync(join(tmpdir(), 'zhicang-deep-rounds-'));
 const path = join(folder, 'live.db');
@@ -40,4 +40,16 @@ test('R2 CSV broken quotes are rejected before writes; BOM/multiline and JSON ar
   assert.equal(importJson(JSON.stringify({ bookmarks: [record] })).imported, 1);
   const restored = queryBookmarks({ keyword: 'archive-restored' }).items[0];
   assert.equal(restored.status, 'archived'); assert.equal(restored.visitedAt, 12345);
+});
+
+test('R3 failed mixed-ID tag batch rolls back bookmarks AND tag creation; empty batches do not create orphan tags', () => {
+  const b = createBookmark({ url: 'https://rounds.example.test/batch', tags: ['old-tag'] });
+  assert.throws(() => addTagToBookmarks([b.id, 987654321], 'rollback-tag'));
+  assert.deepEqual(getBookmark(b.id)?.tags, ['old-tag']);
+  assert.ok(!listTags().some(t => t.name === 'rollback-tag'));
+  addTagToBookmarks([], 'empty-batch-tag');
+  assert.ok(!listTags().some(t => t.name === 'empty-batch-tag'));
+  assert.throws(() => addTagToBookmarks([b.id], '   '), /不能为空/);
+  addTagToBookmarks([b.id, b.id], 'new-tag');
+  assert.deepEqual(getBookmark(b.id)?.tags, ['new-tag', 'old-tag']);
 });
