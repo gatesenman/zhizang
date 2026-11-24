@@ -7,14 +7,15 @@ import { createHash } from 'node:crypto';
 import { assertWindowsPackaging, windowsBuilderLibrary } from '../assert-windows-packaging.mjs';
 import { createSplitSetup, MAX_PART_BYTES } from '../create-windows-split.mjs';
 const root = new URL('../../', import.meta.url);
-test('actual pinned builder includes exact reviewed upstream backport', () => assert.equal(assertWindowsPackaging().builder, '24.13.3'));
-test('pnpm preserves the reviewed NSIS patch across dependency maintenance', () => {
+test('actual pinned builder includes exact reviewed upstream fix', () => assert.equal(assertWindowsPackaging().builder, '26.18.0'));
+test('pnpm locks reviewed upstream NSIS without blanket overrides; historical patch remains available', () => {
   const pkg = JSON.parse(readFileSync(new URL('package.json', root)));
-  assert.equal(pkg.pnpm.patchedDependencies['app-builder-lib@24.13.3'], 'patches/app-builder-lib@24.13.3.patch');
-  assert.match(readFileSync(new URL('pnpm-lock.yaml', root), 'utf8'), /app-builder-lib@24\.13\.3\(patch_hash=/);
+  assert.equal(pkg.pnpm.patchedDependencies, undefined); assert.equal(pkg.pnpm.overrides, undefined);
+  assert.match(readFileSync(new URL('pnpm-lock.yaml', root), 'utf8'), /app-builder-lib@26\.18\.0/);
+  assert.ok(readFileSync(new URL('patches/app-builder-lib@24.13.3.patch', root), 'utf8').includes('lstrcpynW'));
 });
 test('safe copy keeps fallback and scratch registers and frees non-null pointer', () => {
-  const text = readFileSync(join(windowsBuilderLibrary(), 'templates/nsis/multiUser.nsh'), 'utf8');
+  const text = readFileSync(join(windowsBuilderLibrary(), 'templates/nsis/multiUser.nsh'), 'utf8').replace(/^[ \t]*#.*$/gm, '');
   assert.match(text, /Push \$1\s+Push \$2\s+StrCpy \$2 0/);
   assert.match(text, /\$\{If\} \$2 != 0\s+System::Call 'OLE32::CoTaskMemFree\(p r2\)'\s+\$\{endif\}\s+Pop \$2\s+Pop \$1/);
   assert.match(text, /StrCpy \$0 "\$LocalAppData\\Programs"/);

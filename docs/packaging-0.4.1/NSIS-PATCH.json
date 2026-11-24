@@ -1,0 +1,9 @@
+{
+  "source": "https://registry.npmjs.org/app-builder-lib/-/app-builder-lib-26.18.0.tgz",
+  "upstreamFix": "https://github.com/electron-userland/electron-builder/pull/9769",
+  "dependency": "app-builder-lib@26.18.0",
+  "tarballIntegrity": "sha512-lx+KkuCSZHcbECf4R3IAcC9VOFk0+cMUwljO63s5y8yqS1Lw0sRGmjPaWsPwP3zv3ohZYbMhUvjXeiQXXZhJXA==",
+  "reviewedTemplateSha256": "9aca256695c289ec8a875143101fae8c6236bc8c6a7cf369bbe8b4986e09c9cb",
+  "strategy": "Exact upstream template reviewed: bounded lstrcpynW, preserved registers/fallback and CoTaskMemFree for every non-null pointer. Old 24.13.3 patch retained as historical evidence, no active patchedDependencies/overrides.",
+  "windowsFixExecution": "PENDING: Windows NSIS/portable installer execution not performed; static guard and Linux ZIP smoke only."
+}

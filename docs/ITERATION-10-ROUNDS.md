@@ -48,3 +48,9 @@
 - 新增 ipc-trust.ts，index.ts 全部 IPC 统一检查真实 sender/mainFrame/准确入口 URL；db.ts 新收藏拒绝 URL 内嵌口令，POSIX 主 SQLite 文件0600（不是加密，不保证历史 WAL/导出备份/Windows ACL）；同步响应限10MB，后端先查键/载荷长度再按响应预算取数据，避免500篇长笔记同时实例化。
 - 回归首次抓出 Node BlockList IPv4 映射导致错误封禁全部公网的实现缺陷，已分离 IPv4/IPv6 集合修复；初次 lint 常量循环错误亦修复，不计作通过。最终 `pnpm lint`、`pnpm typecheck`、第4轮串行桌面命令80/80通过（round-08*.log）；`pnpm test:backend:e2e` 真实5005+跨端分页/认证隔离/持久化全部通过。
 - 限制：DNS 校验与 Chromium/代理实际连接未绑定，仍有 DNS rebinding TOCTOU，严苛部署需网络出口策略；旧收藏/同步来的媒体 URL 与用户主动原站 webview 仍可能联网，不能宣称完全无追踪/完整 SSRF 防护。IPC 源码回归与模拟事件不是 Windows/GUI 验收；必要人工检查见最终交付指南。
+
+## 第9轮：消除可控严重构建漏洞，迁移而非抹掉 Windows 补丁
+- 先留存本轮全部/生产 before JSON。核对真实注册表后升级 builder26.18.0、匹配Squirrel peer26.18.0、electron-vite6、Vite7.3.8、React插件5.2.0；外置依赖按新API迁移。NSIS26已包含旧修复，移植精确SHA/语义守卫，历史补丁不删除，停止旧 active patch；Linux ZIP策略/AppImage拒绝保留。
+- 首次真实 install 发现 builder26 跨工作区误重建 optional SQLite12 并编译失败，新增限定桌面路径/目标平台架构的 postinstall+beforePack native rebuild，后续完整安装成功。依赖改动独立本地提交，不用 overrides。详见 SECURITY-DEPENDENCIES-0.4.1.md。
+- 实际 `pnpm typecheck`、`build:desktop`、`lint`、串行桌面80/80、`test:packaging`5/5、`test:security`5/5、冻结离线锁一致性通过；最终所有工作区入口/完整构建与产物smoke留第10轮执行。当前 audit 生产0C/0H/2M，全部0C/0H/4M，默认命令仍退出1；完整raw before/after保留，按路径说明条件，不声称完全安全。
+- 操作失败也记录：共享根磁盘满导致一次 install/命令启动失败；仅本checkout纯JS包/Next可重建产物临时移RAM，随后恢复纯JS包正常路径（临时路径曾影响类型/打包，不作兼容性通过）。仅清理本任务失败的无用SQLite12编译缓存及out，未清理别人目录；完整安装/类型/构建在恢复后重跑成功。未执行Windows安装/卸载/portable；上游模板审查不等于Windows实测。

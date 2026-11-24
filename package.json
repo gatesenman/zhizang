@@ -38,12 +38,9 @@
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "^4.6.2"
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "vite": "7.3.8"
   },
-  "pnpm": {
-    "patchedDependencies": {
-      "app-builder-lib@24.13.3": "patches/app-builder-lib@24.13.3.patch"
-    }
-  },
+  "pnpm": {},
   "license": "MIT"
 }
