@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { Input, Button, Segmented, Space, Dropdown, Badge, Tooltip, Tag, App as AntApp } from 'antd';
+import { Input, Button, Segmented, Space, Dropdown, Tooltip, Tag, App as AntApp } from 'antd';
 import {
   PlusOutlined,
   SettingOutlined,
@@ -17,7 +17,6 @@ import {
   LinkOutlined,
   CopyOutlined,
   DeploymentUnitOutlined,
-  CloseOutlined,
   GlobalOutlined,
 } from '@ant-design/icons';
 import Sidebar from './components/Sidebar';

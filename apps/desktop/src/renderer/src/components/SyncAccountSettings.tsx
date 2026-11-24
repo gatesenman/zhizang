@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, App, Button, Form, Input, Space } from 'antd';
 import { cleanIpcError } from '../util';
 
-export default function SyncAccountSettings(): React.ReactElement {
+export default function SyncAccountSettings({ onSessionChange }: { onSessionChange: () => void }): React.ReactElement {
   const { message } = App.useApp();
   const [base, setBase] = useState('');
   const [email, setEmail] = useState('');
@@ -20,7 +20,7 @@ export default function SyncAccountSettings(): React.ReactElement {
       await window.api.sync.setBackendUrl(base);
       await window.api.sync.testServer(base);
       await window.api.sync.connect(email, password, register);
-      setPassword(''); await refresh(); message.success('同步账号已连接，请按需开启自动同步');
+      setPassword(''); await refresh(); onSessionChange(); message.success('同步账号已连接，请按需开启自动同步');
     } catch (e) { message.error(cleanIpcError(e)); }
     finally { setBusy(false); }
   };
@@ -33,7 +33,7 @@ export default function SyncAccountSettings(): React.ReactElement {
     <Space wrap>
       <Button loading={busy} type="primary" onClick={() => void connect(false)}>登录同步服务</Button>
       <Button loading={busy} onClick={() => void connect(true)}>注册同步账号</Button>
-      <Button disabled={busy} onClick={() => { void window.api.sync.disconnect().then(refresh).catch((e) => message.error(cleanIpcError(e))); }}>断开同步（保留收藏）</Button>
+      <Button disabled={busy} onClick={() => { void window.api.sync.disconnect().then(async () => { await refresh(); onSessionChange(); }).catch((e) => message.error(cleanIpcError(e))); }}>断开同步（保留收藏）</Button>
     </Space>
   </Form>;
 }

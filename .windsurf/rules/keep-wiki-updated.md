@@ -27,8 +27,8 @@ description: 保持 wiki/ 知识库与代码/文档同步更新
 | 桌面端主/渲染进程、IPC、桥接、组件 | `wiki/03-Desktop-App.md` |
 | 数据模型（schema / 实体 / 共享类型） | `wiki/04-Data-Model.md` |
 | 抓取 / AI 富化 / LLM 配置 / AI 面板 | `wiki/05-AI-Enrichment.md` |
-| 后端鉴权 / 授权 / 支付 / 邮件 / 同步 / API | `wiki/06-Backend-And-Licensing.md` |
-| 付费门户 / 后台 | `wiki/07-Portal.md` |
+| 后端账号鉴权 / 自托管同步 / API | `wiki/06-Backend-And-Licensing.md` |
+| 开源项目站 | `wiki/07-Portal.md` |
 | 浏览器插件 | `wiki/08-Browser-Extension.md` |
 | MCP 工具 | `wiki/09-MCP.md` |
 | 打包 / 发布 / 依赖打包策略 / 踩坑 | `wiki/10-Build-And-Release.md` |

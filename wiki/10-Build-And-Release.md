@@ -46,7 +46,7 @@ pnpm test        # pnpm -r --if-present test（各包 node --test）
 - **ESLint**：根 `.eslintrc.cjs`（ESLint 8.57 经典配置，`root:true`）+ `@typescript-eslint` v7 + `eslint-plugin-react` / `react-hooks`。根 `lint` 用 `--max-warnings 0`，任何警告即失败。
   - 关键正确性规则置为 `error`：`@typescript-eslint/no-unused-vars`（`^_` 豁免）、`prefer-const`、`no-var`、`eqeqeq`（`smart`，允许 `== null`）、`no-throw-literal`。
   - 良性提示：`@typescript-eslint` 报「TypeScript 5.9.3 未被官方支持」属警告，**不影响退出码**。
-- **测试**：使用 Node 内置 `node --test` + `ts-node/register`（无 vitest/jest），经跨平台运行器 `scripts/run-tests.mjs` 调度。当前 42 个用例：`packages/shared` 5、`apps/backend` 8、`apps/desktop` 29；另有真实 HTTP 后端/桌面授权同步 E2E。
+- **测试**：使用 Node 内置 `node --test` + `ts-node/register`（无 vitest/jest），经跨平台运行器 `scripts/run-tests.mjs` 调度。用例以当前测试输出为准；另有真实 HTTP 后端/桌面账号同步 E2E。
   - 桌面端测试需 `apps/desktop/tsconfig.test.json`（CommonJS + esModuleInterop）供 ts-node 加载。
   - **跨平台**：`scripts/run-tests.mjs` 用 Node 自行发现 `<dir>/*.test.ts` 再交给 `node --test`，规避 `test/*.test.ts` glob 在 Windows/cmd 下不展开的问题；可选 `--project tsconfig.test.json` 跨平台替代内联 `TS_NODE_PROJECT` 环境变量（桌面端用）。
 
@@ -72,7 +72,7 @@ pnpm --filter @zhicang/{backend,portal,desktop,extension} build  # desktop 仅�
    ```ts
    externalizeDepsPlugin({ exclude: ['cheerio', 'yaml', '@zhicang/shared'] })
    ```
-   - `cheerio` / `yaml` / `@zhicang/shared`（及其 `jsonwebtoken`→`jws` 依赖链）被打进 `out/main/index.js`，不再依赖 node_modules 解析。
+   - `cheerio` / `yaml` / `@zhicang/shared`被打进 `out/main/index.js`，不再依赖 node_modules 解析。
    - 只有原生模块 `better-sqlite3` 保持 external（无法 bundle），由 electron-builder 解包到 asar 外。
 3. **HTML 解析使用 `cheerio/slim`**：cheerio 1.2 默认引入 `undici`，而 undici 依赖实验性 `node:sqlite`（Electron 的 Node 20 不含），改用 `cheerio/slim` 规避。
 
@@ -126,3 +126,8 @@ pnpm build:extension   # → apps/extension/dist/zhicang-chrome.zip, zhicang-fir
 本次新增 `scripts/run-desktop-tests.mjs`：桌面测试用 Electron 的 Node 运行时，匹配 postinstall 的 SQLite ABI。`pnpm test:backend:e2e` 使用标准 Node 启动临时后端，测试数据结束清理，仅 mock 支付与 console 邮件。测试/构建日志见 docs/verification，完整命令见交付说明。本次已生成未签名 Windows x64 NSIS/portable EXE，并验证 PE/ASAR/原生模块/归档完整性；未在 Windows 实机安装运行，未发布。GUI 已通过父会话 computerUse 完成隔离库中的核心流程验收，见 docs/verification/GUI-ACCEPTANCE.md；普通/最大化布局通过，任意尺寸未验证。GUI 或构建通过均不等于安装包及商业发布验收。原 build.publish 默认已移除，新源须由发行者正确配置。
 
 Windows 0.2.0 安装/使用/构建与验证边界见根目录 `Windows使用说明.md`、`交付说明.md` 以及 `docs/功能覆盖与验证矩阵.md`。
+
+
+## 0.4.0 开源版
+
+构建不再注入 ZHICANG_LICENSE_PUBLIC_KEY；shared 无 jsonwebtoken 依赖，后端仍保留账号 JWT。部署不生成或挂载许可证密钥。CI 增加 edition 边界与后端账号同步 E2E；实际验证及未测项见 docs/OPEN-SOURCE-0.4.0.md。旧版产物名和踩坑表仅是历史记录，不是 0.4.0 验收结论。

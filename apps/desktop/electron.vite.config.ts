@@ -4,7 +4,6 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   main: {
-    define: { 'process.env.ZHICANG_LICENSE_PUBLIC_KEY': JSON.stringify(process.env.ZHICANG_LICENSE_PUBLIC_KEY || '') },
     plugins: [externalizeDepsPlugin({ exclude: ['cheerio', 'yaml', '@zhicang/shared'] })],
     build: {
       rollupOptions: {

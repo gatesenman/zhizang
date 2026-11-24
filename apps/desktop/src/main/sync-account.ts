@@ -14,7 +14,7 @@ export function getBackendUrl(): string {
 export function getSyncSession(): Session | null {
   try {
     const session = JSON.parse(getSetting(SESSION_KEY) || 'null') as Session | null;
-    return session?.token && session.email && session.backendUrl === getBackendUrl() ? session : null;
+    return session && typeof session.token === 'string' && !!session.token && typeof session.email === 'string' && !!session.email && session.backendUrl === getBackendUrl() ? session : null;
   } catch { return null; }
 }
 
@@ -40,13 +40,13 @@ export async function connectSyncAccount(email: string, password: string, regist
   if (!backendUrl) throw new Error('请先配置自己的同步服务地址');
   if (!email.trim() || !password) throw new Error('请输入同步账号和密码');
   const res = await transport(`${backendUrl}/auth/${register ? 'register' : 'login'}`, {
-    method: 'POST', signal: AbortSignal.timeout(30000),
+    method: 'POST', redirect: 'error', signal: AbortSignal.timeout(30000),
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email.trim(), password }),
   });
   if (!res.ok) throw new Error(`同步账号登录/注册失败 (${res.status})`);
   const data = await res.json() as { token?: string; user?: { email?: string } };
-  if (!data.token || !data.user?.email) throw new Error('同步服务响应无效');
+  if (typeof data.token !== 'string' || !data.token || typeof data.user?.email !== 'string' || !data.user.email) throw new Error('同步服务响应无效');
   // Do not persist passwords. Changing account must not reuse another account's cursor.
   if (getBackendUrl() !== backendUrl) throw new Error('同步服务地址已更改，请重试');
   disconnectSyncAccount();

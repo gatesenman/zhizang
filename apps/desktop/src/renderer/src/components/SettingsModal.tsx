@@ -309,7 +309,7 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
 
   const tabItems = [
     { key: 'general', label: t('settings.tabGeneral'), children: tabGeneral },
-    { key: 'sync-account', label: '同步账号', children: <SyncAccountSettings /> },
+    { key: 'sync-account', label: '同步账号', children: <SyncAccountSettings onSessionChange={() => { void window.api.sync.getConfig().then(setAutoSync); }} /> },
     { key: 'ai', label: t('settings.tabAi'), children: tabAi },
     { key: 'graph', label: t('settings.tabGraph'), children: tabGraph },
     { key: 'network', label: t('settings.tabNetwork'), children: tabNetwork },

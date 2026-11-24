@@ -10,7 +10,7 @@ apps/desktop/src/
 │   ├── index.ts          # 窗口创建 + 全部 IPC handler 注册
 │   ├── db.ts             # SQLite/FTS5 schema、迁移、CRUD、查询、统计
 │   ├── enrich.ts         # 抓取 meta / 正文、链接探活、静态存档、AI 富化
-│   ├── license.ts        # 设备 ID、许可证验签、激活/注销
+│   ├── sync-account.ts        # 可选同步账号连接/断开，服务地址与会话
 │   ├── sync.ts           # 云同步（与后端 /sync 对接）
 │   ├── bridge.ts         # 本地 HTTP 桥接服务（插件 + MCP，带令牌鉴权）
 │   ├── updater.ts        # 自动更新（electron-updater，仅打包版生效）
@@ -21,7 +21,7 @@ apps/desktop/src/
     └── components/        # Sidebar / BookmarkPanel / WebPreview /
                            # AIPanel / CommandPalette / SettingsModal /
                            # PasteImportModal / StatsModal / SmartFolderModal /
-                           # AddBookmarkModal / LicenseGate / ListToolbar / GraphModal
+                           # AddBookmarkModal / ListToolbar / GraphModal
 ```
 
 ## IPC API（`window.api`）
@@ -43,12 +43,11 @@ apps/desktop/src/
 | `graph` | `getConfig / setConfig`（嵌入配置）、`status`（向量统计+模式）、`data(opts)`（构建并返回图谱）、`docsForEmbedding`（取待嵌入文本，供渲染层本地模型用）、`storeVectors(items, model)` / `clearVectors`（向量增删）、`buildApi`（主进程用 API 批量算向量，带 `graph:progress` 事件）、`search(q, k)`（lexical/api 检索）、`searchByVector(vec, k)`（local 模式：渲染层算好查询向量后稠密检索） |
 | `bridge` | `status`（桥接服务状态，含端口与访问令牌）、`resetToken`（重置令牌，旧令牌立即失效） |
 | `settings` | `getLlm / setLlm / get / set` |
-| `license` | `status / activate / deactivate / deviceId / getBackendUrl / setBackendUrl` |
 | `io` | `importHtml / importJson / importCsv / importYaml / exportHtml / exportJson` |
 | `app` | `version`（当前版本）、`checkUpdate`（手动检查更新）、`updateStatus`（取当前更新状态） |
 | 其它 | `openExternal(url)`、`on(channel, cb)` 订阅主进程事件（如 `bookmarks:changed`、`update:status`、`graph:progress`） |
 
-> IPC channel 命名采用 `域:动作`（如 `bookmarks:query`、`license:activate`），在 `main/index.ts` 内用 `ipcMain.handle` 注册，与 preload 一一对应。
+> IPC channel 命名采用 `域:动作`（如 `bookmarks:query`、`sync:connect`），在 `main/index.ts` 内用 `ipcMain.handle` 注册，与 preload 一一对应。
 
 ### `bookmarks:create` 返回结构与重复处理
 
@@ -66,7 +65,7 @@ apps/desktop/src/
 - 配置存于 SQLite `settings` 表：`sync_auto_enabled`（`'1'`/`'0'`）与 `sync_auto_interval_min`（默认 30，最小 5）。
 - `getSyncConfig()` / `setSyncConfig(cfg)` 读写配置；`setSyncConfig` 写库后调用 `scheduleAutoSync()` 热更新定时器（`setInterval`，并 `unref()` 不阻塞退出）。
 - `initAutoSync()` 在 `app.whenReady` 后延迟启动（避开冷启动高峰）：若已开启则先尝试同步一次再起定时器。
-- 定时回调内 `runSync().catch(() => undefined)`：未激活 / 网络异常时静默跳过，不打断用户。
+- 定时回调内 `runSync().catch(() => undefined)`：未连接账号 / 网络异常时记录错误并跳过，不打断用户。
 
 设置页 `SettingsModal` 新增「云同步」分组：`自动云同步` 开关 + `同步间隔（分钟，最小 5）`，经 `window.api.sync.getConfig/setConfig` 读写。
 
@@ -83,7 +82,6 @@ apps/desktop/src/
 
 | 组件 | 职责 |
 | --- | --- |
-| `LicenseGate.tsx` | 启动门禁：未激活时显示激活 / 试用界面 |
 | `OnboardingModal.tsx` | 首启引导：按角色（`CATEGORY_ROLE_PRESETS`）一键生成多级分类目录 / 导入 YAML 树 / 跳过 |
 | `Sidebar.tsx` | 左侧导航：全部/星标/稍后读/回收站（固定项，不再与同名分类重复）；分类**多级目录树**（由扁平 `parentId` 构建父→子映射，缩进渲染、caret 折叠/展开、父级显示「自身+子孙」聚合计数）。目录右键菜单：重命名 / 新增下级 / **新增同级** / 删除（删除时收藏与子目录上提到上级，见数据模型）。**跨层级拖拽**：拖目录到另一目录行上=成为其子级；拖到目录间的缝隙（`CatGap`）=同级重排或上提为顶级（经 `categories.move`+`categories.reorder`，禁止拖入自身子孙）。点击目录展示「自身+所有子孙」的收藏。**父分类默认折叠**（仅记录被展开节点的 `expanded` 状态），分类目录标题栏提供「全部展开/折叠」切换，避免大型角色预设目录把侧栏一次铺开过长；行高/间距经收紧以提升信息密度 |
 | `BookmarkPanel.tsx` | 中间列表/卡片视图、右键菜单、多选批量浮条、分页；`Favicon` 组件按 `util.faviconCandidates()` 逐级回退（富化 favicon → 站点 `/favicon.ico` → 公共服务 → 首字母占位）。**空状态**由 `library-presentation.ts` 按范围区分：全部空库引导首条收藏、星标/分类为空引导查看全部、条件零结果引导清除条件、收件箱为整理完成态、回收站无新增引导；每种空态仅一个主动作。批量粘贴固定在操作栏，新增沿用全局入口（空库额外提供首条引导），不再在零结果工具栏堆叠新增按钮；「按角色生成分类目录」属初始化专用操作，仅由首启引导与导入导出菜单入口触发，不放在空状态 |
@@ -105,7 +103,7 @@ apps/desktop/src/
 
 - 收益最大的是 `GraphModal`——它依赖较重的 `react-force-graph-2d`（含 d3），被拆为独立 chunk（约 400 KB），仅在打开知识图谱时才加载。
 - 启动主包从约 2.9 MB 降到约 2.2 MB；其余弹窗各自成块按需加载。
-- 核心布局（`Sidebar` / `BookmarkPanel` / `ListToolbar` / `WebPreview` / `LicenseGate`）保持同步加载，保证首屏即时可用。
+- 核心布局（`Sidebar` / `BookmarkPanel` / `ListToolbar` / `WebPreview`）保持同步加载，保证首屏即时可用。
 - `embedder.ts`（transformers.js）本就运行时从 CDN 动态加载，不打进安装包。
 
 ### 状态管理
@@ -165,7 +163,7 @@ apps/desktop/src/
 
 - **Antd 组件**：`main.tsx` 的 `Root` 据 `dark` 切换 `ConfigProvider` 的 `algorithm`（`darkAlgorithm`/`defaultAlgorithm`）+ `theme.ts` 的 `darkTheme`，覆盖所有 antd 组件的背景/文字/边框。
 - **自定义布局与浮层**：`App.tsx` 用副作用把 `zc-dark` 类挂到 `document.body`（而非仅 App 根节点）。因为 Modal/Drawer/Dropdown/message 等经 portal 渲染到 `body` 之外的 App 子树，只有挂在 `body` 上，`styles.css` 里 `.zc-dark …` 规则才能同时命中页面内容与这些浮层。
-- `styles.css` 的 `.zc-dark` 段为自定义容器（侧栏 / 列表面板 / 预览区 / 卡片 / 导航项 / 试用横幅 / 地址栏 / 激活页渐变等）补齐暗色背景与文字，修复此前「白底 + 浅色文字」不可读的问题。新增自定义浅色样式时，须同步补 `.zc-dark` 覆盖。
+- `styles.css` 的 `.zc-dark` 段为自定义容器（侧栏 / 列表面板 / 预览区 / 卡片 / 导航项 / 地址栏等）补齐暗色背景与文字，修复此前「白底 + 浅色文字」不可读的问题。新增自定义浅色样式时，须同步补 `.zc-dark` 覆盖。
 
 ## 知识图谱 / 语义检索引擎
 
@@ -173,7 +171,7 @@ apps/desktop/src/
 
 ## 相关源码
 
-- `apps/desktop/src/main/index.ts` / `db.ts` / `bridge.ts` / `updater.ts` / `enrich.ts` / `license.ts` / `sync.ts` / `import-export.ts` / `graph.ts`
+- `apps/desktop/src/main/index.ts` / `db.ts` / `bridge.ts` / `updater.ts` / `enrich.ts` / `sync-account.ts` / `sync.ts` / `import-export.ts` / `graph.ts`
 - `apps/desktop/src/preload/index.ts`
 - `apps/desktop/src/renderer/src/`（App.tsx / store.ts / util.ts / i18n.tsx / embedder.ts / main.tsx / components/*）
 - 测试：`apps/desktop/test/bridge.test.ts`（桥接鉴权 + Origin/Host 校验）
@@ -190,3 +188,8 @@ apps/desktop/src/
 - `WebPreview.tsx` 标题与关闭入口独立，阅读/外部打开为直接操作，编辑/引用/归档等从更多菜单访问；标签默认 3 个，可展开，详情头限高并独立滚动，为正文保留空间。修复首次阅读提取时无加载反馈及错误后重试/返回网页时的事件重新绑定。
 - `NoteEditor.tsx` 笔记正文可展开/收起，但始终挂载；保存状态始终保留在笔记标题中。折叠不取消草稿或自动保存；笔记区域不触发全局 Ctrl/Cmd+N/K。
 - 相关源码：`renderer/src/library-presentation.ts`、`App.tsx`、`components/{ListToolbar,BookmarkPanel,WebPreview,NoteEditor}.tsx`、`styles.css`。测试：`test/library-presentation.test.ts`（纯展示策略）、`test/library-components.test.ts`（受控状态的静态组件渲染，非 GUI/E2E）。
+
+
+## 0.4.0 免费开源模式
+
+启动直接初始化收藏库，不再有激活/试用门禁、授权徽章或横幅；store 与 preload 移除 license API。新增 sync.accountStatus/connect/disconnect/setBackendUrl/testServer，仅服务于可选自托管同步；网络页不检查付费资格，但开启自动同步须有已连接账号。见 wiki/06 的旧配置忽略和安全边界。

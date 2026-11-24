@@ -15,6 +15,6 @@ export class SyncController {
     @CurrentUser() user: User,
     @Body() body: { since?: number; items?: SyncPushItem[] },
   ): Promise<{ items: SyncPushItem[]; serverTime: number }> {
-    return this.sync.sync(user.email, body.since ?? 0, body.items ?? []);
+    return this.sync.sync(`account:${user.id}`,  body.since ?? 0, body.items ?? []);
   }
 }

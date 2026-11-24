@@ -1,27 +1,33 @@
-// Local-only integration test. Uses a disposable SQLite DB and generated TEST keys.
-// mock payment + console mail only: no real payment or email is performed.
+// Local-only integration test: disposable DB and account fixtures, no real services.
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
 import { createServer } from 'node:net';
-import { generateKeyPairSync, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
 const require = createRequire(new URL('../apps/desktop/package.json', import.meta.url));
-const { verifyLicense } = require('@zhicang/shared');
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dir = mkdtempSync(join(tmpdir(), 'zhicang-backend-smoke-'));
-const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048, privateKeyEncoding: { type: 'pkcs8', format: 'pem' }, publicKeyEncoding: { type: 'spki', format: 'pem' } });
+const dbFile = join(dir, 'smoke.db');
+// Seed pre-upgrade data: old tables and legacy email data must survive, not be claimed.
+const SQL = await require('sql.js')();
+const legacy = new SQL.Database();
+legacy.run("CREATE TABLE activation_codes (id varchar PRIMARY KEY, code varchar); INSERT INTO activation_codes VALUES ('legacy-id', 'not-a-real-activation-code')");
+const { writeFileSync } = await import('node:fs');
+legacy.run('CREATE TABLE sync_items (id varchar PRIMARY KEY NOT NULL, email varchar NOT NULL, urlHash varchar NOT NULL, payload text NOT NULL, updatedAtMs bigint NOT NULL, deleted boolean NOT NULL DEFAULT 0)');
+legacy.run('INSERT INTO sync_items VALUES (?, ?, ?, ?, ?, ?)', ['legacy-sync-id', 'integration@example.test', 'legacy-private-hash', JSON.stringify({ notes: 'private legacy data' }), '1', 0]);
+writeFileSync(dbFile, legacy.export()); legacy.close();
 const reservation = createServer();
 reservation.listen(0, '127.0.0.1'); await once(reservation, 'listening');
 const port = reservation.address().port; await new Promise((done) => reservation.close(done));
 const base = `http://127.0.0.1:${port}/api`;
 const child = spawn(process.execPath, [join(root, 'apps/backend/dist/main.js')], {
   cwd: join(root, 'apps/backend'),
-  env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), DATABASE_URL: '', SQLITE_PATH: join(dir, 'smoke.db'), JWT_SECRET: randomUUID(), LICENSE_PRIVATE_KEY: privateKey, LICENSE_PUBLIC_KEY: publicKey, PUBLIC_BASE_URL: `http://127.0.0.1:${port}`, PORTAL_URL: 'http://localhost:3002' },
+  env: { ...process.env, NODE_ENV: 'test', HOST: '127.0.0.1', PORT: String(port), DATABASE_URL: '', SQLITE_PATH: dbFile, JWT_SECRET: randomUUID() },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let output = '';
@@ -37,35 +43,28 @@ try {
     finish();
   });
   assert.equal((await fetch(base + '/health')).status, 200);
-  const products = await (await fetch(base + '/products')).json();
-  assert.equal(products.length, 3);
+  for (const path of ['/license/activate', '/payment/checkout', '/payment/mock/confirm', '/admin/codes']) {
+    assert.equal((await post(path, {})).status, 404, path);
+  }
+  assert.equal((await fetch(base + '/products')).status, 404);
   const email = 'integration@example.test';
-  const checkoutRes = await post('/payment/checkout', { productId: products[0].id, email });
-  assert.equal(checkoutRes.status, 201);
-  const checkout = await checkoutRes.json();
-  assert.equal(checkout.provider, 'mock');
-  const confirm = await post('/payment/mock/confirm', { orderId: checkout.orderId });
-  assert.equal(confirm.status, 302);
-  const order = await (await fetch(base + '/payment/order/' + checkout.orderId)).json();
-  assert.equal(order.status, 'paid'); assert.ok(order.code);
-  await post('/payment/mock/confirm', { orderId: checkout.orderId });
-  const repeated = await (await fetch(base + '/payment/order/' + checkout.orderId)).json();
-  assert.equal(order.code, repeated.code);
-  const activationRes = await post('/license/activate', { email, code: order.code, deviceId: 'test-device-one' });
-  assert.equal(activationRes.status, 201);
-  const activation = await activationRes.json();
-  const token = activation.token;
-  assert.equal(verifyLicense(token, publicKey).sub, email);
+  const credentials = { email, password: 'fixture-password-only' };
+  const registration = await post('/auth/register', credentials);
+  assert.equal(registration.status, 201);
+  const { token } = await registration.json();
+  assert.ok(token);
+  assert.equal((await post('/auth/login', { ...credentials, password: 'wrong-password' })).status, 401);
+  assert.equal((await post('/auth/register', credentials)).status, 400);
+  assert.equal((await post('/auth/login', credentials)).status, 201);
   const client = spawnSync(require('electron'), [join(root, 'scripts/desktop-cloud-smoke.cjs')], {
     cwd: root, encoding: 'utf8', timeout: 45000,
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', TS_NODE_PROJECT: join(root, 'apps/desktop/tsconfig.test.json'), ZHICANG_LICENSE_PUBLIC_KEY: publicKey, ZHICANG_TEST_SERVER: `http://127.0.0.1:${port}`, ZHICANG_TEST_CODE: order.code },
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', TS_NODE_PROJECT: join(root, 'apps/desktop/tsconfig.test.json'), ZHICANG_TEST_SERVER: `http://127.0.0.1:${port}` },
   });
   if (client.stdout) process.stdout.write(client.stdout);
   if (client.stderr) process.stderr.write(client.stderr);
-  assert.equal(client.status, 0, 'Actual desktop activation/sync client must pass');
-  const wrongEmail = await post('/license/activate', { email: 'other@example.test', code: order.code, deviceId: 'test-device-two' });
-  assert.equal(wrongEmail.status, 400);
+  assert.equal(client.status, 0, 'Actual desktop account/sync client must pass');
   assert.equal((await post('/sync', { since: 0, items: [] })).status, 401);
+  assert.equal((await post('/sync', { since: 0, items: [] }, token + 'tampered')).status, 401);
   const sync = await post('/sync', { since: 0, items: [] }, token);
   assert.equal(sync.status, 201); assert.ok((await sync.json()).serverTime);
   const item = { urlHash: 'fixture-hash', url: 'https://example.test/sync', title: '同步收藏', description: '', tags: ['测试'], favorite: true, pinned: false, readState: 'unread', notes: '云端往返', status: 'active', deleted: false, updatedAt: Date.now() };
@@ -76,10 +75,20 @@ try {
   assert.equal((await stale.json()).items.find((x) => x.urlHash === item.urlHash).title, '同步收藏');
   const removed = await post('/sync', { since: 0, items: [{ ...item, deleted: true, updatedAt: item.updatedAt + 10 }] }, token);
   assert.equal((await removed.json()).items.find((x) => x.urlHash === item.urlHash).deleted, true);
-  assert.equal((await post('/sync', { since: 0, items: [] }, token + 'tampered')).status, 401);
-  assert.ok(output.includes('[邮件:console]'));
-  assert.ok(readFileSync(join(dir, 'smoke.db')).subarray(0, 16).toString().startsWith('SQLite format 3'));
-  console.log('PASS: real HTTP + SQLite health/products → MOCK checkout/fulfillment/idempotency → signed activation → authenticated sync push/pull/LWW/deletion. Console mail only. No live payment/email tested.');
+  const other = await (await post('/auth/register', { email: 'other@example.test', password: credentials.password })).json();
+  assert.equal((await (await post('/sync', { since: 0, items: [], email }, other.token)).json()).items.length, 0);
+  for (const body of [{ since: -1, items: [] }, { since: 'bad', items: [] }, { items: [null] }, { items: [{ ...item, url: 'javascript:alert(1)' }] }, { items: {} }]) {
+    assert.equal((await post('/sync', body, token)).status, 400, JSON.stringify(body));
+  }
+  // Verify old tables remain; no cleanup touched legacy commercial rows.
+  const saved = new SQL.Database(readFileSync(dbFile));
+  assert.equal(saved.exec('SELECT code FROM activation_codes')[0].values[0][0], 'not-a-real-activation-code');
+  const namespaces = saved.exec('SELECT DISTINCT email FROM sync_items')[0].values.flat();
+  assert.ok(namespaces.includes('integration@example.test'), 'legacy cloud rows preserved');
+  assert.ok(namespaces.some((namespace) => namespace.startsWith('account:')));
+  assert.equal((await (await post('/sync', { since: 0, items: [] }, token)).json()).items.some((entry) => entry.urlHash === 'legacy-private-hash'), false, 'unverified email registration cannot claim old cloud data');
+  saved.close();
+  console.log('PASS: HTTP + SQLite health → account register/login → authenticated per-account sync/LWW/deletion; missing/tampered tokens and malformed data rejected; removed commercial routes 404; legacy table preserved.');
 } catch (error) {
   console.error(output); throw error;
 } finally {

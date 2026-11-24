@@ -82,7 +82,7 @@ export default function OnboardingModal({
       footer={<Space>{step > 0 && <Button disabled={busy} onClick={() => setStep(step - 1)}>上一步</Button>}{step === 0 && <Button icon={<ImportOutlined />} loading={busy} onClick={importYaml}>{t('onboarding.importYamlTree')}</Button>}<Button type="primary" disabled={busy} onClick={() => step < 2 ? setStep(step + 1) : void finish()}>{step === 2 ? '完成并开始使用' : step === 0 ? '暂不选择，下一步' : '下一步'}</Button></Space>}
     >
       <Steps size="small" current={step} items={[{ title: '分类目录' }, { title: '可选服务' }, { title: '开始使用' }]} style={{ marginBottom: 20 }} />
-      {step === 0 && <><Alert type="info" showIcon message="本地模式免费开源，不要求购买或填写 API Key" description="收藏、搜索、标签、离线阅读、完整备份都在本机运行；云同步仍需有效商业许可证。" style={{ marginBottom: 12 }} />
+      {step === 0 && <><Alert type="info" showIcon message="免费开源，本地收藏无需账号或 API Key" description="收藏、搜索、标签、离线阅读、完整备份都在本机运行；外部 AI 需自行配置 Key，第三方可能收费；同步可选择自托管服务。" style={{ marginBottom: 12 }} />
       <Text type="secondary">
         {t('onboarding.desc')}
       </Text>
@@ -116,7 +116,7 @@ export default function OnboardingModal({
       {step === 1 && <Space direction="vertical" size={16} style={{ width: '100%' }}>
         <Alert type="info" message="AI（可选）" description="设置 → AI：选择 OpenAI 兼容服务，填写自己的 Base URL、模型和 Key，点击真实连接测试，再保存。无 Key 时明确使用本地关键词检索。" />
         <Alert type="info" message="浏览器插件 / MCP（可选）" description="设置 → 网络：开启本机桥接，复制端口与访问令牌填入扩展或 MCP 配置。令牌重置后立即失效，插件需同步更新。" />
-        <Alert type="info" message="授权与云同步（可选）" description="设置 → 授权/云服务：填写发行方服务地址并测试，再激活邮箱/激活码。自动同步失败会保留错误，不会当作成功。" />
+        <Alert type="info" message="自托管同步（可选）" description="设置 → 同步账号：填写自己的 HTTPS 同步服务地址并注册/登录。账号仅用于隔离私人数据。自动同步失败会保留错误，不会当作成功。" />
         <Alert type="warning" message="无需配置更新源也可正常使用" description="默认关闭更新。只有发行方提供有效 HTTPS 更新目录时才开启，不会静默连接原仓库。" />
       </Space>}
       {step === 2 && <Space direction="vertical" size={16} style={{ width: '100%' }}><Alert type="success" message="开始建立你的本地知识库" description="Ctrl+N 新增、Ctrl+K 命令面板；支持浏览器书签/CSV/JSON 导入。设置 → 通用可创建完整备份（含设置/可能的凭据）并恢复；JSON 只是收藏交换文件。" /><Typography.Paragraph>本地数据会保留到下次启动，关闭窗口不会删除收藏。所有可选服务都可稍后在设置中配置；本向导完成后不再自动弹出。</Typography.Paragraph><Checkbox checked={configure} onChange={(e) => setConfigure(e.target.checked)}>完成后打开设置，检查数据目录与可选配置</Checkbox></Space>}

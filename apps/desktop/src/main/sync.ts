@@ -26,6 +26,7 @@ export async function runSync(transport: typeof fetch = netFetch): Promise<SyncR
 
   const res = await transport(`${getBackendUrl().replace(/\/$/, '')}/sync`, {
     method: 'POST',
+    redirect: 'error',
     signal: AbortSignal.timeout(30000),
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ since, items: local }),

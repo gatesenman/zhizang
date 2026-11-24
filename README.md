@@ -29,7 +29,7 @@ pnpm --filter @zhicang/desktop rebuild
 ```bash
 # 仅需要自托管同步时才运行后端
 pnpm build:shared
-pnpm dev:backend                  # http://localhost:3001/api
+pnpm start:backend                # http://localhost:3001/api
 pnpm dev:portal                   # 开源项目介绍站 http://localhost:3002
 # 或三者一起：pnpm dev:all
 ```

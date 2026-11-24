@@ -1,3 +1,5 @@
+> 本文为 0.4.0 前的历史设计/验收记录，不代表当前开源版功能或验证状态；当前版见 [OPEN-SOURCE-0.4.0.md](./OPEN-SOURCE-0.4.0.md)。
+
 > 实施收口：五项主线已落地，桌面/Chrome真实GUI及最终0.3.0自动证据见`MAINLINE-GUI-RESULTS.md`、`VERIFICATION.json`；以下保留初始诊断与实施记录。
 
 # 主线产品优化 · 实施诊断（2026-11-22）

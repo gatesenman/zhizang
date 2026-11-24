@@ -29,7 +29,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:backend:e2e": "pnpm build:shared && pnpm build:backend && node scripts/smoke-backend.mjs",
-    "test:packaging": "node --test scripts/test/windows-packaging.test.mjs"
+    "test:packaging": "node --test scripts/test/windows-packaging.test.mjs",
+    "test:edition": "node --test scripts/test/open-source-edition.test.mjs"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.18.0",

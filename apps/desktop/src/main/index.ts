@@ -468,7 +468,7 @@ function registerIpc(): void {
     return { ok: true, elapsedMs: Date.now() - start };
   });
   ipcMain.handle('sync:testServer', async (_e, base: string) => {
-    const res = await netFetch(normalizeSyncBase(base) + '/health', { signal: AbortSignal.timeout(10000) });
+    const res = await netFetch(normalizeSyncBase(base) + '/health', { redirect: 'error', signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error('同步服务连接失败 HTTP ' + res.status);
     const data: any = await res.json();
     if (!data.ok) throw new Error('响应不是智藏健康检查');
@@ -560,7 +560,7 @@ function registerIpc(): void {
   ipcMain.handle('io:restore', async () => {
     const file = await dialog.showOpenDialog({ title: '恢复智藏完整备份', properties: ['openFile'], filters: [{ name: '智藏完整备份', extensions: ['zhicang', 'db'] }] });
     if (file.canceled || !file.filePaths[0]) return null;
-    const confirmation = await dialog.showMessageBox({ type: 'warning', buttons: ['取消', '恢复并重启'], defaultId: 0, cancelId: 0, message: '恢复会替换当前全部收藏、设置和本地授权信息。', detail: '当前库将自动备份到 userData/backups。请确认只使用信任的智藏备份文件。' });
+    const confirmation = await dialog.showMessageBox({ type: 'warning', buttons: ['取消', '恢复并重启'], defaultId: 0, cancelId: 0, message: '恢复会替换当前全部收藏、设置和本机会话凭据。', detail: '当前库将自动备份到 userData/backups。请确认只使用信任的智藏备份文件。' });
     if (confirmation.response !== 1) return null;
     try {
       const result = await restoreFullBackup(file.filePaths[0]);
@@ -668,7 +668,7 @@ if (primaryInstance) app.whenReady().then(() => {
   startBridgeServer();
   queue.setConcurrency(getLlmConfig().concurrency || 3);
   setTimeout(resumePending, 1500);
-  // 延迟启动自动同步：避开冷启动高峰，未激活/未开启时内部静默跳过。
+  // 延迟启动自动同步：避开冷启动高峰，未连接账号/未开启时内部静默跳过。
   setTimeout(initAutoSync, 4000);
   // 延迟检查更新：仅打包后的正式版生效，dev 模式内部跳过。
   setTimeout(() => initAutoUpdate(() => mainWindow), 6000);

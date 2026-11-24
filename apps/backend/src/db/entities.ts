@@ -33,7 +33,7 @@ export class TagDict {
   @CreateDateColumn() createdAt!: Date;
 }
 
-// 云同步：每个用户(email)一份收藏记录，按 urlHash 唯一
+// 同步按 account:<user UUID> 隔离；email 列名保留兼容旧表，旧邮箱行不自动迁移。
 @Entity('sync_items')
 @Index(['email', 'urlHash'], { unique: true })
 @Index(['email', 'updatedAtMs'])

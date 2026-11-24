@@ -1,10 +1,8 @@
-# 智藏 ZhiCang 付费门户镜像（Next.js）。从仓库根目录构建：
+# 智藏 ZhiCang 开源项目站镜像（Next.js）。从仓库根目录构建：
 #   docker build -f apps/portal/Dockerfile -t zhicang-portal .
 FROM node:20-bookworm-slim AS build
 WORKDIR /app
 RUN corepack enable
-ARG NEXT_PUBLIC_API_BASE=http://localhost:3001/api
-ENV NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/portal/package.json apps/portal/

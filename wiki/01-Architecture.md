@@ -2,7 +2,7 @@
 
 ## 总体架构
 
-智藏由 5 个可独立运行的应用 + 1 个共享包组成，通过 pnpm workspace 管理。桌面端是核心，后端/门户负责商业化（授权与售卖），插件/MCP 通过本地桥接接入桌面端。
+智藏由 5 个可独立运行的应用 + 1 个共享包组成，通过 pnpm workspace 管理。桌面端是核心，后端提供可选自托管同步，项目站提供开源说明，插件/MCP 通过本地桥接接入桌面端。
 
 ```mermaid
 graph TB
@@ -15,10 +15,10 @@ graph TB
     AIClient["Claude Desktop / Cursor"]
   end
 
-  subgraph Cloud["服务端（商业化）"]
-    Backend["后端 NestJS\n授权 / 支付 / 邮件 / 同步"]
+  subgraph Cloud["可选自托管服务"]
+    Backend["后端 NestJS\n账号认证 / 私有同步"]
     PG[("PostgreSQL")]
-    Portal["付费门户 Next.js\n购码 + 后台"]
+    Portal["开源项目站 Next.js\n说明 + 源码链接"]
   end
 
   LLM["大模型\nOpenAI 兼容端点"]
@@ -29,7 +29,7 @@ graph TB
   MCP -->|/api/search 等| Bridge
   AIClient -->|MCP 协议| MCP
   Desktop -->|富化/问答| LLM
-  Desktop -->|激活/同步| Backend
+  Desktop -->|可选账号同步| Backend
   Portal -->|下单/管理| Backend
   Backend --> PG
 ```
@@ -49,7 +49,6 @@ graph LR
     Index["index.ts\nIPC 注册 + 窗口"]
     DB["db.ts\nSQLite/FTS5"]
     Enrich["enrich.ts\n抓取 + AI 富化"]
-    License["license.ts\n验签 + 设备绑定"]
     Sync["sync.ts\n云同步"]
     BridgeM["bridge.ts\n本地 HTTP 服务\n（令牌鉴权）"]
     IO["import-export.ts"]
@@ -66,7 +65,6 @@ graph LR
   Preload -->|ipcRenderer.invoke| Index
   Index --> DB
   Index --> Enrich
-  Index --> License
   Index --> Sync
   Index --> BridgeM
   Index --> IO
@@ -75,8 +73,8 @@ graph LR
 
 > 渲染层与主进程均**中/英双语**（React Context `i18n.tsx`），主进程更新弹窗读取持久化的 `settings.lang` 选择语言；详见 [wiki/03](./03-Desktop-App.md)。
 
-- **主进程**：拥有数据库、网络抓取、AI 调用、授权、桥接服务等全部能力。
-- **预加载层**：`contextBridge` 把分组化的 `window.api`（categories / bookmarks / ai / license / io ...）安全暴露给渲染层，禁用 nodeIntegration。
+- **主进程**：拥有数据库、网络抓取、AI 调用、同步账号、桥接服务等全部能力。
+- **预加载层**：`contextBridge` 把分组化的 `window.api`（categories / bookmarks / ai / sync / io ...）安全暴露给渲染层，禁用 nodeIntegration。
 - **渲染层**：React + Ant Design，状态用 zustand（`store.ts`），所有数据操作经 `window.api` 走 IPC。
 
 ## 关键数据流
@@ -84,9 +82,7 @@ graph LR
 1. **新增收藏**：渲染层 `bookmarks.create` → IPC → 写库（`ai_state=pending`）→ 后台抓取 meta → AI 富化队列 → 通过 `on('bookmarks:changed')` 通知渲染层刷新。
 2. **插件收藏**：浏览器插件 → `POST http://127.0.0.1:38121/api/capture` → 桥接 handler → 复用主进程入库 + 富化逻辑。
 3. **AI 检索**：MCP / AI 面板 → `/api/search` 或 `ai:ask` → FTS5 命中（+ 可选 LLM 重排/问答）。
-4. **授权激活**：渲染层 `license.activate(email, code)` → 后端 `/license/activate` 校验激活码 + 绑定设备 → 返回 RS256 许可证 JWT → 本地存储，启动时用内置公钥验签。
 5. **云同步**：`sync.run` → 后端 `/sync`（按 email + urlHash 双向合并）。
-6. **支付履约**：门户下单 → 后端按 `payment.provider` 创建 Stripe/支付宝/微信结算 → 用户付款 → 渠道回调 `/payment/webhook/{stripe,alipay,wechat}`（验签）→ 幂等 `fulfill` 生成激活码 + 发邮件。详见 [wiki/06](./06-Backend-And-Licensing.md)。
 
 ## 相关源码
 
@@ -95,3 +91,8 @@ graph LR
 - `apps/desktop/src/preload/index.ts`（API 暴露）
 - `apps/desktop/src/renderer/src/store.ts`（前端状态）
 - `apps/desktop/src/main/updater.ts`（自动更新）、`apps/desktop/src/renderer/src/i18n.tsx`（i18n）
+
+
+## 0.4.0 开源边界
+
+本地工作台启动不经授权服务。主进程 sync-account.ts 管理可选同步身份；服务端使用普通账号 JWT 隔离同步数据，不再装载商业模块。详见 wiki/06。
