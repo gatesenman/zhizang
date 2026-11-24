@@ -46,14 +46,14 @@ test('self-hosted account login, credential minimization, error reporting, curso
   await runSync(async (_url, init) => {
     assert.equal(init?.redirect, 'error');
     assert.equal((init?.headers as Record<string, string>).Authorization, 'Bearer fixture-session-token');
-    return response({ items: [], serverTime: 100 });
+    return response({ items: [], serverTime: 100, protocol: 2, nextCursor: null });
   });
-  assert.equal(getLastSyncAt(), 100);
+  const completedAt = getLastSyncAt(); assert.ok(completedAt > 100 && completedAt <= Date.now());
   await assert.rejects(runSync(async () => response({}, 401)), /401/);
   assert.match(getSetting('sync_last_error')!, /401/);
-  assert.equal(getLastSyncAt(), 100);
+  assert.equal(getLastSyncAt(), completedAt);
   await assert.rejects(runSync(async () => response({ items: [] })), /响应格式无效/);
-  assert.equal(getLastSyncAt(), 100);
+  assert.equal(getLastSyncAt(), completedAt);
   setBackendUrl('https://other.test');
   assert.equal(getSyncSession(), null); assert.equal(getLastSyncAt(), 0); assert.equal(getSyncConfig().enabled, false);
   disconnectSyncAccount(); setSyncConfig({ enabled: false });
@@ -61,6 +61,18 @@ test('self-hosted account login, credential minimization, error reporting, curso
 });
 test('a response from the previous sync account is not applied after an account switch', async () => {
   await connectSyncAccount('fixture@example.test', 'fixture-password', false, async () => response({ token: 'fixture-token-2', user: { email: 'fixture@example.test' } }));
-  await assert.rejects(runSync(async () => { disconnectSyncAccount(); return response({ items: [], serverTime: 200 }); }), /账号已更改/);
+  await assert.rejects(runSync(async () => { disconnectSyncAccount(); return response({ items: [], serverTime: 200, protocol: 2, nextCursor: null }); }), /账号已更改/);
   assert.equal(getLastSyncAt(), 0);
+});
+
+test('paged sync is single-flight and rejects looping/empty pages without advancing the local cursor', async () => {
+  await connectSyncAccount('fixture@example.test', 'fixture-password', false, async () => response({ token: 'fixture-page-token', user: { email: 'fixture@example.test' } }));
+  let release!: () => void; const gate = new Promise<void>(resolve => { release = resolve; }); let calls = 0;
+  const a = runSync(async () => { if (++calls === 1) await gate; return response({ items: [], protocol: 2, nextCursor: null, serverTime: Date.now() + 86400000 }); });
+  const b = runSync(async () => { throw new Error('overlapping transport must not run'); });
+  assert.equal(a, b); release(); await a;
+  assert.ok(calls >= 2 && calls <= 3); const cutoff = getLastSyncAt(); assert.ok(cutoff <= Date.now());
+  await assert.rejects(runSync(async (_url, init) => response({ items: [], protocol: 2, nextCursor: JSON.parse(String(init?.body)).pushOnly ? null : 'loop', serverTime: Date.now() })), /游标无效/);
+  assert.equal(getLastSyncAt(), cutoff);
+  disconnectSyncAccount();
 });

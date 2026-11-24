@@ -4,10 +4,11 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
-import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark, addTagToBookmarks, listTags, saveBookmarkNotes } from '../src/main/db';
+import { initDb, getDb, createBookmark, getBookmark, setSetting, getSetting, queryBookmarks, updateBookmark, addTagToBookmarks, listTags, saveBookmarkNotes, changedSince, applyRemote, deleteBookmark } from '../src/main/db';
 import { importCsv, importJson, exportJson } from '../src/main/import-export';
 import { fetchReadable, fetchSiteMeta } from '../src/main/enrich';
 import { NoteDraft, noteDraftKey } from '../src/renderer/src/note-draft';
+import { chunkSyncItems } from '../src/main/sync';
 const folder = mkdtempSync(join(tmpdir(), 'zhicang-deep-rounds-'));
 const path = join(folder, 'live.db');
 initDb(path);
@@ -93,4 +94,21 @@ test('R6 clearing a note during an in-flight save remains durably recoverable an
   assert.equal(calls, 2); assert.equal(getBookmark(b.id)?.notes, '');
   assert.equal(draft.snapshot().status, 'saved'); assert.equal(records.has(noteDraftKey(b)), false);
   draft.detach();
+});
+
+test('R7 permanent deletions retain only a hash/timestamp tombstone and cannot resurrect on full pulls', () => {
+  const b = createBookmark({ url: 'https://rounds.example.test/permanent-delete', title: 'private title', tags: ['private'] });
+  updateBookmark(b.id, { notes: 'private note' });
+  const before = changedSince(0).find(x => x.urlHash === b.urlHash)!;
+  deleteBookmark(b.id);
+  const tombstone = changedSince(0).find(x => x.urlHash === b.urlHash)!;
+  assert.equal(tombstone.deleted, true); assert.equal(tombstone.url, ''); assert.equal(tombstone.notes, '');
+  assert.equal(Object.keys(getDb().prepare('SELECT * FROM sync_tombstones WHERE url_hash=?').get(b.urlHash) as object).length, 2);
+  assert.equal(applyRemote([before]).applied, 0); assert.equal(getBookmark(b.id), null);
+  const recreated = createBookmark({ url: b.url });
+  assert.ok(recreated.updatedAt > tombstone.updatedAt);
+  assert.equal(changedSince(0).filter(x => x.urlHash === b.urlHash).length, 1);
+  const chunks = chunkSyncItems(Array.from({ length: 12 }, () => ({ ...before, notes: '汉'.repeat(100000) })));
+  assert.ok(chunks.length > 1);
+  for (const chunk of chunks) assert.ok(Buffer.byteLength(JSON.stringify(chunk)) < 1_010_000);
 });

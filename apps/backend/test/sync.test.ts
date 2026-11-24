@@ -39,3 +39,9 @@ test('database initialization does not register legacy commercial entities or de
     if (oldSync === undefined) delete process.env.DB_SYNC; else process.env.DB_SYNC = oldSync;
   }
 });
+
+test('paged protocol rejects invalid negotiation/cursors before touching storage', async () => {
+  const service = new SyncService({} as Repository<SyncItem>);
+  await assert.rejects(service.sync('account:fixture', 0, [], { protocol: 3 as 2 }), /分页/);
+  await assert.rejects(service.sync('account:fixture', 0, [], { protocol: 2, cursor: 'x'.repeat(257) }), /分页/);
+});

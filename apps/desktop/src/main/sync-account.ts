@@ -27,6 +27,7 @@ export function disconnectSyncAccount(): void {
   setSetting(SESSION_KEY, '');
   setSetting('sync_auto_enabled_v2', '0');
   setSetting('last_sync_at', '0');
+  setSetting('last_sync_local_v2', '0');
 }
 
 export function setBackendUrl(url: string): void {

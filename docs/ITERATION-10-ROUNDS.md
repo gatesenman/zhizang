@@ -33,3 +33,11 @@
 - 审查 NoteDraft 的 SQLite CAS/冲突/引用复用：已有版本冲突与切换保护保留；发现先保存 A、请求未返回时清空至旧 base，会提前删除本机草稿；若此刻崩溃，A 可能提交而清空意图丢失。
 - note-draft.ts 在请求在途时即使 text==旧 base 也保留草稿，全部串行 CAS 结束才清理。deep-rounds.test.ts 用 Promise 屏障+真实 SQLite 保存验证清空意图持久化、两次 CAS、最终空笔记与草稿清理。
 - 第4轮串行等价完整桌面测试通过，/workspace/zhizang-round-06.log；没有模拟成用户真的崩溃重启或可视编辑器已验收。
+
+## 第7轮：超过 5000 条也完整同步，时钟与永久删除不再漏数
+- 审查发现：服务端 take 5000 后却返回墙钟高水位，客户端把服务端时钟当本地上传游标；大批上传超过请求体默认 100KB；旧硬删除没有持久墓碑，完整拉取会复活已清空记录。
+- 改 shared/types、backend sync.service/controller/main、desktop sync/sync-account/db：协商协议2，按 urlHash keyset 分页（每页最多500），上传按500条/1MB双重拆分，显式2MB服务端JSON上限；完整按键遍历避免把不可信客户端时间当服务端分页游标。上传本地截止时间独立且重叠1ms、时钟回退重扫、单飞防并行、每页继续校验账号/服务地址及分页进度。服务端事务+队列防止 SQL.js 写批次交错；旧协议遇截断/新版最小墓碑明确拒绝而非伪成功。
+- 本地永久删除只留下 urlHash+时间两列墓碑，无 URL/标题/笔记/Key；重新收藏可覆盖旧墓碑；全量拉取不复活旧删除。未删除既有用户表或配置。
+- 新增/更新 deep-rounds、open-source、backend/sync 单测与真实 desktop-cloud-smoke：两份独立 Electron/SQLite 库经实际 Nest/SQL.js HTTP 往返5005+条，未来服务器时间不影响后续上传，永久删除跨端/重启不复活。最初真实 E2E 报413后查明默认100KB瓶颈并修复，未把失败计通过。
+- `pnpm build:shared`、`pnpm typecheck`、backend 单测、串行全部桌面测试通过（round-07*.log）；`pnpm test:backend:e2e`最终通过（/workspace/zhizang-round-07-e2e.log）。规模夹具将临时服务全局配额设500，不是默认限流/负载测试，生产默认120不变，认证仍真实执行。
+- 边界：协议2要求客户端与自托管服务一起升级；目前每轮全量分页拉取，以带宽换正确性，不冒称增量服务端变更日志。LWW 对真实设备时钟偏差、同毫秒冲突仍有固有限制；多进程/高并发 SaaS 不在 SQL.js 小型自托管保证范围。

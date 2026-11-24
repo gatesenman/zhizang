@@ -27,7 +27,7 @@ const port = reservation.address().port; await new Promise((done) => reservation
 const base = `http://127.0.0.1:${port}/api`;
 const child = spawn(process.execPath, [join(root, 'apps/backend/dist/main.js')], {
   cwd: join(root, 'apps/backend'),
-  env: { ...process.env, NODE_ENV: 'test', HOST: '127.0.0.1', PORT: String(port), DATABASE_URL: '', SQLITE_PATH: dbFile, JWT_SECRET: randomUUID() },
+  env: { ...process.env, NODE_ENV: 'test', HOST: '127.0.0.1', PORT: String(port), DATABASE_URL: '', SQLITE_PATH: dbFile, JWT_SECRET: randomUUID(), THROTTLE_LIMIT: '500' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let output = '';
@@ -57,7 +57,7 @@ try {
   assert.equal((await post('/auth/register', credentials)).status, 400);
   assert.equal((await post('/auth/login', credentials)).status, 201);
   const client = spawnSync(require('electron'), [join(root, 'scripts/desktop-cloud-smoke.cjs')], {
-    cwd: root, encoding: 'utf8', timeout: 45000,
+    cwd: root, encoding: 'utf8', timeout: 180000,
     env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', TS_NODE_PROJECT: join(root, 'apps/desktop/tsconfig.test.json'), ZHICANG_TEST_SERVER: `http://127.0.0.1:${port}` },
   });
   if (client.stdout) process.stdout.write(client.stdout);
@@ -66,6 +66,7 @@ try {
   assert.equal((await post('/sync', { since: 0, items: [] })).status, 401);
   assert.equal((await post('/sync', { since: 0, items: [] }, token + 'tampered')).status, 401);
   assert.equal((await fetch(base + '/sync', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })).status, 400, 'missing body is rejected, not a 500 after Express 5 migration');
+  assert.equal((await post('/sync', { oversized: 'x'.repeat(2_100_000) }, token)).status, 413, 'bounded 2 MB JSON limit remains active');
   const sync = await post('/sync', { since: 0, items: [] }, token);
   assert.equal(sync.status, 201); assert.ok((await sync.json()).serverTime);
   const item = { urlHash: 'fixture-hash', url: 'https://example.test/sync', title: '同步收藏', description: '', tags: ['测试'], favorite: true, pinned: false, readState: 'unread', notes: '云端往返', status: 'active', deleted: false, updatedAt: Date.now() };

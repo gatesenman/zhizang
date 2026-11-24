@@ -147,6 +147,8 @@ export interface SyncPushItem {
 export interface SyncResponse {
   items: SyncPushItem[];
   serverTime: number;
+  protocol?: 2;
+  nextCursor?: string | null;
 }
 
 export interface LlmConfig {
