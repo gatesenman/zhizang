@@ -6,12 +6,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { buildDbOptions } from './db/data-source';
 import { SettingsModule } from './settings/settings.module';
 import { AuthModule } from './auth/auth.module';
-import { LicenseModule } from './license/license.module';
-import { ProductsModule } from './products/products.module';
-import { OrdersModule } from './orders/orders.module';
-import { PaymentModule } from './payment/payment.module';
-import { EmailModule } from './email/email.module';
-import { AdminModule } from './admin/admin.module';
 import { SyncModule } from './sync/sync.module';
 import { AppController } from './app.controller';
 
@@ -25,13 +19,7 @@ import { AppController } from './app.controller';
     ]),
     TypeOrmModule.forRoot(buildDbOptions()),
     SettingsModule,
-    EmailModule,
     AuthModule,
-    LicenseModule,
-    ProductsModule,
-    OrdersModule,
-    PaymentModule,
-    AdminModule,
     SyncModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

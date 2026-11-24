@@ -59,10 +59,9 @@ export const netFetch: typeof fetch = (input, init) => net.fetch(input, init) as
 | --- | --- |
 | `enrich.ts` | 站点抓取、链接探活、正文抓取、图片转 data URI、LLM `chat/completions` 与 `embeddings` |
 | `sync.ts` | 云同步 `POST /sync` |
-| `license.ts` | 激活 `POST /license/activate` |
 | `graph.ts` | API 嵌入 `POST /embeddings`（知识图谱构建向量） |
 
-原因：Node 默认 fetch（undici）**不复用系统代理、不读取操作系统证书库**，在企业代理 / 自签证书 / 部分网络环境下常报 `fetch failed`，表现为「新增收藏富化失败」「favicon 抓不到」「云同步 / 激活失败」。Electron `net.fetch` 走 Chromium 网络栈，自动复用系统代理与 OS 证书，与右侧 webview 行为一致，因此可靠。`net.fetch` 须在 app ready 后调用——富化 / 同步 / 激活 / 向量均发生在运行期，满足条件。
+原因：Node 默认 fetch（undici）**不复用系统代理、不读取操作系统证书库**，在企业代理 / 自签证书 / 部分网络环境下常报 `fetch failed`，表现为「新增收藏富化失败」「favicon 抓不到」「云同步失败」。Electron `net.fetch` 走 Chromium 网络栈，自动复用系统代理与 OS 证书，与右侧 webview 行为一致，因此可靠。`net.fetch` 须在 app ready 后调用——富化 / 同步 / 向量均发生在运行期，满足条件。
 
 > favicon 还在**渲染层**做了逐级回退（富化得到的 → 站点 `/favicon.ico` → 公共 favicon 服务 → 首字母占位），即使后台抓取失败也能显示图标。详见 [wiki/03](./03-Desktop-App.md)。
 
@@ -105,3 +104,9 @@ export const netFetch: typeof fetch = (input, init) => net.fetch(input, init) as
 ## 2026-11 本地交付补充
 
 `main/assistant.ts` 提供可测试的收藏检索/问答，中文问法归一化，无命中直接返回空引用，不用最近收藏补假命中。没有启用模型或 Key 时明确返回 keyword 模式。aiChat/aiEnrich 请求 30 秒超时，空内容/无效 JSON 算失败；自动标签合并保留已有手工标签。在线模型供应商本次未配置凭证、未实测。
+
+
+0.4.0 移除注册码系统，不移除外部 AI API Key 设置或模型地址校验。AI 为可选服务，第三方可能收费。
+
+## 0.4.1 自动抓取与自备服务分离
+main/public-web-fetch.ts只保护自动公网网页/图片/探活，逐跳DNS全地址检查、拒绝凭据、限制流式字节与取消；metadata图片也验证目标。主文档以最终URL解析相对链接。未绑定Chromium/代理DNS，存在rebinding TOCTOU。用户明确配置的AI/嵌入/同步服务仍走原验证与传输，可保留本机HTTP模型；不把自备API Key当注册码，不承诺外部服务免费。

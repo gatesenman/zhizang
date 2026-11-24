@@ -1,0 +1,83 @@
+{
+  "result": "PASS",
+  "version": "0.4.1",
+  "packageSHA256": "87778fa6413c0c20b39c752c7827967ab09736afd9f80935c5918e22ffbfe184",
+  "packageSizeBytes": 135359505,
+  "electronVersions": {
+    "node": "24.22.3",
+    "acorn": "8.18.0",
+    "ada": "4.0.0",
+    "amaro": "1.1.11",
+    "ares": "1.34.9",
+    "brotli": "1.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.4.4",
+    "merve": "1.2.2",
+    "modules": "150",
+    "napi": "10",
+    "nbytes": "0.1.4",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.70.0",
+    "nghttp3": "",
+    "ngtcp2": "",
+    "openssl": "0.0.0",
+    "simdjson": "4.6.11",
+    "simdutf": "7.7.0",
+    "sqlite": "3.54.1",
+    "tz": "2026e",
+    "undici": "7.30.2",
+    "unicode": "17.0",
+    "uv": "1.52.1",
+    "uvwasi": "0.0.23",
+    "v8": "15.6.75.57-electron.c2a1644ee688c616",
+    "zlib": "1.3.2.1-motley",
+    "zstd": "1.6.0",
+    "electron": "45.4.1",
+    "chrome": "156.0.8078.100"
+  },
+  "packagedMainPreloadMatch": true,
+  "checks": [
+    "ZIP CRC/path/no-AppRun",
+    "exact executable-disk package, SHA-matched hardlink deduplication",
+    "guarded real renderer IPC",
+    "collect/organize/search/offline read/no-key reuse",
+    "actual app restart persistence",
+    "obsolete license retained without activation",
+    "private bridge401"
+  ],
+  "rendererResults": [
+    {
+      "version": "0.4.1",
+      "id": 1,
+      "checks": [
+        "guarded main-frame IPC",
+        "collect/organize/note CAS/search/visit"
+      ]
+    },
+    {
+      "version": "0.4.1",
+      "id": 1,
+      "checks": [
+        "offline snapshot read",
+        "no-key actual references",
+        "persisted notes/tags"
+      ]
+    },
+    {
+      "version": "0.4.1",
+      "id": 1,
+      "checks": [
+        "offline snapshot read",
+        "no-key actual references",
+        "persisted notes/tags"
+      ]
+    }
+  ],
+  "limitations": [
+    "headless programmatic smoke, not visual GUI acceptance",
+    "offline read fixture inserted into isolated SQLite; no real site/AI download",
+    "temporary loopback debugger used only for isolated test process",
+    "no Windows/macOS installer, external AI or cloud deployment validation"
+  ]
+}

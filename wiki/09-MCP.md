@@ -49,3 +49,10 @@ graph LR
 - `apps/mcp/src/index.js`（基于 `@modelcontextprotocol/sdk`）
 - `apps/mcp/README.md`
 - 桥接路由见 [wiki/03 · 本地桥接服务](./03-Desktop-App.md#本地桥接服务)
+
+
+## 0.4.0 开源版
+
+MCP 协议版本信息改为读取本包 package.json，避免与 0.4.0 版本脱节。桥接令牌与本机服务安全检查保留。
+
+安全整改使用 MCP SDK 1.32.2 与显式 zod 4.6.7 peer；桥接令牌仍必需，不属于软件激活。

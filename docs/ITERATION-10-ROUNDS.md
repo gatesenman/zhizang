@@ -1,0 +1,71 @@
+# 0.4.1：十轮真实主线迭代
+
+起点：705e9313b587d5d61637aae5897a91743570cd73（不是重计前三轮开源/依赖整改）。日期 2026-11-24，Asia/Shanghai UTC+8。按用户要求在既有本机 checkout 工作，不使用云代理、不触碰用户目录；PR 到 main、不合并；首次交付曾采用单次push偏好，CI收尾允许正常追加补丁，禁止force push或改写已推历史。
+
+开始前已 fetch/read：远程 main 为 8c596e971a5923092204cbf1d2eb2c80e2acda9c，尚无同名远程分支/同主题 PR。PR #1（fix/ci-eslint-and-windows-packages）修改 README、Windows使用说明、library-components.test.ts；本工作不合并/改写其分支，最终 PR 明示这些重叠。
+
+## 第1轮：升级失败也不能损坏旧库
+- 审查发现：initDb 的多阶段迁移各自提交，后续 seed 失败会留下 earlier hash/version 写入且数据库句柄未关闭。
+- 修改：db.ts 将完整升级/种子/任务恢复置于一个事务，失败关闭句柄；deep-rounds.test.ts 用真实 SQLite trigger 注入中途失败，验证迁移标记回滚、旧收藏/授权配置/自备 Key 均保留且可重新打开。
+- 回归：`pnpm --filter @zhicang/desktop test`，全部通过（含新失败注入用例），日志 /workspace/zhizang-round-01.log；不是 GUI 验收。仅临时测试库，无用户目录操作。
+
+## 第2轮：导入质量与元数据往返
+- 审查发现 CSV 未闭合引号会静默吞入后续行，JSON 往返将 archived/dead 状态及访问时间丢失；BOM/重复导入路径原本可用，不重复发明。
+- 修改 import-export.ts：CSV 解析结束前拒绝未闭合引号（任何写入之前），JSON 恢复合法 status/visitedAt；deep-rounds.test.ts 覆盖恶意截断、BOM、多行标题、去重、archived 跨记录往返。
+- 回归 `pnpm --filter @zhicang/desktop test` 全通过，/workspace/zhizang-round-02.log。HTML/JSON/CSV 为手动导入，不自动读取用户文件；没有宣称全量 GUI 通过。
+
+## 第3轮：批处理原子性与空操作
+- 审查收件箱/多选/回收站恢复链路：已有筛选换页清选、回收站/撤销测试保持；发现批量打标签在事务外建标签，混入失效 ID 时会遗留孤儿标签，空批次也会建标签。
+- 修改 db.ts 将标签创建纳入整批事务、空批次不写入、拒绝空白标签。deep-rounds.test.ts 用真实 FK 失败验证整批回滚，验证重复 ID 幂等和原标签保留。
+- 回归 `pnpm --filter @zhicang/desktop test` 全通过，/workspace/zhizang-round-03.log；未声称可视撤销交互已重新验收。
+
+## 第4轮：可预测分页与列表查询计划
+- 审查发现同毫秒/同标题记录没有 ID 排序键，分页顺序未被 SQL 契约固定；默认列表缺少删除状态+置顶+时间联合排序索引。已有 LIKE 转义/中文笔记回退保留。
+- db.ts 添加非破坏性联合索引与 ID tie-breaker；新增同时间两页无重叠/升降序及真实 EXPLAIN QUERY PLAN 索引命中回归。
+- 初始并行测试遭共享机器 IO 阻塞（子进程 disk-sleep），只终止本任务测试，未算通过；NODE_OPTIONS 不接受该 Node 参数的尝试亦记失败。改用实际支持的串行命令后全通过：在 apps/desktop 下 `ELECTRON_RUN_AS_NODE=1 TS_NODE_PROJECT=tsconfig.test.json ../../node_modules/electron/dist/electron --require ts-node/register --test --test-concurrency=1 test/*.test.ts`，/workspace/zhizang-round-04.log。后续轮暂用同一串行等价命令，最终统一修正测试入口；没有给并发写入期间 OFFSET 分页作快照一致性承诺。
+
+## 第5轮：阅读真实失败与相对资源
+- 审查发现 404/500 页面会作为成功正文缓存，PDF 等非网页响应被当 HTML；重定向后相对图片/链接仍以旧站点根目录解析。
+- enrich.ts 明确校验 HTTP 状态/内容类型，以最终文档 URL 为相对资源基准；可注入 transport 以隔离网络回归。deep-rounds.test.ts 验证 404、PDF、跨源重定向后的文章目录相对链接与标题。
+- 第4轮串行等价测试命令全通过，/workspace/zhizang-round-05.log。响应夹具不是实际外站/GUI 验收；保留现有错误提示、外部打开与离线阅读兜底。
+
+## 第6轮：笔记在途清空也要可恢复
+- 审查 NoteDraft 的 SQLite CAS/冲突/引用复用：已有版本冲突与切换保护保留；发现先保存 A、请求未返回时清空至旧 base，会提前删除本机草稿；若此刻崩溃，A 可能提交而清空意图丢失。
+- note-draft.ts 在请求在途时即使 text==旧 base 也保留草稿，全部串行 CAS 结束才清理。deep-rounds.test.ts 用 Promise 屏障+真实 SQLite 保存验证清空意图持久化、两次 CAS、最终空笔记与草稿清理。
+- 第4轮串行等价完整桌面测试通过，/workspace/zhizang-round-06.log；没有模拟成用户真的崩溃重启或可视编辑器已验收。
+
+## 第7轮：超过 5000 条也完整同步，时钟与永久删除不再漏数
+- 审查发现：服务端 take 5000 后却返回墙钟高水位，客户端把服务端时钟当本地上传游标；大批上传超过请求体默认 100KB；旧硬删除没有持久墓碑，完整拉取会复活已清空记录。
+- 改 shared/types、backend sync.service/controller/main、desktop sync/sync-account/db：协商协议2，按 urlHash keyset 分页（每页最多500），上传按500条/1MB双重拆分，显式2MB服务端JSON上限；完整按键遍历避免把不可信客户端时间当服务端分页游标。上传本地截止时间独立且重叠1ms、时钟回退重扫、单飞防并行、每页继续校验账号/服务地址及分页进度。服务端事务+队列防止 SQL.js 写批次交错；旧协议遇截断/新版最小墓碑明确拒绝而非伪成功。
+- 本地永久删除只留下 urlHash+时间两列墓碑，无 URL/标题/笔记/Key；重新收藏可覆盖旧墓碑；全量拉取不复活旧删除。未删除既有用户表或配置。
+- 新增/更新 deep-rounds、open-source、backend/sync 单测与真实 desktop-cloud-smoke：两份独立 Electron/SQLite 库经实际 Nest/SQL.js HTTP 往返5005+条，未来服务器时间不影响后续上传，永久删除跨端/重启不复活。最初真实 E2E 报413后查明默认100KB瓶颈并修复，未把失败计通过。
+- `pnpm build:shared`、`pnpm typecheck`、backend 单测、串行全部桌面测试通过（round-07*.log）；`pnpm test:backend:e2e`最终通过（/workspace/zhizang-round-07-e2e.log）。规模夹具将临时服务全局配额设500，不是默认限流/负载测试，生产默认120不变，认证仍真实执行。
+- 边界：协议2要求客户端与自托管服务一起升级；目前每轮全量分页拉取，以带宽换正确性，不冒称增量服务端变更日志。LWW 对真实设备时钟偏差、同毫秒冲突仍有固有限制；多进程/高并发 SaaS 不在 SQL.js 小型自托管保证范围。
+
+## 第8轮：自动网页、IPC 与私密数据边界
+- 审查发现：自动元数据/离线抓取可重定向到私网、正文/同步响应无流式字节上限；IPC 只凭通道名，没有限定真实主窗口/主帧/应用入口；阅读沙箱仍会自动加载远程跟踪图片。
+- 新增 public-web-fetch.ts：仅自动网页 GET/HEAD，逐跳 DNS 全地址/IPv4/IPv6 私网与保留段检查、拒绝 URL 口令、去除认证/Cookie/Key、取消/超时与流式大小限制；metadata 新图片也验证目标，离线阅读 CSP 仅允许 data 图片（完整存档通过受控抓取内联）。显式自备 AI/同步服务不走公网限制，本地 HTTP AI 测试保留。旧 URL/配置不擅自删除。
+- 新增 ipc-trust.ts，index.ts 全部 IPC 统一检查真实 sender/mainFrame/准确入口 URL；db.ts 新收藏拒绝 URL 内嵌口令，POSIX 主 SQLite 文件0600（不是加密，不保证历史 WAL/导出备份/Windows ACL）；同步响应限10MB，后端先查键/载荷长度再按响应预算取数据，避免500篇长笔记同时实例化。
+- 回归首次抓出 Node BlockList IPv4 映射导致错误封禁全部公网的实现缺陷，已分离 IPv4/IPv6 集合修复；初次 lint 常量循环错误亦修复，不计作通过。最终 `pnpm lint`、`pnpm typecheck`、第4轮串行桌面命令80/80通过（round-08*.log）；`pnpm test:backend:e2e` 真实5005+跨端分页/认证隔离/持久化全部通过。
+- 限制：DNS 校验与 Chromium/代理实际连接未绑定，仍有 DNS rebinding TOCTOU，严苛部署需网络出口策略；旧收藏/同步来的媒体 URL 与用户主动原站 webview 仍可能联网，不能宣称完全无追踪/完整 SSRF 防护。IPC 源码回归与模拟事件不是 Windows/GUI 验收；必要人工检查见最终交付指南。
+
+## 第9轮：消除可控严重构建漏洞，迁移而非抹掉 Windows 补丁
+- 先留存本轮全部/生产 before JSON。核对真实注册表后升级 builder26.18.0、匹配Squirrel peer26.18.0、electron-vite6、Vite7.3.8、React插件5.2.0；外置依赖按新API迁移。NSIS26已包含旧修复，移植精确SHA/语义守卫，历史补丁不删除，停止旧 active patch；Linux ZIP策略/AppImage拒绝保留。
+- 首次真实 install 发现 builder26 跨工作区误重建 optional SQLite12 并编译失败，新增限定桌面路径/目标平台架构的 postinstall+beforePack native rebuild，后续完整安装成功。依赖改动独立本地提交，不用 overrides。详见 SECURITY-DEPENDENCIES-0.4.1.md。
+- 实际 `pnpm typecheck`、`build:desktop`、`lint`、串行桌面80/80、`test:packaging`5/5、`test:security`5/5、冻结离线锁一致性通过；最终所有工作区入口/完整构建与产物smoke留第10轮执行。当前 audit 生产0C/0H/2M，全部0C/0H/4M，默认命令仍退出1；完整raw before/after保留，按路径说明条件，不声称完全安全。
+- 操作失败也记录：共享根磁盘满导致一次 install/命令启动失败；仅本checkout纯JS包/Next可重建产物临时移RAM，随后恢复纯JS包正常路径（临时路径曾影响类型/打包，不作兼容性通过）。仅清理本任务失败的无用SQLite12编译缓存及out，未清理别人目录；完整安装/类型/构建在恢复后重跑成功。未执行Windows安装/卸载/portable；上游模板审查不等于Windows实测。
+
+## 第10轮：真实综合回归、可复验入口与交付一致性
+- 审查发现测试运行器默认无界文件并行，缺失/空目录反而成功；shared只有类型却有假测试入口；AGENTS仍要求已禁用AppImage，版本/部分wiki仍描述5000上限与旧严重工具链风险。
+- 改 run-tests.mjs 按文件串行、缺失/空目录/缺少project参数非零，隔离NODE_TEST_CONTEXT让嵌套黑盒测试有真实报告；新增typed fixture黑盒回归（最初stdout空被抓出并修正，未计通过），移除shared伪入口。所有包/扩展/项目站统一0.4.1，CI加入tooling与live high审计门槛、无override；README/贡献/更新日志/数据模型/同步/IPC/抓取/构建wiki同步，历史安全原件明确标注历史。
+- 新增可复验Linux包smoke：精确ZIP在可执行磁盘用SHA相同硬链接去重（RAM只存归档/profile），通过实际renderer→preload→全部IPC守卫进行收藏、整理、搜索、笔记CAS、访问、离线读与无Key引用；真正退出/重启再验证持久化、旧授权保留无激活与私有桥接401。离线HTML是临时SQLite夹具，不冒充真实外站。首次探测器误选libvulkan.so.1，已修正后全流程通过，见结构化证据。
+- 全量实际通过：冻结完整安装、build:shared、lint、typecheck、test（后端4/桌面80）、edition4、packaging5、security5、tooling1、build:all、Chrome/Firefox扩展构建、5005+真实双端同步HTTP E2E；Next生产HTTP200/旧商业路由404，MCP真实stdio0.4.1/4工具，builder26 Linux ZIP打包/CRC/Main-Preload字节/ASAR/运行重启smoke。日志 /workspace/zhizang-round-10-*.log；见 DELIVERY-0.4.1.md 与 security/0.4.1/validation.json。
+- 当前audit生产0C/0H/2M、全部0C/0H/4M，默认audit非零；high阈值0只是阻止严重项，不抹中危。提交前源码候选与全部Git历史Gitleaks/敏感路径检查、diff审阅，清洁ZIP与commit摘要放专用artifacts目录；不提交真实env/凭据/收藏库/安装包/依赖/缓存。
+- 未测Windows/macOS安装/人工GUI/真实AI、模型下载/浏览器扩展GUI/线上签名更新/Docker/Postgres部署；已有headless截图不等同这些验收。仍有LWW时钟/同毫秒、全量带宽、SQL.js单进程、DNS TOCTOU与旧媒体联网、素材权属待核实等边界，按当前安全/交付文档说明停止扩大范围。
+
+## 第10轮后续：PR2 CI最小收尾（不重新计轮次）
+- 真实远端情况：5080c8b的PR事件完整成功，但push事件两次在规模同步PASS后外层fetch报UND_ERR_SOCKET/other side closed；没有把其中一次成功当作全绿。
+- 诊断：smoke-backend.mjs用spawnSync等待长子进程，阻塞父HTTP客户端处理keep-alive定时器/关闭事件。先做2.8s简化实验未复现，不计作证明；再在CI同版Node24.22.3中，用真实5005+双端客户端并仅将子进程寿命保持至少8.5s做对照：旧版实际exit1/UND_ERR_SOCKET/未输出最终PASS，新版exit0且完整HTTP断言通过。证据 security/0.4.1/ci-keepalive-regression.json。
+- 最小修改：spawnSync→spawn+await once(close)，stdout/stderr持续转发，180s超时、真实子退出码assert以及全部401/400/413/隔离/LWW/墓碑等断言原样保留；不重试POST、不吞fetch错误、不删测试。tooling增加防同步等待/退出断言丢失的守卫。
+- 本地实际通过lint/typecheck、后端4+桌面80、edition4/packaging5/security5/tooling2；真实完整同步E2E连续3次，其中2次由Electron内嵌Node24.22.3运行。生产代码与依赖未改变，原Linux精确包/阅读/IPC验证仍对应相同构建字节，不冒充本次重做了GUI/Windows验收。
+- 本次正常补丁提交/push到原PR2，不改PR1、不force、不改已推历史；这不是新增功能轮次。最终commit的push与PR事件两套CI必须分别核对；具体运行URL/结论及重新扫描后的源码ZIP/manifest/SHA记录在外侧最终DELIVERY-0.4.1.json，不能用旧SHA或本地通过代替远端检查。

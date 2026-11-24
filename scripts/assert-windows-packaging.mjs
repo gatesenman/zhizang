@@ -13,12 +13,12 @@ export function windowsBuilderLibrary(project = root) {
 export function assertWindowsPackaging(project = root) {
   const library = windowsBuilderLibrary(project);
   const pkg = JSON.parse(readFileSync(resolve(library, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '24.13.3', 'Review/backport the NSIS fix before changing the pinned builder');
+  assert.equal(pkg.version, '26.18.0', 'Review the upstream NSIS template before changing the pinned builder');
   const template = readFileSync(resolve(library, 'templates/nsis/multiUser.nsh'), 'utf8');
-  const record = JSON.parse(readFileSync(resolve(project, 'docs/packaging-0.3.1/NSIS-PATCH.json'), 'utf8'));
-  assert.equal(createHash('sha256').update(template).digest('hex'), record.patchedTemplateSha256, 'NSIS patch missing or unexpected: use pnpm install --frozen-lockfile (not npm)');
+  const record = JSON.parse(readFileSync(resolve(project, 'docs/packaging-0.4.1/NSIS-PATCH.json'), 'utf8'));
+  assert.equal(createHash('sha256').update(template).digest('hex'), record.reviewedTemplateSha256, 'NSIS patch missing or unexpected: use pnpm install --frozen-lockfile (not npm)');
   assert.ok(!template.includes('*$2(&w${NSIS_MAX_STRLEN} .s)'), 'Unsafe pointer over-read must not ship');
   assert.ok(template.includes("KERNEL32::lstrcpynW(w .r0, p r2, i ${NSIS_MAX_STRLEN})p"));
-  return { builder: pkg.version, templateSha256: record.patchedTemplateSha256, source: record.source };
+  return { builder: pkg.version, templateSha256: record.reviewedTemplateSha256, source: record.source };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) console.log(JSON.stringify(assertWindowsPackaging()));

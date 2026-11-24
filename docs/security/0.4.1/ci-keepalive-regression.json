@@ -1,0 +1,18 @@
+{
+  "before": {
+    "exitCode": 1,
+    "scalePassed": true,
+    "socketError": true,
+    "wholeSmokePassed": false
+  },
+  "after": {
+    "exitCode": 0,
+    "scalePassed": true,
+    "socketError": false,
+    "wholeSmokePassed": true
+  },
+  "method": "Same actual >5000-client smoke, Node24.22.3; child held at least8.5s across backend keep-alive expiry. Original vs async patch, no retries.",
+  "baselineCommit": "5080c8b6f15ef2e590791a58e297b5348492a4d1",
+  "short_negative_control": "A separate 2.8s synthetic test did not reproduce; not counted as proof.",
+  "productionChanges": "None; only CI integration parent awaits the child asynchronously, retains timeout/exit assertion and all HTTP assertions."
+}

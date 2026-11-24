@@ -1,11 +1,11 @@
 {
   "name": "zhicang",
-  "version": "0.1.0",
+  "version": "0.4.1",
   "private": true,
-  "description": "智藏 ZhiCang · AI 驱动的收藏夹管理桌面程序（跨端 + 授权 + 付费门户）",
+  "description": "智藏 ZhiCang · 免费开源、本地优先的 AI 收藏管理工具",
   "packageManager": "pnpm@9.15.1",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev:desktop": "pnpm --filter @zhicang/desktop dev",
@@ -29,18 +29,23 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:backend:e2e": "pnpm build:shared && pnpm build:backend && node scripts/smoke-backend.mjs",
-    "test:packaging": "node --test scripts/test/windows-packaging.test.mjs"
+    "test:packaging": "node --test scripts/test/windows-packaging.test.mjs scripts/test/windows-release.test.mjs",
+    "test:edition": "node --test scripts/test/open-source-edition.test.mjs",
+    "test:security": "node --test scripts/test/security-dependencies.test.mjs",
+    "test:tooling": "node --test scripts/test/test-runner.test.mjs"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "^4.6.2"
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "vite": "7.3.8"
   },
-  "pnpm": {
-    "patchedDependencies": {
-      "app-builder-lib@24.13.3": "patches/app-builder-lib@24.13.3.patch"
-    }
+  "pnpm": {},
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gatesenman/zhizang.git"
   }
 }

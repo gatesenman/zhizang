@@ -25,6 +25,6 @@
 
 ## 开发注意
 
-- 桌面端依赖 / `electron.vite.config.ts` / `.npmrc` 改动后，**必须解包 AppImage 实测启动**，不能只测 dev 模式（见 `wiki/10` 踩坑记录）。
+- 桌面端依赖 / `electron.vite.config.ts` / `.npmrc` 改动后，**必须解包当前 Linux ZIP 实测启动（AppImage 暂禁）**，不能只测 dev 模式（见 `wiki/10` 踩坑记录）。
 - 渲染层不要在列表 `.map()` 内调用 React hook。
 - 不要提交 `keys/` 下私钥、`.env`、`node_modules`、构建产物。

@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            target: --linux AppImage
-          - os: windows-latest
-            target: --win nsis
+            target: --linux zip
+          - os: windows-2022
+            target: --win nsis --x64
           - os: macos-latest
             target: --mac dmg
     runs-on: ${{ matrix.os }}
@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -37,17 +37,24 @@ jobs:
       - name: Build shared package
         run: pnpm --filter @zhicang/shared build
 
+      # Keep pnpm/lockfile unchanged; its node-gyp 10 supports VS2022, not VS2026.
+      - name: Verify reviewed NSIS security template
+        run: node scripts/assert-windows-packaging.mjs
+
       - name: Build & package desktop
-        run: pnpm --filter @zhicang/desktop exec electron-vite build && pnpm --filter @zhicang/desktop exec electron-builder ${{ matrix.target }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm --filter @zhicang/desktop exec electron-vite build && pnpm --filter @zhicang/desktop exec electron-builder ${{ matrix.target }} --publish never
+
+      - name: Smoke packaged Windows Electron and persistent native SQLite
+        if: runner.os == 'Windows'
+        run: node scripts/smoke-windows-package.mjs
 
       - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
           name: zhicang-${{ matrix.os }}
           path: |
-            apps/desktop/release/*.AppImage
+            apps/desktop/release/*.zip
             apps/desktop/release/*.exe
             apps/desktop/release/*.dmg
-          if-no-files-found: ignore
+            apps/desktop/release/BUILD-PROVENANCE.json
+          if-no-files-found: error

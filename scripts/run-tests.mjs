@@ -14,7 +14,7 @@ const argv = process.argv.slice(2);
 let dir = 'test';
 let project;
 for (let i = 0; i < argv.length; i++) {
-  if (argv[i] === '--project') project = argv[++i];
+  if (argv[i] === '--project') { project = argv[++i]; if (!project) throw new Error('--project requires a tsconfig path'); }
   else dir = argv[i];
 }
 
@@ -25,18 +25,20 @@ try {
     .sort()
     .map((f) => join(dir, f));
 } catch {
-  console.log(`[run-tests] 测试目录不存在：${dir}`);
-  process.exit(0);
+  console.log(`[run-tests] 测试目录不可读：${dir}`);
+  process.exit(1);
 }
 if (files.length === 0) {
-  console.log(`[run-tests] ${dir} 下没有 *.test.ts，跳过`);
-  process.exit(0);
+  console.log(`[run-tests] ${dir} 下没有 *.test.ts，拒绝伪成功`);
+  process.exit(1);
 }
 
 const env = { ...process.env };
+delete env.NODE_TEST_CONTEXT; // a nested black-box run must report its own real tests
 if (project) env.TS_NODE_PROJECT = project;
 
-const res = spawnSync(process.execPath, ['--require', 'ts-node/register', '--test', ...files], {
+// Bounded default prevents ts-node file workers exhausting shared CI memory/IO.
+const res = spawnSync(process.execPath, ['--require', 'ts-node/register', '--test', '--test-concurrency=1', ...files], {
   stdio: 'inherit',
   env,
 });

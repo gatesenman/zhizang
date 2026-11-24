@@ -1,0 +1,26 @@
+# Keep secrets, user data and host build artifacts out of image contexts.
+.git
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+**/*.db
+**/*.db-*
+**/*.sqlite
+**/*.sqlite-*
+**/*.zhicang
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+keys
+**/userData
+**/userdata
+**/ZhiCang-data
+**/.next
+**/out
+**/dist
+**/release
+**/coverage
+**/*.log
+**/*.tsbuildinfo

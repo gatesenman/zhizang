@@ -1,0 +1,7 @@
+{
+  "result": "PASS",
+  "command": "electron-builder --linux AppImage",
+  "exitCode": 1,
+  "reason": "AppImage disabled: GHSA-7g7r-gx96-252g",
+  "artifactGenerated": false
+}

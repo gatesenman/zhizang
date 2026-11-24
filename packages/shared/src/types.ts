@@ -147,6 +147,8 @@ export interface SyncPushItem {
 export interface SyncResponse {
   items: SyncPushItem[];
   serverTime: number;
+  protocol?: 2;
+  nextCursor?: string | null;
 }
 
 export interface LlmConfig {
@@ -180,24 +182,6 @@ export interface AiEnrichResult {
   description: string;
   tags: string[];
   suggestedCategory: string;
-}
-
-// 许可证 / 授权
-export interface LicensePayload {
-  sub: string; // user id / email
-  deviceId: string;
-  code: string;
-  plan: string;
-  iat?: number;
-  exp?: number;
-}
-
-export interface LicenseStatus {
-  activated: boolean;
-  plan?: string;
-  expireAt?: number | null;
-  email?: string;
-  reason?: string;
 }
 
 // ===== 知识图谱 / 语义检索 =====

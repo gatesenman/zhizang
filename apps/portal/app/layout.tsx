@@ -1,18 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import SiteChrome from './SiteChrome';
-
 export const metadata: Metadata = {
-  title: '智藏 ZhiCang · AI 收藏夹管理',
-  description: 'AI 驱动的跨端收藏夹管理桌面程序 — 在线购买激活码 / AI-powered cross-platform bookmark manager',
+  title: '智藏 ZhiCang · 免费开源收藏管理',
+  description: '本地优先、无需注册码的 AI 收藏管理工具。外部 AI 服务需自备 API Key，第三方可能收费。',
 };
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="zh-CN">
-      <body>
-        <SiteChrome>{children}</SiteChrome>
-      </body>
-    </html>
-  );
+  return <html lang="zh-CN"><body>{children}</body></html>;
 }

@@ -71,6 +71,11 @@ const api = {
     overview: () => ipcRenderer.invoke('stats:overview'),
   },
   sync: {
+    testServer: (base: string) => ipcRenderer.invoke('sync:testServer', base),
+    accountStatus: () => ipcRenderer.invoke('sync:accountStatus') as Promise<{ connected: boolean; email?: string; backendUrl: string }>,
+    connect: (email: string, password: string, register = false) => ipcRenderer.invoke('sync:connect', email, password, register),
+    disconnect: () => ipcRenderer.invoke('sync:disconnect'),
+    setBackendUrl: (url: string) => ipcRenderer.invoke('sync:setBackendUrl', url),
     run: () => ipcRenderer.invoke('sync:run'),
     status: () => ipcRenderer.invoke('sync:status'),
     lastAt: () => ipcRenderer.invoke('sync:lastAt'),
@@ -107,15 +112,6 @@ const api = {
     setLlm: (cfg: LlmConfig) => ipcRenderer.invoke('settings:setLlm', cfg),
     get: (key: string) => ipcRenderer.invoke('settings:get', key),
     set: (key: string, value: string) => ipcRenderer.invoke('settings:set', key, value),
-  },
-  license: {
-    testServer: (base: string) => ipcRenderer.invoke('license:testServer', base),
-    status: () => ipcRenderer.invoke('license:status'),
-    activate: (email: string, code: string) => ipcRenderer.invoke('license:activate', email, code),
-    deactivate: () => ipcRenderer.invoke('license:deactivate'),
-    deviceId: () => ipcRenderer.invoke('license:deviceId'),
-    getBackendUrl: () => ipcRenderer.invoke('license:getBackendUrl'),
-    setBackendUrl: (url: string) => ipcRenderer.invoke('license:setBackendUrl', url),
   },
   io: {
     backup: () => ipcRenderer.invoke('io:backup'),

@@ -1,4 +1,5 @@
 import { app } from 'electron';
+import { chmodSync } from 'node:fs';
 import { join } from 'path';
 import Database from 'better-sqlite3';
 import { createHash } from 'crypto';
@@ -20,16 +21,24 @@ let db: Database.Database;
 
 export function initDb(dbPath = join(app.getPath('userData'), 'zhicang.db')): Database.Database {
   db = new Database(dbPath);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
-  db.function('url_hostname', { deterministic: true }, (value: unknown) => { try { return new URL(String(value)).hostname.toLowerCase(); } catch { return ''; } });
-  migrate();
-  migrateUrlHashes();
-  seed();
-  migrateLegacySystemCategories();
-  // 上次未完成（中断）的任务重新排队
-  db.prepare("UPDATE bookmarks SET ai_state = 'pending' WHERE ai_state = 'processing'").run();
-  return db;
+  try {
+    if (process.platform !== 'win32' && dbPath !== ':memory:') chmodSync(dbPath, 0o600);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    db.function('url_hostname', { deterministic: true }, (value: unknown) => { try { return new URL(String(value)).hostname.toLowerCase(); } catch { return ''; } });
+    // A failed upgrade must not leave half-migrated user data or a locked handle.
+    db.transaction(() => {
+      migrate();
+      migrateUrlHashes();
+      seed();
+      migrateLegacySystemCategories();
+      db.prepare("UPDATE bookmarks SET ai_state = 'pending' WHERE ai_state = 'processing'").run();
+    })();
+    return db;
+  } catch (error) {
+    db.close();
+    throw error;
+  }
 }
 
 export function getDb(): Database.Database {
@@ -93,6 +102,11 @@ function migrate(): void {
       FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS sync_tombstones (
+      url_hash TEXT PRIMARY KEY,
+      updated_at INTEGER NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT
@@ -146,6 +160,7 @@ function migrate(): void {
   addColumnIfMissing('bookmarks', 'snapshot', 'INTEGER DEFAULT 0');
   addColumnIfMissing('bookmarks', 'snapshot_at', 'INTEGER');
   db.exec('CREATE INDEX IF NOT EXISTS idx_bookmarks_deleted ON bookmarks(deleted_at)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_bookmarks_active_created ON bookmarks(deleted_at, pinned DESC, created_at DESC, id DESC)');
 
   migrateFts();
 }
@@ -415,10 +430,11 @@ export function createBookmark(input: {
   tags?: string[];
 }): Bookmark {
   const parsed = new URL(input.url.trim());
-  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('仅支持 HTTP / HTTPS 网页链接');
+  if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error('仅支持不含用户名/密码的 HTTP / HTTPS 网页链接');
   input = { ...input, url: input.url.trim() };
-  const now = Date.now();
   const urlHash = hashUrl(input.url);
+  const tombstone = db.prepare('SELECT updated_at FROM sync_tombstones WHERE url_hash = ?').get(urlHash) as { updated_at: number } | undefined;
+  const now = Math.max(Date.now(), (tombstone?.updated_at ?? 0) + 1);
   const existing = db.prepare('SELECT id, deleted_at FROM bookmarks WHERE url_hash = ?').get(urlHash) as any;
   if (existing) {
     if (existing.deleted_at) throw new Error('该网址在回收站，请先明确恢复');
@@ -442,6 +458,7 @@ export function createBookmark(input: {
   if (input.tags?.length) setBookmarkTags(id, input.tags);
   const b = getBookmark(id)!;
   syncFts(b);
+  db.prepare('DELETE FROM sync_tombstones WHERE url_hash = ?').run(urlHash);
   return b;
 }
 
@@ -527,8 +544,12 @@ export function updateBookmark(id: number, patch: UpdatablePatch): Bookmark {
 
 // 硬删除（清空回收站时用）
 export function deleteBookmark(id: number): void {
-  db.prepare('DELETE FROM bookmarks WHERE id = ?').run(id);
-  db.prepare('DELETE FROM fts_bookmarks WHERE rowid = ?').run(id);
+  db.transaction(() => {
+    const row = db.prepare('SELECT url_hash, updated_at FROM bookmarks WHERE id = ?').get(id) as { url_hash: string; updated_at: number } | undefined;
+    if (row) db.prepare('INSERT INTO sync_tombstones VALUES (?, ?) ON CONFLICT(url_hash) DO UPDATE SET updated_at=excluded.updated_at').run(row.url_hash, Math.max(Date.now(), row.updated_at + 1));
+    db.prepare('DELETE FROM bookmarks WHERE id = ?').run(id);
+    db.prepare('DELETE FROM fts_bookmarks WHERE rowid = ?').run(id);
+  })();
 }
 
 // 仅允许永久删除回收站内记录；混入正常收藏时整批拒绝。
@@ -581,9 +602,11 @@ export function moveBookmarks(ids: number[], categoryId: number | null): void {
 }
 
 export function addTagToBookmarks(ids: number[], tag: string): void {
-  const tagId = ensureTag(tag);
+  if (typeof tag !== 'string' || !tag.trim()) throw new Error('标签不能为空');
+  if (!ids.length) return;
   const now = Date.now();
   const tx = db.transaction((arr: number[]) => {
+    const tagId = ensureTag(tag);
     const link = db.prepare('INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag_id) VALUES (?, ?)');
     const touch = db.prepare('UPDATE bookmarks SET updated_at = ? WHERE id = ?');
     for (const id of arr) {
@@ -741,7 +764,7 @@ export function queryBookmarks(q: BookmarkQuery): { items: Bookmark[]; total: nu
   const limit = Number.isFinite(q.limit) ? Math.max(1, Math.min(100000, Math.floor(q.limit!))) : 50;
   const offset = Number.isFinite(q.offset) ? Math.max(0, Math.floor(q.offset!)) : 0;
   const rows = db
-    .prepare(`SELECT b.* ${from} ${whereSql} ORDER BY ${pinnedFirst}${order} LIMIT ? OFFSET ?`)
+    .prepare(`SELECT b.* ${from} ${whereSql} ORDER BY ${pinnedFirst}${order}, b.id ${q.sort === 'created_asc' || q.sort === 'title_asc' ? 'ASC' : 'DESC'} LIMIT ? OFFSET ?`)
     .all(...params, limit, offset) as any[];
   const items = rows.map((r) => mapBookmark(r, getBookmarkTags(r.id)));
   return { items, total };
@@ -898,7 +921,7 @@ export function statsOverview(): StatsOverview {
 export function changedSince(since: number): SyncPushItem[] {
   const rows = db.prepare('SELECT * FROM bookmarks WHERE updated_at > ?').all(since) as any[];
   const cats = new Map(listCategories().map((c) => [c.id, c.name]));
-  return rows.map((r) => ({
+  const live: SyncPushItem[] = rows.map((r) => ({
     urlHash: r.url_hash,
     url: r.url,
     title: r.title,
@@ -915,6 +938,9 @@ export function changedSince(since: number): SyncPushItem[] {
     deleted: !!r.deleted_at,
     updatedAt: r.updated_at,
   }));
+  const deleted = db.prepare('SELECT * FROM sync_tombstones WHERE updated_at > ?').all(since) as { url_hash: string; updated_at: number }[];
+  return live.concat(deleted.map((row) => ({ urlHash: row.url_hash, url: '', title: '', description: '', notes: '', tags: [], favorite: false,
+    pinned: false, readState: 'unread' as const, status: 'active' as const, deleted: true, updatedAt: row.updated_at })));
 }
 
 // 应用云端下发的变更（按 url_hash 做 last-write-wins）
@@ -923,9 +949,19 @@ export function applyRemote(items: SyncPushItem[]): { applied: number } {
   const tx = db.transaction((list: SyncPushItem[]) => {
     for (const remote of list) {
       // Older cloud clients used the legacy hash. Recompute by actual URL to avoid duplicates.
-      const it = { ...remote, urlHash: hashUrl(remote.url) };
+      const minimalDelete = remote.deleted === true && remote.url === '' && /^[a-f0-9]{40}$/.test(remote.urlHash);
+      const it = { ...remote, urlHash: minimalDelete ? remote.urlHash : hashUrl(remote.url) };
+      const tombstone = db.prepare('SELECT updated_at FROM sync_tombstones WHERE url_hash = ?').get(it.urlHash) as { updated_at: number } | undefined;
+      if (tombstone && tombstone.updated_at >= it.updatedAt) continue;
       const local = db.prepare('SELECT id, updated_at FROM bookmarks WHERE url_hash = ?').get(it.urlHash) as any;
       if (local && local.updated_at >= it.updatedAt) continue; // 本地更新，跳过
+      if (minimalDelete) {
+        if (local) db.prepare('UPDATE bookmarks SET deleted_at=?, updated_at=? WHERE id=?').run(it.updatedAt, it.updatedAt, local.id);
+        else db.prepare('INSERT INTO sync_tombstones VALUES (?, ?) ON CONFLICT(url_hash) DO UPDATE SET updated_at=excluded.updated_at').run(it.urlHash, it.updatedAt);
+        applied++;
+        continue;
+      }
+      db.prepare('DELETE FROM sync_tombstones WHERE url_hash = ?').run(it.urlHash);
       const categoryId = it.categoryName ? ensureCategoryByName(it.categoryName) : null;
       if (local) {
         db.prepare(

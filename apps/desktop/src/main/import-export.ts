@@ -123,6 +123,8 @@ export function importJson(text: string): { imported: number; skipped: number } 
             notes: typeof item.notes === 'string' ? item.notes : '',
             favorite: item.favorite === true, pinned: item.pinned === true,
             readState: item.readState === 'read' ? 'read' : 'unread',
+            status: ['active', 'dead', 'archived'].includes(item.status) ? item.status : 'active',
+            visitedAt: Number.isSafeInteger(item.visitedAt) && item.visitedAt > 0 ? item.visitedAt : null,
             contentExcerpt: typeof item.contentExcerpt === 'string' ? item.contentExcerpt : '',
             visitCount: Number.isSafeInteger(item.visitCount) && item.visitCount >= 0 ? item.visitCount : 0,
           });
@@ -222,6 +224,7 @@ function parseCsv(text: string): string[][] {
       row = [];
     } else field += c;
   }
+  if (inQuotes) throw new Error('CSV 引号未闭合，未导入任何数据');
   if (field.length || row.length) {
     row.push(field);
     if (row.some((f) => f.length)) rows.push(row);

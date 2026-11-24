@@ -1,6 +1,6 @@
 # 04 · 数据模型
 
-数据模型分三处：桌面端本地 SQLite（收藏主数据）、后端 PostgreSQL/SQLite（授权与商业化）、共享类型包（领域类型与契约）。
+数据模型分三处：桌面端本地 SQLite（收藏主数据）、后端 PostgreSQL/SQLite（账号与可选同步）、共享类型包（领域类型与契约）。
 
 ## 桌面端 SQLite（`apps/desktop/src/main/db.ts`）
 
@@ -97,7 +97,6 @@ erDiagram
 - `SyncPushItem` / `SyncResponse`：云同步载荷（按 `urlHash` 唯一）。
 - `LlmConfig` + `LLM_PRESETS`：大模型配置与预置（openai/deepseek/qwen/zhipu/custom）。
 - `AiEnrichResult`：AI 富化结构化结果（description/tags/suggestedCategory）。
-- `LicensePayload` / `LicenseStatus`：许可证负载与状态。
 - `EmbeddingConfig` + `EMBEDDING_PRESETS`：嵌入配置（`mode` ∈ `lexical|local|api`、`localModel`、`apiModel`）与本地模型预置（BGE/E5/MiniLM）。
 - `GraphNode` / `GraphLink` / `GraphData` / `GraphOptions`：知识图谱节点（收藏/分类/标签）、边（category/tag/semantic）、整图与构图选项（启用哪些边、语义近邻数 K、阈值、是否含枢纽节点）。
 - `SemanticHit`：语义检索命中项（`{ id, score }`）。
@@ -105,18 +104,14 @@ erDiagram
 
 ## 后端实体（`apps/backend/src/db/entities.ts`，TypeORM）
 
-> 时间列类型按 `DATABASE_URL` 是否存在自动切换 timestamp / datetime，兼容 Postgres 与 SQLite。
+> 时间列由 TypeORM 按数据库类型处理；桌面模型不变。
 
 | 实体 | 说明 |
 | --- | --- |
 | `User` | 邮箱唯一、密码哈希、角色（user/admin） |
-| `ActivationCode` | 激活码：plan、有效天数、最大设备数、状态（unused/active/revoked）、绑定 email/orderId/备注 |
-| `DeviceBinding` | 设备绑定：`(codeId, deviceId)` 唯一，记录激活设备 |
-| `Setting` | 后台可配置项键值表（支付/邮件/登录渠道等） |
-| `Product` | 售卖产品：名称、plan、价格（分）、币种、有效天数、最大设备数、上下架、排序 |
-| `Order` | 订单：产品、email、金额、支付渠道、状态（pending/paid/failed/refunded）、关联激活码 |
-| `TagDict` | 全局标签词典（后台维护，供 AI 富化对齐） |
-| `SyncItem` | 云同步记录：`(email, urlHash)` 唯一，payload 为 JSON 的 `SyncPushItem` |
+| `Setting` | 站点/注册策略键值表（旧商业设置保留但不再读取） |
+| `TagDict` | 原有标签词典表（兼容保留，暂无管理 API） |
+| `SyncItem` | 云同步记录：`(email, urlHash)` 唯一，email 列现存储 account:<UUID> 命名空间，payload 为 JSON 的 `SyncPushItem` |
 
 ## 相关源码
 
@@ -128,3 +123,11 @@ erDiagram
 ## 2026-11 本地交付补充
 
 本次未变更桌面表结构。queryBookmarks 保留 FTS，同时对中文子串、笔记、标签执行转义的字面 LIKE；用户 `%`/`_` 不作为通配符。系统未分类查询和计数包含 category_id IS NULL。目录遍历防环，移动目录不得指向自身或后代。purgeTrashedBookmarks 在事务中校验目标均在回收站后按 ID 删除，级联清理存档等关联。
+
+
+## 0.4.0 变更
+
+shared 移除许可证类型与签发/验签工具，不再依赖 jsonwebtoken。桌面收藏 schema 与数据目录不变，旧授权 settings 行保留但忽略。服务端不再注册商业 entities；保留 User/Setting/TagDict/SyncItem，不主动 drop 旧表。同步命名空间迁移规则见 wiki/06。
+
+## 0.4.1 无损与分页
+initDb完整迁移/种子/哈希/恢复包在事务，失败关闭句柄；旧授权与自备Key保留。bookmarks新增非破坏联合排序索引(deleted_at,pinned DESC,created_at DESC,id DESC)，列表用id固定平局顺序，不承诺并发OFFSET快照。sync_tombstones只有url_hash主键与updated_at时间，不保留正文/URL；永久删除留下墓碑并跨重启上传，新建可覆盖旧墓碑。设置last_sync_local_v2是本地上传截止点，和服务端时间分离。POSIX主库0600并非加密。相关源码：main/db.ts、sync.ts；真实回归deep-rounds.test.ts及desktop-cloud-smoke。

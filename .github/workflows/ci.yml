@@ -19,11 +19,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Reject known high/critical dependency advisories (moderates documented)
+        run: pnpm audit --audit-level high
 
       # 共享包先产出 dist，供其余包的类型检查 / 构建消费
       - name: Build shared package
@@ -38,8 +41,14 @@ jobs:
       - name: Test
         run: pnpm -r --if-present test
 
+      - name: Open-source edition boundaries and packaging guards
+        run: pnpm test:edition && pnpm test:packaging && pnpm test:security && pnpm test:tooling
+
       - name: Build backend
         run: pnpm --filter @zhicang/backend build
+
+      - name: Account-isolated sync integration (disposable local database)
+        run: pnpm test:backend:e2e
 
       - name: Build portal
         run: pnpm --filter @zhicang/portal build

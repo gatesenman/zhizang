@@ -1,105 +1,38 @@
-# 06 · 后端与授权
+# 06 · 可选自托管同步与账号（0.4.1）
 
-后端 `apps/backend` 基于 NestJS 10 + TypeORM，负责授权（激活码 + 设备绑定 + 许可证签发）、商业化（产品/订单/支付/邮件）、云同步与可配置后台。未配 `DATABASE_URL` 时回退 SQLite，便于本地直接跑。
+文件名保留以避免旧链接失效；注册码/许可证服务器已移除。
 
-启动时（`main.ts`）启用 `helmet` 安全响应头、CORS 与全局 `ValidationPipe`；`NestFactory.create(AppModule, { rawBody: true })` 保留原始请求体，供支付网关回调验签使用。
+## 当前架构
 
-## 模块结构
+`AppModule` 仅装配 Settings、Auth、Sync；保留 helmet、CORS、ValidationPipe、全局限流与登录限流。无 products / orders / payment / email / admin 商业管理接口，无激活码、设备绑定、许可证公私钥或支付凭据依赖。`@nestjs/jwt` 仅用于同步账号认证，不对本地功能设门槛。
 
-```
-apps/backend/src/
-├── main.ts, app.module.ts, app.controller.ts (/health)
-├── auth/        # 注册/登录(JWT)、guards
-├── license/     # 激活码校验 + RS256 许可证签发
-├── products/    # 产品列表
-├── orders/      # 订单
-├── payment/     # 可插拔支付（mock/Stripe/支付宝/微信）
-├── email/       # 可插拔邮件（console/SMTP/SendGrid）
-├── sync/        # 云同步
-├── admin/       # 后台管理（激活码/订单/产品/标签/设置）
-├── settings/    # 可配置项读写
-└── db/          # entities.ts, data-source.ts
-```
+- `GET /api/health`：健康检查。
+- `POST /api/auth/register`、`POST /api/auth/login`：同步账号（部署者可在 settings 表设置 login.allowRegister=false 禁止新注册）。
+- `GET /api/auth/me`：当前账号。
+- `POST /api/sync`：必须携带有效账号 Bearer token，经 JwtAuthGuard 查用户身份后只读写该账号的同步命名空间；不信任客户端提交的邮箱身份。
 
-## 授权流程
+## 升级与数据安全
 
-```mermaid
-sequenceDiagram
-  participant U as 用户(门户)
-  participant P as 付费门户
-  participant B as 后端
-  participant D as 桌面端
+桌面继续使用原 appId/数据目录/收藏 SQLite；不迁移、不删除收藏、笔记、AI Key 或旧授权配置。旧 license_token/license_email/device_salt/backend_url/local_mode 不再读取。新的 sync_backend_url、sync_account_session、sync_auto_enabled_v2 与旧配置隔离，默认不连接任何服务器，旧自动同步不自动上传。
 
-  U->>P: 选套餐下单
-  P->>B: POST /payment/checkout
-  B-->>P: 收银台链接(mock)
-  U->>B: 支付确认 (mock/confirm)
-  B->>B: 订单 paid → 生成激活码(绑 email)
-  B-->>U: 展示激活码
-  U->>D: 在桌面端输入 email + 激活码
-  D->>B: POST /license/activate {email, code, deviceId}
-  B->>B: 校验码状态/设备数 → 绑定设备
-  B-->>D: RS256 许可证 JWT
-  D->>D: 内置公钥验签 + 设备匹配校验 → 激活
-```
+服务端移除商业 entity 注册，不执行 drop 表、清库或删除文件。旧 activation_codes/device_bindings/products/orders 表及历史 settings 可保留，不被应用使用；生产应 DB_SYNC=false，并先备份、审核 schema。自托管账号仍需强 JWT_SECRET、HTTPS、安全数据库凭据与备份。
 
-- **许可证**：RS256 JWT，后端用私钥（`keys/license_private.pem`）签发，桌面端 `license.ts` 内置配对公钥验签（`@zhicang/shared` 的 `verifyLicense`）。
-- **设备绑定**：设备 ID = `sha256(hostname + 随机盐)`，存于本地 `settings`；激活码可限制 `maxDevices`。
-- **离线宽限**：许可证带 `exp`，本地验签，无需每次联网。
+**遗留云数据不能按自报邮箱直接继承**：未验证邮箱的注册流程不证明邮箱所有权。0.4.0 同步使用 `account:<user UUID>` 作为存储命名空间（沿用 sync_items.email 列名，不代表实际邮箱），旧邮箱行保留但隔离。管理员如需迁移，应在验证身份、备份并停机后，将指定用户旧邮箱行迁入其 account 命名空间，处理 urlHash 冲突；本版本不自动操作。
 
-## HTTP API（前缀 `/api`）
+桌面登录密码不持久化；会话令牌保存在设置数据库（与旧设置同级保护），完整备份也含它。账号/服务切换会清除会话、关闭自动同步并重置游标，不删本地内容。不要在共享设备上不受保护地保存该目录或上传备份。
 
-| 模块 | 方法 路由 | 说明 |
-| --- | --- | --- |
-| 健康 | `GET /health` | 健康检查 |
-| 认证 | `POST /auth/register`、`POST /auth/login`、`GET /auth/me` | 注册 / 登录 / 当前用户 |
-| 许可证 | `POST /license/activate` | 校验激活码 + 绑定设备 + 签发许可证 |
-| 产品 | `GET /products` | 在售产品列表 |
-| 支付 | `POST /payment/checkout`、`GET /payment/order/:id`、`GET /payment/mock/pay`、`POST /payment/mock/confirm` | 下单 / 查单 / mock 收银台 |
-| 支付回调 | `POST /payment/webhook/stripe`、`POST /payment/webhook/alipay`、`POST /payment/webhook/wechat` | 网关异步回调（验签→幂等履约）；回调豁免限流（`@SkipThrottle`） |
-| 同步 | `POST /sync` | 云同步双向合并 |
-| 后台 | `GET/PUT /admin/settings`、`GET/POST /admin/codes`、`PATCH /admin/codes/:id`、`GET /admin/orders`、`GET/POST/DELETE /admin/products[/:id]`、`GET/POST/DELETE /admin/tags[/:id]` | 设置 / 激活码（批量生成、吊销）/ 订单 / 产品 / 全局标签 |
+## 限制
 
-## 可插拔支付与履约闭环
-
-- **支付**（`payment/providers.ts`）：策略模式，预置 `mock` / `stripe` / `alipay` / `wechat` 四个真实适配器；当前渠道由 `settings` 的 `payment.provider` 决定（默认 `mock`），凭证亦从 `settings` 读取，无需改代码即可切换。
-- **统一履约**：所有渠道支付成功后都汇入 `PaymentService.fulfill(orderId)` —— **幂等**（订单已 `paid` 且已绑码则直接返回原激活码）→ 生成激活码（绑定 email/订单）→ 标记订单 `paid` → 调邮件服务发码。
-- **回调验签**（`provider.verifyWebhook`，统一入口 `PaymentService.handleWebhook`）：
-  - **Stripe**：`Stripe-Signature` 头做 HMAC-SHA256 校验（`payment.stripe.webhookSecret`），消费 `checkout.session.completed`。
-  - **支付宝**：异步通知 RSA2（RSA-SHA256）验签（`payment.alipay.publicKey`），成功须回纯文本 `success`。
-  - **微信支付 v3**：`WECHATPAY2-SHA256-RSA2048` 验签 + `AEAD_AES_256_GCM` 解密回调密文（`payment.wechat.apiV3Key`/`apiKey`、`platformPublicKey`），成功回 `{code:"SUCCESS"}`。
-- **配置项（settings 键）**：
-  - Stripe：`payment.stripe.secretKey`、`payment.stripe.webhookSecret`
-  - 支付宝：`payment.alipay.appId`、`payment.alipay.privateKey`、`payment.alipay.publicKey`、`payment.alipay.gateway`
-  - 微信：`payment.wechat.mchId`、`payment.wechat.appId`、`payment.wechat.serialNo`、`payment.wechat.privateKey`、`payment.wechat.apiV3Key`/`apiKey`、`payment.wechat.platformPublicKey`
-- **邮件**（`email/email.service.ts`）：`console` / `smtp` / `sendgrid` 可切换。
-- 这些渠道均通过后台「设置」配置化，无需改代码即可启用。
-
-## 安全加固
-
-- **限流**（`@nestjs/throttler`，全局 `ThrottlerGuard`）：默认 60s 内每 IP 120 次（可经 `THROTTLE_TTL`/`THROTTLE_LIMIT` 覆盖）；敏感端点用 `@Throttle` 收紧（注册/登录、激活、下单等），支付网关回调用 `@SkipThrottle` 豁免。
-- **安全头**：`helmet`（API 服务，关闭 CSP 以免影响 mock 收银台内联样式，`crossOriginResourcePolicy=cross-origin`）。
-- **CORS 白名单**（`main.ts`）：环境变量 `CORS_ORIGINS`（逗号分隔）设置后按白名单收紧允许来源；留空则 `origin:true` 放行任意来源（便于本地/桌面端，桌面等原生客户端不带 Origin 始终放行）。生产建议收紧为门户域名。
-- **管理员引导白名单**（`auth.service.ts`）：环境变量 `ADMIN_BOOTSTRAP_EMAILS`（逗号分隔邮箱）设置后，仅该名单内邮箱注册时成为 `admin`；留空则回退到「首个注册用户为管理员」（便于本地/演示，生产务必显式配置）。
-
-## 云同步
-
-- 实体 `SyncItem` 按 `(email, urlHash)` 唯一，payload 存 JSON 的 `SyncPushItem`。
-- 桌面端 `sync.run` 推送本地变更并拉取服务端更新，按 `updatedAt` 合并，支持多设备。请求经 Electron `net.fetch`（`POST /sync`），代理 / 证书环境更可靠。
-- 定时自动同步：设置页可开启「自动云同步」并设间隔（分钟，最小 5，默认 30）。配置存桌面端 `settings` 表，启动时 `initAutoSync()` 起定时器；未激活 / 网络异常静默跳过。详见 [wiki/03](./03-Desktop-App.md#定时自动云同步)。
+0.4.1协议2按urlHash keyset完整分页（<=500条/页，响应体预算），上传<=500条/1MB，服务端JSON2MB。每轮全量遍历而非增量服务日志；本地上传游标独立于服务器墙钟，时钟回退重扫；单飞/逐页校验账号地址，纯hash墓碑防止永久删除复活。旧协议>5000/过大/新版墓碑明确失败，不静默完成。客户端与自托管服务一起升级。LWW仍受设备时钟/同毫秒冲突影响，SQL.js写队列仅单进程，不是协同编辑/多实例一致性。无邮箱验证/找回/自动续期；部署加固与剩余中危见 [当前安全报告](../docs/SECURITY-DEPENDENCIES-0.4.1.md)。
 
 ## 相关源码
 
-- `apps/backend/src/main.ts`（helmet / rawBody / CORS 白名单 / ValidationPipe）、`app.module.ts`（ThrottlerModule + 全局 Guard）
-- `apps/backend/src/auth/auth.service.ts`（注册/登录 + `ADMIN_BOOTSTRAP_EMAILS` 管理员引导白名单）
-- 环境变量模板 `.env.example`（`CORS_ORIGINS` / `ADMIN_BOOTSTRAP_EMAILS` 等）
-- `apps/backend/src/payment/payment.controller.ts`（checkout / mock / 三渠道 webhook）、`payment.service.ts`（`fulfill` 幂等履约、`handleWebhook`）、`payment/providers.ts`（mock/stripe/alipay/wechat 适配器 + 验签/解密）
-- `apps/backend/src/`（各模块 controller/service）
-- `apps/backend/src/db/entities.ts` / `data-source.ts`
-- `apps/desktop/src/main/license.ts`、`packages/shared/src/license.ts`
-- 测试：`apps/backend/test/payment-crypto.test.ts`（签名/解密往返）
+- apps/backend/src/{app.module.ts,auth/,sync/,db/}
+- apps/desktop/src/main/{sync-account.ts,sync.ts,service-url.ts}
+- apps/desktop/src/renderer/src/components/SyncAccountSettings.tsx
+- .env.example、docker-compose.yml
 
+安全整改已升级 Nest 11 / Express 5 / TypeORM 0.3.31，明确拒绝缺失的同步请求体；真实路径与剩余两个 ORM glob/minimatch 中危见 [安全整改](../docs/SECURITY-DEPENDENCIES-0.4.1.md)。
 
-## 2026-11 本地交付补充
-
-开发环境无 DATABASE_URL 时使用 SQL.js + autoSave + location 写入 SQLite 文件，避免 Electron 与 Node 的 better-sqlite3 ABI 冲突；SQL.js 是单进程整库内存模式，生产用 PostgreSQL。HOST 环境变量支持本机回环监听。本次 backend-e2e 使用临时库/测试 RSA 密钥，真实 HTTP 测试 mock 履约、签名激活、同步鉴权/推送/拉取/LWW；无真实支付或外发邮件。
+## 0.4.1 实际关联源码
+shared/types.ts 定义可选 protocol2/nextCursor；backend sync.controller/service.ts 进行分页/有界响应/账号命名空间/写队列事务；main.ts 显式JSON限制；desktop sync.ts/sync-account.ts/db.ts 负责拆批、独立游标、切号隔离与墓碑。真实5005+双客户端HTTP E2E见 scripts/desktop-cloud-smoke.cjs。完整边界见 docs/ITERATION-10-ROUNDS.md。

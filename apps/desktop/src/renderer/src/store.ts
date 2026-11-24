@@ -4,7 +4,6 @@ import type {
   Bookmark,
   BookmarkQuery,
   Category,
-  LicenseStatus,
   ReadState,
   SmartFolder,
   Tag,
@@ -46,7 +45,6 @@ interface State {
   selected: Bookmark | null;
   selectedIds: number[];
   aiStatus: AiStatus;
-  license: LicenseStatus;
   loading: boolean;
   error: string | null;
   lastSyncAt: number;
@@ -70,7 +68,6 @@ interface State {
   visit: (id: number) => Promise<void>;
   addBookmark: (input: { url: string; title?: string; categoryId?: number | null; tags?: string[]; restoreTrashed?: boolean }) => Promise<{ duplicate: boolean; trashed?: boolean; restored?: boolean; id?: number }>;
   removeBookmark: (id: number) => Promise<void>;
-  refreshLicense: () => Promise<void>;
   applyUpdatedBookmark: (b: Bookmark) => void;
   setAiStatus: (s: AiStatus) => void;
 
@@ -148,7 +145,6 @@ export const useStore = create<State>((set, get) => ({
   selected: null,
   selectedIds: [],
   aiStatus: { counts: {}, pending: 0 },
-  license: { activated: false },
   loading: false,
   error: null,
   lastSyncAt: 0,
@@ -160,7 +156,6 @@ export const useStore = create<State>((set, get) => ({
       get().loadTags(),
       get().loadSmartFolders(),
       get().loadTrashCount(),
-      get().refreshLicense(),
     ]);
     await get().loadBookmarks();
     const [s, lastSyncAt] = await Promise.all([window.api.ai.status(), window.api.sync.lastAt()]);
@@ -280,7 +275,6 @@ export const useStore = create<State>((set, get) => ({
     await Promise.all([get().loadBookmarks(), get().refreshSidebarCounts()]);
   },
 
-  refreshLicense: async () => set({ license: await window.api.license.status() }),
 
   applyUpdatedBookmark: (b) => {
     set((state) => ({

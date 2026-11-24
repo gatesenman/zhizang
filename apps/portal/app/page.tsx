@@ -1,96 +1,20 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { createCheckout, fetchProducts, yuan, type Product } from '@/lib/api';
-import { useI18n } from '@/lib/i18n';
-
-export default function HomePage() {
-  const { t } = useI18n();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [picked, setPicked] = useState<Product | null>(null);
-  const [email, setEmail] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetchProducts()
-      .then(setProducts)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  async function buy() {
-    if (!picked) return;
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      setError(t('home.invalidEmail'));
-      return;
-    }
-    setSubmitting(true);
-    setError('');
-    try {
-      const { payUrl } = await createCheckout(picked.id, email);
-      window.location.href = payUrl;
-    } catch (e) {
-      setError((e as Error).message);
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <main className="container">
-      <section className="hero">
-        <h1>{t('home.heroTitle')}</h1>
-        <p>{t('home.heroDesc')}</p>
-      </section>
-
-      {loading && <p className="spin" style={{ textAlign: 'center' }}>{t('home.loading')}</p>}
-      {error && !picked && <p className="error" style={{ textAlign: 'center' }}>{error}</p>}
-
-      <section className="grid">
-        {products.map((p, i) => (
-          <div key={p.id} className={`card${i === 1 ? ' featured' : ''}`}>
-            {i === 1 && <div className="badge">{t('home.popular')}</div>}
-            <h3>{p.name}</h3>
-            <div className="price">
-              <small>￥</small>
-              {yuan(p.priceCents)}
-              <small> / {p.plan === 'lifetime' ? t('home.lifetime') : `${p.durationDays} ${t('home.days')}`}</small>
-            </div>
-            <div className="feat">· {p.description}</div>
-            <div className="feat">· {t('home.maxDevices', { n: p.maxDevices })}</div>
-            <div className="feat">· {t('home.allAI')}</div>
-            <div className="feat">· {t('home.importExport')}</div>
-            <button className="btn" onClick={() => { setPicked(p); setError(''); }}>
-              {t('home.buyNow')}
-            </button>
-          </div>
-        ))}
-      </section>
-
-      {picked && (
-        <div className="modal-mask" onClick={() => !submitting && setPicked(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{t('home.modalTitle', { name: picked.name })}</h3>
-            <p className="muted">￥{yuan(picked.priceCents)} · {t('home.modalDesc')}</p>
-            <input
-              className="input"
-              type="email"
-              placeholder={t('home.emailPlaceholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoFocus
-            />
-            {error && <p className="error">{error}</p>}
-            <button className="btn" disabled={submitting} onClick={buy}>
-              {submitting ? t('home.creating') : t('home.goPay')}
-            </button>
-            <button className="btn ghost" disabled={submitting} onClick={() => setPicked(null)} style={{ marginTop: 8 }}>
-              {t('home.cancel')}
-            </button>
-          </div>
-        </div>
-      )}
-    </main>
-  );
+const repo = 'https://github.com/gatesenman/zhizang';
+export default function Home() {
+  return <main>
+    <p>智藏 ZhiCang · 0.4.1</p>
+    <h1>你的收藏，你的知识库。</h1>
+    <p>免费开源、本地优先。无需注册、激活码、订阅或设备授权即可管理收藏。</p>
+    <nav><a href={repo}>源代码与构建指南</a><a href={`${repo}/releases`}>查看发布版本</a><a href={`${repo}/blob/main/CONTRIBUTING.md`}>参与贡献</a></nav>
+    <h2>保留完整的收藏工作流</h2>
+    <p>导入导出、分类标签、搜索、笔记、阅读状态、网页预览、知识图谱、浏览器扩展和 MCP 本机桥接。</p>
+    <h2>AI 与同步由你选择</h2>
+    <p>本地收藏无需 AI。在线 AI 功能需自行配置服务地址、模型与 API Key；第三方服务可能收费。离线关键词检索可直接使用；本地嵌入模型首次需下载，并遵守模型自身许可。</p>
+    <p>跨设备同步为可选自托管服务，账号仅用于隔离私人数据，不是购买凭证。没有默认官方同步服务器，服务器运营成本由部署者承担。</p>
+    <h2>数据与隐私</h2>
+    <p>收藏默认保存在本机。启用 AI、网页抓取、模型下载、更新源或同步时，会连接你选择的相应服务。同步会上传收藏和笔记；AI 请求会把相关内容发送给配置的提供商。请只连接你信任的服务。</p>
+    <p>本机桥接保留安全令牌；它不是注册码。完整备份包含设置与凭据，请勿公开或提交到仓库。</p>
+    <h2>开源许可</h2>
+    <p>项目自有代码采用 MIT；第三方依赖、模型及素材保留各自许可和权利声明。软件按原样提供，不附保证。</p>
+    <a href={`${repo}/blob/main/THIRD_PARTY_NOTICES.md`}>第三方声明与权利边界</a>
+  </main>;
 }

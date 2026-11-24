@@ -9,3 +9,13 @@ export function validateLlmConfig(cfg: { baseUrl: string; apiKey: string; model:
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('模型地址须为 HTTP(S) 地址');
   if (!cfg.apiKey.trim() || !cfg.model.trim()) throw new Error('请填写 API Key 与模型名称');
 }
+
+// Sync credentials must never cross the network over plaintext HTTP.
+export function normalizeSyncBase(input: string): string {
+  const base = normalizeApiBase(input);
+  const url = new URL(base);
+  if (url.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) {
+    throw new Error('同步服务必须使用 HTTPS（仅本机允许 HTTP）');
+  }
+  return base;
+}

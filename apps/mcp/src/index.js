@@ -8,12 +8,15 @@
  *   - list_recent(limit)
  * 通过 stdio 传输，可接入 Claude Desktop / Cursor 等支持 MCP 的客户端。
  */
+import { readFileSync } from 'node:fs';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+
+const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
 const BRIDGE = process.env.ZHICANG_BRIDGE_URL || 'http://127.0.0.1:38121';
 // 桥接访问令牌：从桌面端「设置 → 本地桥接服务 → 访问令牌」复制后写入此环境变量
@@ -79,7 +82,7 @@ const TOOLS = [
 ];
 
 const server = new Server(
-  { name: 'zhicang-mcp', version: '0.1.0' },
+  { name: 'zhicang-mcp', version },
   { capabilities: { tools: {} } },
 );
 

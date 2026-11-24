@@ -1,6 +1,6 @@
 {
   "name": "@zhicang/shared",
-  "version": "0.1.0",
+  "version": "0.4.1",
   "private": true,
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
@@ -20,15 +20,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.esm.json",
     "dev": "tsc -p tsconfig.json --watch",
-    "lint": "eslint src --ext .ts --max-warnings 0",
-    "test": "node ../../scripts/run-tests.mjs"
-  },
-  "dependencies": {
-    "jsonwebtoken": "^9.0.2"
+    "lint": "eslint src --ext .ts --max-warnings 0"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^20.11.0",
+    "@types/node": "^24.0.0",
     "typescript": "^5.4.0"
-  }
+  },
+  "license": "MIT"
 }
